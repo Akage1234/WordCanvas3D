@@ -118,3 +118,31 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Loading text scroller */
+.loader {
+  width: fit-content;
+  font-weight: bold;
+  font-family: monospace;
+  white-space: pre;
+  font-size: 30px;
+  line-height: 1.2em;
+  height: 1.2em;
+  overflow: hidden;
+}
+
+/* Track that scrolls vertically, 6 steps like before */
+.loader-track {
+  display: inline-block;
+  white-space: pre;
+  animation: l38 1s infinite steps(6);
+}
+
+/* One character per line in blue */
+.loader-hl {
+  color: #60a5fa; /* sky-400 */
+}
+
+@keyframes l38 {
+  100% { transform: translateY(-100%) }
+}
