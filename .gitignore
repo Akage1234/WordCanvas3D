@@ -1,0 +1,93 @@
+
+# Node / Next.js
+node_modules/
+Frontend/node_modules/
+.npm/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Next.js build outputs
+.next/
+Frontend/.next/
+out/
+Frontend/out/
+.vercel/
+Frontend/.vercel/
+.turbo/
+Frontend/.turbo/
+
+# Build artifacts
+dist/
+build/
+.cache/
+coverage/
+*.tsbuildinfo
+
+# Environment files (keep example checked in)
+.env
+.env.*
+!.env.example
+Frontend/.env
+Frontend/.env.*
+!Frontend/.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE/editor
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+.idea/
+*.iml
+
+# Logs
+logs/
+*.log
+*.log.*
+log/
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Misc caches
+.tmp/
+temp/
+tmp/
+.cache/
+.swc/
+.eslintcache
+.stylelintcache
+
+# Storybook (if used)
+.storybook-out/
+.storybook-static/
+
+# Images/graphics tooling (if used)
+*.sketch
+*.fig
+
+# Python (just in case)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Local data dumps (adjust if you want to track)
+*.sqlite
+*.db
+*.sqlite3
