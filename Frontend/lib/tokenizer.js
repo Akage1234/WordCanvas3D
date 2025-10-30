@@ -1,21 +1,63 @@
-let enc;
-let initPromise;
+import { init, Tiktoken } from '@dqbd/tiktoken/lite/init'
+import cl100k_base from '@dqbd/tiktoken/encoders/cl100k_base.json'
+import p50k_base from '@dqbd/tiktoken/encoders/p50k_base.json'
+import p50k_edit from '@dqbd/tiktoken/encoders/p50k_edit.json'
+import r50k_base from '@dqbd/tiktoken/encoders/r50k_base.json'
+import gpt2 from '@dqbd/tiktoken/encoders/gpt2.json'
+import o200k_base from '@dqbd/tiktoken/encoders/o200k_base.json'
 
-export async function tokenizeText(text) {
-  if (!initPromise) {
-    initPromise = (async () => {
-      const { init, encoding_for_model } = await import("@dqbd/tiktoken/lite/init");
-      // Fetch wasm at runtime to avoid bundler parse of .wasm
-      const wasm = await fetch("https://unpkg.com/@dqbd/tiktoken@1.0.7/lite/tiktoken_bg.wasm").then(r => r.arrayBuffer());
-      await init((imports) => WebAssembly.instantiate(wasm, imports));
-      enc = encoding_for_model("gpt-3.5-turbo");
-    })();
+const ENCODING_META = { cl100k_base, p50k_base, r50k_base }
+const td = new TextDecoder()
+
+// Robust WASM bootstrap (streaming + fallback)
+async function initWasm() {
+  const wasmUrl = new URL('@dqbd/tiktoken/lite/tiktoken_bg.wasm', import.meta.url)
+  try {
+    await init((imports) => WebAssembly.instantiateStreaming(fetch(wasmUrl), imports))
+  } catch {
+    const res = await fetch(wasmUrl)
+    const buf = await res.arrayBuffer()
+    await init((imports) => WebAssembly.instantiate(buf, imports))
   }
-  await initPromise;
+}
 
-  const ids = enc.encode(text || "");
-  return ids.map((id) => ({
-    id,
-    token: enc.decode([id]),
-  }));
+let wasmReadyPromise = null
+const encoderCache = new Map()
+
+async function getEncoder(encodingName) {
+  const meta = ENCODING_META[encodingName] ?? ENCODING_META.cl100k_base
+  if (!wasmReadyPromise) wasmReadyPromise = initWasm()
+  await wasmReadyPromise
+  if (!encoderCache.has(meta)) {
+    const enc = new Tiktoken(meta.bpe_ranks, meta.special_tokens, meta.pat_str)
+    encoderCache.set(meta, enc)
+  }
+  return encoderCache.get(meta)
+}
+
+export async function tokenizeText(text, encodingName = 'cl100k_base', opts = {}) {
+  if (typeof text !== 'string') return []
+  try {
+    const enc = await getEncoder(encodingName)
+
+    // encode(text, allowed_special = 'none', disallowed_special = 'all')
+    let allowed_special = 'none'
+    if (opts.allowedSpecial instanceof Set && opts.allowedSpecial.size > 0) {
+      allowed_special = Array.from(opts.allowedSpecial)
+    } else if (opts.allowedSpecial === 'all') {
+      allowed_special = 'all'
+    }
+
+    const ids = enc.encode(text, allowed_special)
+    return Array.from(ids, (id) => ({
+      id,
+      token: td.decode(enc.decode(new Uint32Array([id]))),
+    }))
+  } catch (e) {
+    if (typeof window !== 'undefined') {
+      // eslint-disable-next-line no-console
+      console.error('[tiktoken] tokenize error', e)
+    }
+    return []
+  }
 }
