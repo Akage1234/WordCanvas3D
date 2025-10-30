@@ -24,6 +24,8 @@ export default function TokenizerPage() {
     { label: "Instruct (p50k_edit)", value: "p50k_edit" },
     { label: "Codex (r50k_base)", value: "r50k_base" },
     { label: "GPT-2 (gpt2)", value: "gpt2" },
+    { label: "LLaMA 2 (llama2)", value: "llama2" },
+    { label: "LLaMA (llama)", value: "llama" },
   ];
   const [tokenizer, setTokenizer] = useState(TOKENIZERS[0].value);
 

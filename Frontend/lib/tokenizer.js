@@ -5,8 +5,17 @@ import p50k_edit from '@dqbd/tiktoken/encoders/p50k_edit.json'
 import r50k_base from '@dqbd/tiktoken/encoders/r50k_base.json'
 import gpt2 from '@dqbd/tiktoken/encoders/gpt2.json'
 import o200k_base from '@dqbd/tiktoken/encoders/o200k_base.json'
+import llamaTokenizer from 'llama-tokenizer-js'
 
-const ENCODING_META = { cl100k_base, p50k_base, r50k_base }
+const ENCODING_META = {
+  o200k_base,
+  cl100k_base,
+  p50k_base,
+  p50k_edit,
+  r50k_base,
+  gpt2,
+}
+
 const td = new TextDecoder()
 
 // Robust WASM bootstrap (streaming + fallback)
@@ -39,7 +48,13 @@ export async function tokenizeText(text, encodingName = 'cl100k_base', opts = {}
   if (typeof text !== 'string') return []
   try {
     const enc = await getEncoder(encodingName)
-
+    if (encodingName === 'llama' || encodingName === 'llama2') {
+      const ids = llamaTokenizer.encode(text) || []
+      return ids.map((id) => ({
+        id,
+        token: llamaTokenizer.decode([id]) || '',
+      }))
+    }
     // encode(text, allowed_special = 'none', disallowed_special = 'all')
     let allowed_special = 'none'
     if (opts.allowedSpecial instanceof Set && opts.allowedSpecial.size > 0) {
