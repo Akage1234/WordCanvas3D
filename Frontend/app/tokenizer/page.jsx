@@ -244,7 +244,7 @@ export default function TokenizerPage() {
         <div className="mx-auto w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch h-[70vh]">
           {/* Left: input */}
           <section className="h-full">
-            <div className="h-full flex flex-col rounded-lg border border-neutral-800/90 bg-neutral-800/60 p-3">
+            <div className="h-full flex flex-col rounded-lg border border-neutral-800/90 bg-neutral-800/60 p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="text-sm text-neutral-400 text-white">Input</div>
                 {/* Tokenizer selection */}
