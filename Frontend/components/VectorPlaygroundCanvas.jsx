@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
-export default function EmbeddingCanvas() {
+export default function VectorPlaygroundCanvas() {
   const ref = useRef(null);
   const rafRef = useRef(0);
 
