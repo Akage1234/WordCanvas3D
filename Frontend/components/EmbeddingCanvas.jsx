@@ -5,7 +5,7 @@ import JSZip from "jszip";
 import { ungzip } from "pako";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "glove", searchWord = "", useClusterColors = false }, ref) {
+const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "glove", searchWord = "", useClusterColors = false, showClusterEdges = false }, ref) {
   const containerRef = useRef(null);
   const rafRef = useRef(0);
   const canvasFunctionsRef = useRef({ searchForWord: null, updateClusterColors: null, resetColors: null, getWords: null });
@@ -59,7 +59,9 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     const searchColor = new THREE.Color(0xff00ff); // Magenta for searched word
     let highlightSphere = null;
     let searchSphere = null;
-    let clusters = null;
+    let clusters = null; // Array of cluster IDs (pre-computed from JSON)
+    let edgesData = null; // Array of edge indices per point (pre-computed from JSON)
+    let clusterEdges = null;
 
     // Raycaster + mouse for hover picking
     const raycaster = new THREE.Raycaster();
@@ -99,7 +101,15 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     // --- Load and plot embeddings ---
     async function loadEmbeddings() {
         try {
-          const fetchUrl = embeddingModel === "glove" ? "/glove_50D/glove_3d_1k.json.gz" : "/glove_50D/glove_3d_1k.json.gz";
+          // Map embedding model to file path
+          const fileMap = {
+            "glove_50D": "/glove_50D/glove_3d_1k.json.gz",
+            "glove_100D": "/glove_100D/wiki_giga_100d_3d.json.gz",
+            "glove_200D": "/glove_200D/wiki_giga_200d_3d.json.gz",
+            "glove_300D": "/glove_300D/wiki_giga_300d_3d.json.gz",
+          };
+          
+          const fetchUrl = fileMap[embeddingModel] || fileMap["glove_50D"];
           const res = await fetch(fetchUrl);
           const url = res.url || "";
           const contentType = res.headers.get("content-type") || "";
@@ -134,9 +144,13 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
           const positions = new Float32Array(data.length * 3);
           const colors = new Float32Array(data.length * 3);
           
+          // Initialize clusters and edges arrays
+          clusters = new Array(data.length);
+          edgesData = new Array(data.length);
+          
           for (let i = 0; i < data.length; i++) {
         const item = data[i];
-        const { x, y, z } = item;
+        const { x, y, z, cluster, edges } = item;
             const i3 = i * 3;
             positions[i3] = x;
             positions[i3 + 1] = y;
@@ -144,6 +158,10 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
         // Try common label fields
         labels[i] = item.word || item.token || item.label || String(i);
         coordinates[i] = { x, y, z };
+            // Store cluster ID (default to 0 if not provided)
+            clusters[i] = cluster !== undefined ? cluster : 0;
+            // Store edges array (default to empty if not provided)
+            edgesData[i] = Array.isArray(edges) ? edges : [];
             // Initialize colors to default
             colors[i3] = defaultColor.r;
             colors[i3 + 1] = defaultColor.g;
@@ -156,7 +174,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
           
           // PointsMaterial for efficient point rendering with vertex colors
           material = new THREE.PointsMaterial({
-            size: 0.01,
+            size: 0.05,
             sizeAttenuation: true,
             depthWrite: false,
             vertexColors: true,
@@ -174,47 +192,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
         }
       }
 
-    // Compute clusters using simple K-means approach
-    function computeClusters(data, k = 8) {
-      if (data.length === 0) return null;
-      
-      const n = data.length;
-      const clusters = new Array(n);
-      
-      // Simple distance-based clustering: group points by proximity
-      const visited = new Set();
-      let clusterId = 0;
-      
-      for (let i = 0; i < n; i++) {
-        if (visited.has(i)) continue;
-        
-        const cluster = [i];
-        visited.add(i);
-        const pos1 = coordinates[i];
-        
-        // Find nearby points
-        for (let j = i + 1; j < n; j++) {
-          if (visited.has(j)) continue;
-          const pos2 = coordinates[j];
-          const dx = pos1.x - pos2.x;
-          const dy = pos1.y - pos2.y;
-          const dz = pos1.z - pos2.z;
-          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-          
-          // Threshold for cluster membership (tune this based on your data)
-          if (dist < 0.3) {
-            cluster.push(j);
-            visited.add(j);
-          }
-        }
-        
-        // Assign cluster ID to all points in this cluster
-        cluster.forEach(idx => clusters[idx] = clusterId % k);
-        clusterId++;
-      }
-      
-      return clusters;
-    }
+    // Clusters are now pre-computed and loaded from JSON - no computation needed
 
     // Color palette for clusters (defined outside so it's accessible everywhere)
     const clusterColors = [
@@ -238,7 +216,14 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       for (let i = 0; i < labels.length; i++) {
         const i3 = i * 3;
         const clusterId = clusters[i];
-        const color = clusterColors[clusterId % clusterColors.length];
+        // Handle negative cluster IDs (e.g., -1 for noise points in DBSCAN)
+        // Use default color for noise points, or map to a valid cluster color
+        let color;
+        if (clusterId < 0) {
+          color = defaultColor; // Use default color for noise points
+        } else {
+          color = clusterColors[clusterId % clusterColors.length];
+        }
         
         colorAttr.array[i3] = color.r;
         colorAttr.array[i3 + 1] = color.g;
@@ -265,13 +250,85 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       colorAttr.needsUpdate = true;
     }
 
+    // Create edges using pre-computed edge data from JSON
+    function createClusterEdges() {
+      // Remove existing edges
+      removeClusterEdges();
+      
+      if (!edgesData || !coordinates || coordinates.length === 0 || !clusters) return;
+      
+      const edgeGeometry = new THREE.BufferGeometry();
+      const edgePositions = [];
+      const edgeColors = [];
+      
+      // Use pre-computed edges from JSON
+      for (let i = 0; i < edgesData.length; i++) {
+        const edgeIndices = edgesData[i];
+        if (!edgeIndices || edgeIndices.length === 0) continue;
+        
+        const pos1 = coordinates[i];
+        const clusterId = clusters[i];
+        // Handle negative cluster IDs (e.g., -1 for noise points)
+        let color;
+        if (clusterId < 0) {
+          color = defaultColor; // Use default color for noise points
+        } else {
+          color = clusterColors[clusterId % clusterColors.length];
+        }
+        
+        // Create edges to all connected points
+        for (const targetIdx of edgeIndices) {
+          // Only create edge once (since edges are bidirectional, only create when i < targetIdx)
+          if (targetIdx > i && targetIdx < coordinates.length) {
+            const pos2 = coordinates[targetIdx];
+            
+            // Add edge from pos1 to pos2
+            edgePositions.push(pos1.x, pos1.y, pos1.z);
+            edgePositions.push(pos2.x, pos2.y, pos2.z);
+            
+            // Add colors for both vertices (use color of source point's cluster)
+            edgeColors.push(color.r, color.g, color.b);
+            edgeColors.push(color.r, color.g, color.b);
+          }
+        }
+      }
+      
+      if (edgePositions.length > 0) {
+        edgeGeometry.setAttribute('position', new THREE.Float32BufferAttribute(edgePositions, 3));
+        edgeGeometry.setAttribute('color', new THREE.Float32BufferAttribute(edgeColors, 3));
+        
+        const edgeMaterial = new THREE.LineBasicMaterial({
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.3,
+          linewidth: 1
+        });
+        
+        clusterEdges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
+        scene.add(clusterEdges);
+        meshes.push(clusterEdges);
+      }
+    }
+
+    // Remove cluster edges
+    function removeClusterEdges() {
+      if (clusterEdges) {
+        scene.remove(clusterEdges);
+        if (clusterEdges.geometry) clusterEdges.geometry.dispose();
+        if (clusterEdges.material) clusterEdges.material.dispose();
+        // Remove from meshes array
+        const idx = meshes.indexOf(clusterEdges);
+        if (idx > -1) meshes.splice(idx, 1);
+        clusterEdges = null;
+      }
+    }
+
     // Search for a word and highlight it
     function searchForWord(word, currentUseClusterColors = false) {
       if (!word || !labels.length || !geometry) {
         // Clear search
         if (searchedIndex !== null) {
-          const restoreColor = currentUseClusterColors && clusters ? 
-            clusterColors[clusters[searchedIndex] % clusterColors.length] : defaultColor;
+          const restoreColor = getPointColor(searchedIndex);
           updatePointColor(searchedIndex, restoreColor);
           if (searchSphere) {
             scene.remove(searchSphere);
@@ -302,8 +359,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       
       // Remove previous search highlight
       if (searchedIndex !== null && searchedIndex !== foundIndex) {
-        const prevColor = currentUseClusterColors && clusters ? 
-          clusterColors[clusters[searchedIndex] % clusterColors.length] : defaultColor;
+        const prevColor = getPointColor(searchedIndex);
         updatePointColor(searchedIndex, prevColor);
         if (searchSphere) {
           scene.remove(searchSphere);
@@ -411,19 +467,22 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     canvasFunctionsRef.current.resetColors = resetColors;
     canvasFunctionsRef.current.clusters = () => clusters;
     canvasFunctionsRef.current.getWords = () => wordsListRef.current;
+    canvasFunctionsRef.current.createClusterEdges = createClusterEdges;
+    canvasFunctionsRef.current.removeClusterEdges = removeClusterEdges;
 
     loadEmbeddings().then(() => {
       // Store words list for combobox
       wordsListRef.current = [...labels];
       
-      // After loading, compute clusters
-      if (coordinates.length > 0) {
-        clusters = computeClusters(coordinates);
-      }
-      
+      // Clusters and edges are already loaded from JSON - no computation needed!
       // Apply initial coloring
       if (useClusterColors && clusters) {
         updateClusterColors();
+      }
+      
+      // Create initial edges if enabled
+      if (showClusterEdges && edgesData) {
+        createClusterEdges();
       }
     });
 
@@ -435,7 +494,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       // Update tooltip position for searched word if active
       if (searchedIndex !== null && searchSphere) {
         const pos = coordinates[searchedIndex];
-        const worldPos = new THREE.Vector3(pos.x, pos.y, pos.z);
+        const worldPos = new THREE.Vector3(pos.x+0.1, pos.y+0.1, pos.z+0.1);
         worldPos.project(camera);
         
         // Only show tooltip if point is in front of camera
@@ -480,15 +539,33 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     renderer.domElement.addEventListener("pointerup", onPointerUp);
 
     const updatePointColor = (index, color) => {
-      if (!geometry || index === null || index < 0) return;
+      if (!geometry || index === null || index < 0 || !color) return;
       const colorAttr = geometry.getAttribute("color");
       if (!colorAttr) return;
+      
+      // Ensure color is a THREE.Color object
+      if (!(color instanceof THREE.Color)) {
+        console.warn("updatePointColor: color is not a THREE.Color", color);
+        return;
+      }
       
       const i3 = index * 3;
       colorAttr.array[i3] = color.r;
       colorAttr.array[i3 + 1] = color.g;
       colorAttr.array[i3 + 2] = color.b;
       colorAttr.needsUpdate = true;
+    };
+    
+    // Helper function to get the correct color for a point based on cluster
+    const getPointColor = (index) => {
+      if (!clusters || index < 0 || index >= clusters.length) {
+        return defaultColor;
+      }
+      const clusterId = clusters[index];
+      if (clusterId < 0 || !useClusterColorsRef.current) {
+        return defaultColor;
+      }
+      return clusterColors[clusterId % clusterColors.length];
     };
 
     const onPointerMove = (event) => {
@@ -534,8 +611,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
             if (idx !== searchedIndex) {
               // Reset previous hover if different
               if (hoveredIndex !== null && hoveredIndex !== idx) {
-                const restoreColor = useClusterColorsRef.current && clusters ? 
-                  clusterColors[clusters[hoveredIndex] % clusterColors.length] : defaultColor;
+                const restoreColor = getPointColor(hoveredIndex);
                 updatePointColor(hoveredIndex, restoreColor);
                 if (highlightSphere) {
                   scene.remove(highlightSphere);
@@ -573,8 +649,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
             } else {
               // Hovering over searched word - remove hover highlight if exists
               if (hoveredIndex !== null && hoveredIndex !== searchedIndex) {
-                const restoreColor = useClusterColorsRef.current && clusters ? 
-                  clusterColors[clusters[hoveredIndex] % clusterColors.length] : defaultColor;
+                const restoreColor = getPointColor(hoveredIndex);
                 updatePointColor(hoveredIndex, restoreColor);
                 if (highlightSphere) {
                   scene.remove(highlightSphere);
@@ -593,8 +668,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
           // No search active - normal hover behavior
           // Reset previous hover if different
           if (hoveredIndex !== null && hoveredIndex !== idx) {
-            const restoreColor = useClusterColorsRef.current && clusters ? 
-              clusterColors[clusters[hoveredIndex] % clusterColors.length] : defaultColor;
+            const restoreColor = getPointColor(hoveredIndex);
             updatePointColor(hoveredIndex, restoreColor);
             if (highlightSphere) {
               scene.remove(highlightSphere);
@@ -648,8 +722,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       } else {
         // Reset hover
         if (hoveredIndex !== null) {
-          const restoreColor = useClusterColorsRef.current && clusters ? 
-            clusterColors[clusters[hoveredIndex] % clusterColors.length] : defaultColor;
+          const restoreColor = getPointColor(hoveredIndex);
           updatePointColor(hoveredIndex, restoreColor);
           if (highlightSphere) {
             scene.remove(highlightSphere);
@@ -670,8 +743,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     const onPointerLeave = () => {
       // Reset hover on leave
       if (hoveredIndex !== null && geometry) {
-        const restoreColor = useClusterColorsRef.current && clusters ? 
-          clusterColors[clusters[hoveredIndex] % clusterColors.length] : defaultColor;
+        const restoreColor = getPointColor(hoveredIndex);
         updatePointColor(hoveredIndex, restoreColor);
         if (highlightSphere) {
           scene.remove(highlightSphere);
@@ -734,6 +806,9 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
         searchSphere.material.dispose();
       }
 
+      // Dispose cluster edges
+      removeClusterEdges();
+
       // Dispose shared geometry and material
       if (geometry) geometry.dispose();
       if (material) material.dispose();
@@ -795,6 +870,19 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       }
     }
   }, [useClusterColors, searchWord]);
+
+  // Handle cluster edges changes
+  useEffect(() => {
+    const createFn = canvasFunctionsRef.current?.createClusterEdges;
+    const removeFn = canvasFunctionsRef.current?.removeClusterEdges;
+    const getClusters = canvasFunctionsRef.current?.clusters;
+    
+    if (showClusterEdges && createFn && getClusters && getClusters()) {
+      createFn();
+    } else if (!showClusterEdges && removeFn) {
+      removeFn();
+    }
+  }, [showClusterEdges]);
 
   return <div ref={containerRef} className="w-full h-full" />;
 });

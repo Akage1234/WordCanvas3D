@@ -33,14 +33,16 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-function EmbeddingControls({ 
-  embeddingModel, 
+function EmbeddingControls({
+  embeddingModel,
   onEmbeddingModelChange,
   searchWord,
   onSearchWordChange,
   useClusterColors,
   onUseClusterColorsChange,
-  wordsList = []
+  showClusterEdges,
+  onShowClusterEdgesChange,
+  wordsList = [],
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -85,7 +87,7 @@ function EmbeddingControls({
         Visualize embeddings in 3D space.
       </p>
       <Separator className="my-4" />
-      
+
       {/* Embedding Selector */}
       <div className="space-y-2">
         <label htmlFor="embedding-select" className="text-sm font-medium">
@@ -96,7 +98,10 @@ function EmbeddingControls({
             <SelectValue placeholder="Select embedding model" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="glove">GloVe 50D</SelectItem>
+            <SelectItem value="glove_50D">GloVe 50D</SelectItem>
+            <SelectItem value="glove_100D">GloVe 100D</SelectItem>
+            <SelectItem value="glove_200D">GloVe 200D</SelectItem>
+            <SelectItem value="glove_300D">GloVe 300D</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -104,10 +109,9 @@ function EmbeddingControls({
       <Separator className="my-4" />
 
       {/* Word Search */}
+      {/* Word Search */}
       <div className="space-y-2">
-        <label className="text-sm font-medium">
-          Word Search
-        </label>
+        <label className="text-sm font-medium">Word Search</label>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
@@ -116,36 +120,48 @@ function EmbeddingControls({
               aria-expanded={open}
               className="w-full justify-between"
             >
-              {searchWord
-                ? searchWord
-                : "Search for a word..."}
+              {searchWord ? searchWord : "Search for a word..."}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+          <PopoverContent
+            className="w-[var(--radix-popover-trigger-width)] p-0"
+            align="start"
+          >
             <Command>
               <CommandInput placeholder="Search words..." className="h-9" />
               <CommandList>
                 <CommandEmpty>No word found.</CommandEmpty>
                 <CommandGroup>
-                  {wordsList.map((word) => (
-                    <CommandItem
-                      key={word}
-                      value={word}
-                      onSelect={(currentValue) => {
-                        onSearchWordChange(currentValue === searchWord ? "" : currentValue);
-                        setOpen(false);
-                      }}
-                    >
-                      {word}
-                      <Check
-                        className={cn(
-                          "ml-auto h-4 w-4",
-                          searchWord === word ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                    </CommandItem>
-                  ))}
+                  {(() => {
+                    // Sort words so selected word appears first
+                    const sortedWords = [...wordsList];
+                    if (searchWord && sortedWords.includes(searchWord)) {
+                      const index = sortedWords.indexOf(searchWord);
+                      sortedWords.splice(index, 1);
+                      sortedWords.unshift(searchWord);
+                    }
+                    return sortedWords.map((word) => (
+                      <CommandItem
+                        key={word}
+                        value={word}
+                        onSelect={(currentValue) => {
+                          onSearchWordChange(
+                            currentValue === searchWord ? "" : currentValue
+                          );
+                          setOpen(false);
+                        }}
+                      >
+                        {word}
+                        <Check
+                          className={cn(
+                            "ml-auto h-4 w-4",
+                            searchWord === word ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                      </CommandItem>
+                    ));
+                  })()}
                 </CommandGroup>
               </CommandList>
             </Command>
@@ -169,14 +185,32 @@ function EmbeddingControls({
           Color by Similarity Cluster
         </label>
       </div>
+
+      <Separator className="my-4" />
+
+      {/* Cluster Edges Checkbox */}
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="cluster-edges"
+          checked={showClusterEdges}
+          onCheckedChange={onShowClusterEdgesChange}
+        />
+        <label
+          htmlFor="cluster-edges"
+          className="text-sm font-medium cursor-pointer"
+        >
+          Connect Clusters with Edges
+        </label>
+      </div>
     </div>
   );
 }
 
 export default function EmbeddingPage() {
-  const [embeddingModel, setEmbeddingModel] = useState("glove");
+  const [embeddingModel, setEmbeddingModel] = useState("glove_50D");
   const [searchWord, setSearchWord] = useState("");
-  const [useClusterColors, setUseClusterColors] = useState(false);
+  const [useClusterColors, setUseClusterColors] = useState(true);
+  const [showClusterEdges, setShowClusterEdges] = useState(true);
   const [wordsList, setWordsList] = useState([]);
   const canvasRef = useRef(null);
 
@@ -208,6 +242,8 @@ export default function EmbeddingPage() {
           onSearchWordChange={setSearchWord}
           useClusterColors={useClusterColors}
           onUseClusterColorsChange={setUseClusterColors}
+          showClusterEdges={showClusterEdges}
+          onShowClusterEdgesChange={setShowClusterEdges}
           wordsList={wordsList}
         />
       }
@@ -217,6 +253,7 @@ export default function EmbeddingPage() {
           embeddingModel={embeddingModel}
           searchWord={searchWord}
           useClusterColors={useClusterColors}
+          showClusterEdges={showClusterEdges}
         />
       }
     />
