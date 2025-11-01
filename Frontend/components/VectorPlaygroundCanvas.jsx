@@ -55,6 +55,16 @@ export default function VectorPlaygroundCanvas({
     renderer.sortObjects = true; // Enable sorting for proper depth
     renderer.depthTest = true;
     renderer.depthWrite = true;
+    
+    // Style the canvas to fill container properly
+    renderer.domElement.style.display = 'block';
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.position = 'absolute';
+    renderer.domElement.style.top = '0';
+    renderer.domElement.style.left = '0';
+    renderer.domElement.style.outline = 'none';
+    
     container.appendChild(renderer.domElement);
 
     // Result info box element (shown in canvas)
@@ -76,6 +86,8 @@ export default function VectorPlaygroundCanvas({
     resultInfoBox.style.display = "none";
     resultInfoBox.style.lineHeight = "1.6";
     container.style.position = "relative";
+    container.style.width = "100%";
+    container.style.height = "100%";
     container.appendChild(resultInfoBox);
 
     // Add OrbitControls for camera manipulation
@@ -83,6 +95,8 @@ export default function VectorPlaygroundCanvas({
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.target.set(0, 0, 0);
+    // Ensure camera looks at origin
+    camera.lookAt(0, 0, 0);
 
     // Add ambient light
     scene.add(new THREE.AmbientLight(0xffffff, 0.8));
@@ -444,6 +458,9 @@ export default function VectorPlaygroundCanvas({
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h, false);
+      // Ensure canvas stays properly styled after resize
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
     };
     const ro = new ResizeObserver(handleResize);
     ro.observe(container);
@@ -652,53 +669,65 @@ export default function VectorPlaygroundCanvas({
       return sprite;
     };
 
-    // Remove vectors that are no longer in the words list OR when embedding model changes (force re-plot)
-    const currentWords = new Set(words);
+    // ALWAYS clear ALL existing word vectors to force re-plot with updated centroid
+    // This ensures vectors are re-centered when resultVector or words change
     for (const [word, vectorData] of vectorsRef.current.entries()) {
-      if (!currentWords.has(word)) {
-        if (vectorData.arrow) sceneRef.current.remove(vectorData.arrow);
-        if (vectorData.label) sceneRef.current.remove(vectorData.label);
-        if (vectorData.hoverTube) sceneRef.current.remove(vectorData.hoverTube);
-        vectorData.arrow?.dispose();
-        vectorData.label?.material?.map?.dispose();
-        vectorData.label?.material?.dispose();
-        vectorData.hoverTube?.geometry?.dispose();
-        vectorData.hoverTube?.material?.dispose();
-        vectorsRef.current.delete(word);
+      if (vectorData.arrow) sceneRef.current.remove(vectorData.arrow);
+      if (vectorData.label) sceneRef.current.remove(vectorData.label);
+      if (vectorData.hoverTube) sceneRef.current.remove(vectorData.hoverTube);
+      vectorData.arrow?.dispose();
+      vectorData.label?.material?.map?.dispose();
+      vectorData.label?.material?.dispose();
+      vectorData.hoverTube?.geometry?.dispose();
+      vectorData.hoverTube?.material?.dispose();
+    }
+    vectorsRef.current.clear();
+
+    // Remove vectors that are no longer in the words list
+    const currentWords = new Set(words);
+
+    // Calculate centroid of all vectors (words + result) to center the plot
+    const allVectorPositions = [];
+    words.forEach((word) => {
+      if (embeddingsDataRef.current[word]) {
+        const embedding = embeddingsDataRef.current[word];
+        allVectorPositions.push([embedding[0] || 0, embedding[1] || 0, embedding[2] || 0]);
       }
+    });
+    if (resultVector && Array.isArray(resultVector) && resultVector.length >= 3) {
+      allVectorPositions.push([resultVector[0] || 0, resultVector[1] || 0, resultVector[2] || 0]);
     }
-
-    // When embedding model changes, clear all existing vectors and re-plot with new embeddings
-    // This ensures vectors are updated with the correct embeddings from the new model
-    const wordsToReplot = words.filter(word => vectorsRef.current.has(word));
-    if (wordsToReplot.length > 0) {
-      wordsToReplot.forEach(word => {
-        const vectorData = vectorsRef.current.get(word);
-        if (vectorData) {
-          if (vectorData.arrow) sceneRef.current.remove(vectorData.arrow);
-          if (vectorData.label) sceneRef.current.remove(vectorData.label);
-          if (vectorData.hoverTube) sceneRef.current.remove(vectorData.hoverTube);
-          vectorData.arrow?.dispose();
-          vectorData.label?.material?.map?.dispose();
-          vectorData.label?.material?.dispose();
-          vectorData.hoverTube?.geometry?.dispose();
-          vectorData.hoverTube?.material?.dispose();
-          vectorsRef.current.delete(word);
-        }
+    
+    // Calculate centroid
+    let centroidX = 0, centroidY = 0, centroidZ = 0;
+    if (allVectorPositions.length > 0) {
+      allVectorPositions.forEach(pos => {
+        centroidX += pos[0];
+        centroidY += pos[1];
+        centroidZ += pos[2];
       });
+      centroidX /= allVectorPositions.length;
+      centroidY /= allVectorPositions.length;
+      centroidZ /= allVectorPositions.length;
     }
 
-    // Add vectors for new words or re-plot existing ones
+    // Add vectors for all words (always re-plot to ensure correct centering)
     words.forEach((word, index) => {
-      // Always re-plot if embedding model changed (word will no longer be in vectorsRef)
-      if (vectorsRef.current.has(word)) return;
+      // Skip words not in the current words list
+      if (!currentWords.has(word)) return;
+      
       if (!embeddingsDataRef.current[word]) {
         console.warn(`Word "${word}" not found in embeddings`);
         return;
       }
 
       const embedding = embeddingsDataRef.current[word];
-      const vector3D = [embedding[0] || 0, embedding[1] || 0, embedding[2] || 0];
+      // Center the vector by subtracting centroid
+      const vector3D = [
+        (embedding[0] || 0) - centroidX,
+        (embedding[1] || 0) - centroidY,
+        (embedding[2] || 0) - centroidZ
+      ];
       const vectorEnd = new THREE.Vector3().fromArray(vector3D);
       const color = vectorColors[index % vectorColors.length];
 
@@ -725,7 +754,7 @@ export default function VectorPlaygroundCanvas({
         originalColor: color
       });
       });
-  }, [words, embeddingModel, embeddingsReady]);
+  }, [words, embeddingModel, embeddingsReady, resultVector]);
 
   // Update gridlines when showGridlines changes
   useEffect(() => {
@@ -752,7 +781,7 @@ export default function VectorPlaygroundCanvas({
 
   // Update result vector when resultVector prop changes
   useEffect(() => {
-    if (!sceneRef.current) return;
+    if (!sceneRef.current || !embeddingsDataRef.current) return;
 
     // Remove existing result vector
     if (resultVectorRef.current) {
@@ -769,7 +798,35 @@ export default function VectorPlaygroundCanvas({
 
     // Add new result vector if provided
     if (resultVector && Array.isArray(resultVector) && resultVector.length >= 3) {
-      const vector3D = [resultVector[0] || 0, resultVector[1] || 0, resultVector[2] || 0];
+      // Calculate centroid of all vectors (words + result) to center the plot - MUST match word vectors calculation
+      const allVectorPositions = [];
+      words.forEach((word) => {
+        if (embeddingsDataRef.current[word]) {
+          const embedding = embeddingsDataRef.current[word];
+          allVectorPositions.push([embedding[0] || 0, embedding[1] || 0, embedding[2] || 0]);
+        }
+      });
+      allVectorPositions.push([resultVector[0] || 0, resultVector[1] || 0, resultVector[2] || 0]);
+      
+      // Calculate centroid (same calculation as in word vectors useEffect)
+      let centroidX = 0, centroidY = 0, centroidZ = 0;
+      if (allVectorPositions.length > 0) {
+        allVectorPositions.forEach(pos => {
+          centroidX += pos[0];
+          centroidY += pos[1];
+          centroidZ += pos[2];
+        });
+        centroidX /= allVectorPositions.length;
+        centroidY /= allVectorPositions.length;
+        centroidZ /= allVectorPositions.length;
+      }
+
+      // Center the result vector by subtracting centroid
+      const vector3D = [
+        (resultVector[0] || 0) - centroidX,
+        (resultVector[1] || 0) - centroidY,
+        (resultVector[2] || 0) - centroidZ
+      ];
       const vectorEnd = new THREE.Vector3().fromArray(vector3D);
       const resultColor = 0x00ff00; // Green color for result vector
 
@@ -856,7 +913,7 @@ export default function VectorPlaygroundCanvas({
         };
       }
     }
-  }, [resultVector, resultLabel]);
+  }, [resultVector, resultLabel, words, embeddingModel]);
 
   // Update result info box when resultInfo prop changes
   useEffect(() => {
@@ -923,14 +980,49 @@ export default function VectorPlaygroundCanvas({
       return;
     }
 
-    // Get 3D positions for a, b, c, and result
+    // Calculate centroid of all vectors (a, b, c, result, and other words) to center the plot
+    // MUST use the same calculation as word vectors and result vector useEffects
+    const allVectorPositions = [];
+    words.forEach((word) => {
+      if (embeddingsDataRef.current[word]) {
+        const embedding = embeddingsDataRef.current[word];
+        allVectorPositions.push([embedding[0] || 0, embedding[1] || 0, embedding[2] || 0]);
+      }
+    });
+    if (resultVector && Array.isArray(resultVector) && resultVector.length >= 3) {
+      allVectorPositions.push([resultVector[0] || 0, resultVector[1] || 0, resultVector[2] || 0]);
+    }
+    
+    // Calculate centroid (same calculation as other useEffects)
+    let centroidX = 0, centroidY = 0, centroidZ = 0;
+    if (allVectorPositions.length > 0) {
+      allVectorPositions.forEach(pos => {
+        centroidX += pos[0];
+        centroidY += pos[1];
+        centroidZ += pos[2];
+      });
+      centroidX /= allVectorPositions.length;
+      centroidY /= allVectorPositions.length;
+      centroidZ /= allVectorPositions.length;
+    }
+
+    // Get 3D positions for a, b, c, and result (centered)
     const getVector3D = (word) => {
       if (word === 'result' || word === null) {
-        return resultVector ? new THREE.Vector3(resultVector[0] || 0, resultVector[1] || 0, resultVector[2] || 0) : null;
+        if (!resultVector) return null;
+        return new THREE.Vector3(
+          (resultVector[0] || 0) - centroidX,
+          (resultVector[1] || 0) - centroidY,
+          (resultVector[2] || 0) - centroidZ
+        );
       }
       const embedding = embeddingsDataRef.current[word];
       if (!embedding) return null;
-      return new THREE.Vector3(embedding[0] || 0, embedding[1] || 0, embedding[2] || 0);
+      return new THREE.Vector3(
+        (embedding[0] || 0) - centroidX,
+        (embedding[1] || 0) - centroidY,
+        (embedding[2] || 0) - centroidZ
+      );
     };
 
     const posA = getVector3D(vectorA);

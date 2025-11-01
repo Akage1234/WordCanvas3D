@@ -36,6 +36,16 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight, false);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    
+    // Style the canvas to fill container properly
+    renderer.domElement.style.display = 'block';
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.position = 'absolute';
+    renderer.domElement.style.top = '0';
+    renderer.domElement.style.left = '0';
+    renderer.domElement.style.outline = 'none';
+    
     container.appendChild(renderer.domElement);
 
     scene.add(new THREE.AmbientLight(0xffffff, 1));
@@ -44,6 +54,9 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
+    controls.target.set(0, 0, 0);
+    // Ensure camera looks at origin
+    camera.lookAt(0, 0, 0);
 
     // Track resources for cleanup
     const meshes = [];
@@ -800,6 +813,9 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h, false);
+      // Ensure canvas stays properly styled after resize
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
     };
     const ro = new ResizeObserver(handleResize);
     ro.observe(container);
