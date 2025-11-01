@@ -5,7 +5,7 @@ import JSZip from "jszip";
 import { ungzip } from "pako";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "glove", searchWord = "", useClusterColors = false, showClusterEdges = false }, ref) {
+const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "glove_50d", wordCount = "1000", searchWord = "", useClusterColors = false, showClusterEdges = false }, ref) {
   const containerRef = useRef(null);
   const rafRef = useRef(0);
   const canvasFunctionsRef = useRef({ searchForWord: null, updateClusterColors: null, resetColors: null, getWords: null });
@@ -24,7 +24,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
 
     // --- Setup scene ---
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x11121b); // Even darker blue-black background
+    scene.background = new THREE.Color(0x090a12); // Even darker blue-black background
     const camera = new THREE.PerspectiveCamera(
       75,
       Math.max(container.clientWidth, 1) / Math.max(container.clientHeight, 1),
@@ -101,15 +101,17 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     // --- Load and plot embeddings ---
     async function loadEmbeddings() {
         try {
-          // Map embedding model to file path
-          const fileMap = {
-            "glove_50D": "/glove_50D/glove_3d_1k.json.gz",
-            "glove_100D": "/glove_100D/wiki_giga_100d_3d.json.gz",
-            "glove_200D": "/glove_200D/wiki_giga_200d_3d.json.gz",
-            "glove_300D": "/glove_300D/wiki_giga_300d_3d.json.gz",
-          };
+          // Build file path based on model and word count
+          let fetchUrl;
           
-          const fetchUrl = fileMap[embeddingModel] || fileMap["glove_50D"];
+          // Normalize model name to lowercase for folder path
+          const modelFolder = embeddingModel.toLowerCase();
+          const modelNum = embeddingModel.replace("glove_", "").toLowerCase();
+          
+          const fileName = `wiki_giga_${modelNum}_${wordCount}_3d.json.gz`;
+          
+          fetchUrl = `/${modelFolder}/${fileName}`;
+          
           const res = await fetch(fetchUrl);
           const url = res.url || "";
           const contentType = res.headers.get("content-type") || "";
@@ -166,6 +168,33 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
             colors[i3] = defaultColor.r;
             colors[i3 + 1] = defaultColor.g;
             colors[i3 + 2] = defaultColor.b;
+          }
+          
+          // Center the data at origin
+          let sumX = 0, sumY = 0, sumZ = 0;
+          for (let i = 0; i < data.length; i++) {
+            const i3 = i * 3;
+            sumX += positions[i3];
+            sumY += positions[i3 + 1];
+            sumZ += positions[i3 + 2];
+          }
+          const centroidX = sumX / data.length;
+          const centroidY = sumY / data.length;
+          const centroidZ = sumZ / data.length;
+          
+          // Subtract centroid to center at origin
+          for (let i = 0; i < data.length; i++) {
+            const i3 = i * 3;
+            positions[i3] -= centroidX;
+            positions[i3 + 1] -= centroidY;
+            positions[i3 + 2] -= centroidZ;
+            
+            // Update coordinates to match centered positions
+            coordinates[i] = {
+              x: positions[i3],
+              y: positions[i3 + 1],
+              z: positions[i3 + 2]
+            };
           }
           
           geometry = new THREE.BufferGeometry();
@@ -825,7 +854,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
         container.removeChild(tooltip);
       }
     };
-  }, [embeddingModel]); // Re-run when embedding model changes
+  }, [embeddingModel, wordCount]); // Re-run when embedding model or word count changes
 
   // Update ref when prop changes
   useEffect(() => {

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import VisualizerLayout from "@/components/VisualizerLayout";
 import EmbeddingCanvas from "@/components/EmbeddingCanvas";
 import {
@@ -36,6 +36,8 @@ import { cn } from "@/lib/utils";
 function EmbeddingControls({
   embeddingModel,
   onEmbeddingModelChange,
+  wordCount,
+  onWordCountChange,
   searchWord,
   onSearchWordChange,
   useClusterColors,
@@ -45,6 +47,45 @@ function EmbeddingControls({
   wordsList = [],
 }) {
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  // Memoize sorted words to avoid recalculation on every render
+  const sortedWords = useMemo(() => {
+    const sorted = [...wordsList];
+    if (searchWord && sorted.includes(searchWord)) {
+      const index = sorted.indexOf(searchWord);
+      sorted.splice(index, 1);
+      sorted.unshift(searchWord);
+    }
+    return sorted;
+  }, [wordsList, searchWord]);
+  
+  // Filter and limit words for performance (max 300 results)
+  const filteredWords = useMemo(() => {
+    if (!open) return []; // Don't filter when closed
+    
+    let filtered = sortedWords;
+    
+    // Filter by search query (case-insensitive)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = sortedWords.filter(word => 
+        word.toLowerCase().includes(query)
+      );
+    } else {
+      // When no search query, only show first 50 items for fast initial render
+      filtered = sortedWords.slice(0, 50);
+    }
+    
+    // Always include the selected word if it exists and isn't already in the list
+    if (searchWord && !filtered.includes(searchWord)) {
+      filtered = [searchWord, ...filtered];
+    }
+    
+    // Limit total results to 300 for performance
+    return filtered.slice(0, 300);
+  }, [sortedWords, searchQuery, open, searchWord]);
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
@@ -98,10 +139,29 @@ function EmbeddingControls({
             <SelectValue placeholder="Select embedding model" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="glove_50D">GloVe 50D</SelectItem>
+            <SelectItem value="glove_50d">GloVe 50D</SelectItem>
             <SelectItem value="glove_100D">GloVe 100D</SelectItem>
             <SelectItem value="glove_200D">GloVe 200D</SelectItem>
             <SelectItem value="glove_300D">GloVe 300D</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Separator className="my-4" />
+
+      {/* Word Count Selector */}
+      <div className="space-y-2">
+        <label htmlFor="word-count-select" className="text-sm font-medium">
+          Word Count
+        </label>
+        <Select value={wordCount} onValueChange={onWordCountChange}>
+          <SelectTrigger id="word-count-select" className="w-full">
+            <SelectValue placeholder="Select word count" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1000">1,000 words</SelectItem>
+            <SelectItem value="5000">5,000 words</SelectItem>
+            <SelectItem value="10000">10,000 words</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -112,7 +172,13 @@ function EmbeddingControls({
       {/* Word Search */}
       <div className="space-y-2">
         <label className="text-sm font-medium">Word Search</label>
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={(newOpen) => {
+          setOpen(newOpen);
+          if (!newOpen) {
+            // Clear search query when closing
+            setSearchQuery("");
+          }
+        }}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -128,40 +194,57 @@ function EmbeddingControls({
             className="w-[var(--radix-popover-trigger-width)] p-0"
             align="start"
           >
-            <Command>
-              <CommandInput placeholder="Search words..." className="h-9" />
+            <Command 
+              shouldFilter={false}
+              onValueChange={(value) => {
+                // Handle value change for searching
+                if (value !== searchWord) {
+                  setSearchQuery(value);
+                }
+              }}
+            >
+              <CommandInput 
+                placeholder="Search words..." 
+                className="h-9"
+                value={searchQuery}
+                onValueChange={setSearchQuery}
+              />
               <CommandList>
-                <CommandEmpty>No word found.</CommandEmpty>
+                <CommandEmpty>
+                  {searchQuery ? "No word found." : `Type to search ${wordsList.length} words...`}
+                </CommandEmpty>
                 <CommandGroup>
-                  {(() => {
-                    // Sort words so selected word appears first
-                    const sortedWords = [...wordsList];
-                    if (searchWord && sortedWords.includes(searchWord)) {
-                      const index = sortedWords.indexOf(searchWord);
-                      sortedWords.splice(index, 1);
-                      sortedWords.unshift(searchWord);
-                    }
-                    return sortedWords.map((word) => (
-                      <CommandItem
-                        key={word}
-                        value={word}
-                        onSelect={(currentValue) => {
-                          onSearchWordChange(
-                            currentValue === searchWord ? "" : currentValue
-                          );
-                          setOpen(false);
-                        }}
-                      >
-                        {word}
-                        <Check
-                          className={cn(
-                            "ml-auto h-4 w-4",
-                            searchWord === word ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                      </CommandItem>
-                    ));
-                  })()}
+                  {filteredWords.map((word) => (
+                    <CommandItem
+                      key={word}
+                      value={word}
+                      onSelect={(currentValue) => {
+                        onSearchWordChange(
+                          currentValue === searchWord ? "" : currentValue
+                        );
+                        setSearchQuery("");
+                        setOpen(false);
+                      }}
+                    >
+                      {word}
+                      <Check
+                        className={cn(
+                          "ml-auto h-4 w-4",
+                          searchWord === word ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                    </CommandItem>
+                  ))}
+                  {searchQuery && filteredWords.length >= 300 && (
+                    <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                      Showing first 300 results. Refine your search for more.
+                    </div>
+                  )}
+                  {!searchQuery && wordsList.length > 50 && (
+                    <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                      Type to search {wordsList.length} words...
+                    </div>
+                  )}
                 </CommandGroup>
               </CommandList>
             </Command>
@@ -207,7 +290,8 @@ function EmbeddingControls({
 }
 
 export default function EmbeddingPage() {
-  const [embeddingModel, setEmbeddingModel] = useState("glove_50D");
+  const [embeddingModel, setEmbeddingModel] = useState("glove_50d");
+  const [wordCount, setWordCount] = useState("1000");
   const [searchWord, setSearchWord] = useState("");
   const [useClusterColors, setUseClusterColors] = useState(true);
   const [showClusterEdges, setShowClusterEdges] = useState(true);
@@ -219,18 +303,31 @@ export default function EmbeddingPage() {
     const checkWords = () => {
       if (canvasRef.current?.getWords) {
         const words = canvasRef.current.getWords();
-        if (words && words.length > 0 && words.length !== wordsList.length) {
-          setWordsList(words);
+        if (words && words.length > 0) {
+          // Only update if the list actually changed
+          setWordsList(prev => {
+            if (prev.length !== words.length) {
+              return words;
+            }
+            // Deep comparison only if lengths match (avoid expensive JSON.stringify on every check)
+            if (prev.length > 0 && prev[0] !== words[0]) {
+              return words;
+            }
+            return prev;
+          });
         }
       }
     };
 
-    // Check initially and then periodically
+    // Check initially
     checkWords();
-    const interval = setInterval(checkWords, 500);
+    
+    // Longer intervals for larger datasets to reduce CPU usage
+    const intervalMs = wordCount === "10000" ? 2000 : wordCount === "5000" ? 1000 : 500;
+    const interval = setInterval(checkWords, intervalMs);
 
     return () => clearInterval(interval);
-  }, [embeddingModel, wordsList.length]);
+  }, [embeddingModel, wordCount]); // Removed wordsList.length dependency to avoid re-running effect
 
   return (
     <VisualizerLayout
@@ -238,6 +335,8 @@ export default function EmbeddingPage() {
         <EmbeddingControls
           embeddingModel={embeddingModel}
           onEmbeddingModelChange={setEmbeddingModel}
+          wordCount={wordCount}
+          onWordCountChange={setWordCount}
           searchWord={searchWord}
           onSearchWordChange={setSearchWord}
           useClusterColors={useClusterColors}
@@ -251,6 +350,7 @@ export default function EmbeddingPage() {
         <EmbeddingCanvas
           ref={canvasRef}
           embeddingModel={embeddingModel}
+          wordCount={wordCount}
           searchWord={searchWord}
           useClusterColors={useClusterColors}
           showClusterEdges={showClusterEdges}
