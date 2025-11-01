@@ -176,3 +176,8 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none;                        /* Chrome/Edge/Safari */
 }
+
+/* Ensure author hover card stays above drei Html components */
+[data-radix-hover-card-portal] {
+  z-index: 99999 !important;
+}

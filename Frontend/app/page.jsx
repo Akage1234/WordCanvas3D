@@ -206,7 +206,7 @@ function FloatingPoints({ count = 800, color = '#60a5fa', labeledCount = 24, nei
         )}
   
         {labelIndices.map((idx, i) => (
-          <Html key={idx} position={getLabelPosition(idx)}>
+          <Html key={idx} position={getLabelPosition(idx)} zIndexRange={[0, 1000]}>
             <div
               style={{
                 pointerEvents: 'none',

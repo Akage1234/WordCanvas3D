@@ -165,7 +165,7 @@ function VectorPlaygroundControls({
 
       {/* Vector Calculation */}
       <div className="space-y-2 max-w-full overflow-hidden">
-        <Label className="text-sm font-medium">Vector Calculation</Label>
+        <Label className="text-sm font-medium">Vector Calculation
         <HoverCard>
           <HoverCardTrigger asChild>
             <HelpCircle className="inline-block ml-1 h-3 w-3 text-muted-foreground cursor-help" />
@@ -213,6 +213,7 @@ function VectorPlaygroundControls({
             </div>
           </HoverCardContent>
         </HoverCard>
+        </Label>
         <div className="flex items-center gap-2">
           <Tooltip open={errorField === "a" && errorMessage ? true : false}>
             <TooltipTrigger asChild>
@@ -494,6 +495,18 @@ export default function PlaygroundPage() {
   const [embeddingsData, setEmbeddingsData] = useState(null);
   const shouldAutoRecalculateRef = useRef(false); // Track if we should auto-recalculate when embeddings load
 
+  // Auto-dismiss error messages after 5 seconds
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => {
+        setErrorMessage(null);
+        setErrorField(null);
+      }, 5000); // 5 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
+
   // Clear calculation result when embedding model changes, but mark for auto-recalculate if we had a result
   useEffect(() => {
     if (calculationResult && vectorA && vectorB && vectorC) {
@@ -672,93 +685,66 @@ export default function PlaygroundPage() {
             <DrawerHeader>
               <DrawerTitle>Geometric Meaning of Embedding Vectors</DrawerTitle>
               <DrawerDescription>
-                Word embeddings represent words as vectors in a high-dimensional
-                space. The geometric relationships between these vectors encode
-                semantic meaning, allowing us to perform mathematical operations
-                that reveal linguistic patterns and solve word analogies through
-                vector arithmetic.
+                Vector math reveals semantic patterns. Word analogies work because geometric relationships encode meaning.
               </DrawerDescription>
             </DrawerHeader>
 
-            <div className="space-y-4 pb-4">
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-4">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-2">
-                  Vector Addition & Subtraction
+            <div className="space-y-3 pb-4">
+              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
+                  Classic analogy
                 </div>
-                <div className="text-sm text-neutral-300 mb-2">
-                  Adding and subtracting vectors in embedding space captures
-                  semantic relationships. The classic example is:
-                </div>
-                <div className="font-mono text-sm text-neutral-200 bg-neutral-900/60 p-2 rounded mt-2 mb-2">
-                  king - man + woman ≈ queen
-                </div>
-                <div className="text-sm text-neutral-300">
-                  This works because the vector (king - man) represents the
-                  "royalty without gender" concept, and adding "woman" applies
-                  that concept to get "queen". The yellow distance vectors show
-                  these geometric relationships.
-                </div>
-              </div>
-
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-4">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-2">
-                  Distance Vectors
-                </div>
-                <div className="text-sm text-neutral-300 mb-2">
-                  The yellow arrows you see represent distance
-                  vectors—directional relationships between word positions.
-                  These vectors encode semantic transitions:
-                </div>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-neutral-300 mt-2">
-                  <li>
-                    <strong>a → b:</strong> The semantic difference from word a
-                    to word b
-                  </li>
-                  <li>
-                    <strong>b → c:</strong> The transition from word b to word c
-                  </li>
-                  <li>
-                    <strong>c → result:</strong> How the final calculated vector
-                    relates to c
-                  </li>
-                </ul>
-                <div className="text-sm text-neutral-300 mt-2">
-                  When these vectors are parallel or similar in direction, it
-                  indicates consistent semantic relationships, which is why word
-                  analogies work so well in embedding space.
-                </div>
-              </div>
-
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-4">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-2">
-                  Geometric Intuition
-                </div>
-                <div className="text-sm text-neutral-300">
-                  In embedding space, words form geometric structures: similar
-                  words cluster together, opposite concepts are positioned
-                  across from each other, and hierarchical relationships form
-                  geometric patterns. By visualizing these structures and
-                  performing vector operations, you can gain intuition about how
-                  AI models understand language through geometry.
-                </div>
-              </div>
-
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-4">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-2">
-                  Try It Yourself
-                </div>
-                <div className="text-sm text-neutral-300 mb-2">
-                  Experiment with different word combinations to see how
-                  geometric relationships reveal semantic patterns:
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <span className="px-2 py-1 text-xs rounded bg-yellow-900/40 text-yellow-200 border border-yellow-700/50">
-                    king - man + woman
+                <div className="text-sm text-white mb-1">"king - man + woman"</div>
+                <div className="flex flex-wrap gap-1">
+                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
+                    king
                   </span>
-                  <span className="px-2 py-1 text-xs rounded bg-yellow-900/40 text-yellow-200 border border-yellow-700/50">
+                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
+                    -
+                  </span>
+                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
+                    man
+                  </span>
+                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
+                    +
+                  </span>
+                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
+                    woman
+                  </span>
+                  <span className="px-2 py-0.5 text-xs rounded bg-green-900/60 text-green-100">
+                    ≈ queen
+                  </span>
+                </div>
+              </div>
+
+              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
+                  Yellow arrows
+                </div>
+                <div className="text-sm text-white mb-1">Distance vectors show relationships</div>
+                <div className="flex flex-wrap gap-1">
+                  <span className="px-2 py-0.5 text-xs rounded bg-yellow-900/60 text-yellow-100">
+                    a → b
+                  </span>
+                  <span className="px-2 py-0.5 text-xs rounded bg-yellow-900/60 text-yellow-100">
+                    b → c
+                  </span>
+                  <span className="px-2 py-0.5 text-xs rounded bg-yellow-900/60 text-yellow-100">
+                    c → result
+                  </span>
+                </div>
+              </div>
+
+              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
+                  Try these
+                </div>
+                <div className="text-sm text-white mb-1">More examples</div>
+                <div className="flex flex-wrap gap-1">
+                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
                     paris - france + italy
                   </span>
-                  <span className="px-2 py-1 text-xs rounded bg-yellow-900/40 text-yellow-200 border border-yellow-700/50">
+                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
                     happy - sad + joy
                   </span>
                 </div>

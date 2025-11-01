@@ -1,6 +1,7 @@
 import '../styles/globals.css';
 import { Navbar } from '@/components/Navbar';
 import DotCanvas from '@/components/DotCanvas';
+import AuthorHoverCard from '@/components/AuthorHoverCard';
 
 export const metadata = {
   title: 'WordCanvas3D',
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
         <DotCanvas opacity={0.09} dotColor="#ffffff" />
         <Navbar />
         {children}
+        <AuthorHoverCard />
       </body>
     </html>
   );

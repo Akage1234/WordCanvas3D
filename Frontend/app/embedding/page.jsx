@@ -356,65 +356,76 @@ export default function EmbeddingPage() {
             <DrawerHeader>
               <DrawerTitle>What is Embedding Space?</DrawerTitle>
               <DrawerDescription>
-                Embedding space is a high-dimensional mathematical space where words, 
-                sentences, or other linguistic units are represented as vectors. These 
-                vectors capture semantic and syntactic relationships, allowing similar 
-                meanings to be positioned close together in the space. Word embeddings 
-                transform discrete text into continuous vectors that machine learning 
-                models can understand and manipulate.
+                Words become vectors in high-dimensional space. Similar meanings cluster together—mathematics captures language.
               </DrawerDescription>
             </DrawerHeader>
 
-            <div className="space-y-4 pb-4">
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-4">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-2">
-                  Semantic Clustering
+            <div className="space-y-3 pb-4">
+              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
+                  Royalty cluster
                 </div>
-                <div className="text-sm text-neutral-300 mb-2">
-                  Words with similar meanings naturally cluster together in embedding space. 
-                  For example, words like "king", "queen", "prince" would be positioned 
-                  close to each other because they share semantic relationships.
-                </div>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  <span className="px-2 py-1 text-xs rounded bg-blue-900/40 text-blue-200 border border-blue-700/50">
+                <div className="text-sm text-white mb-1">Close in meaning</div>
+                <div className="flex flex-wrap gap-1">
+                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
                     king
                   </span>
-                  <span className="px-2 py-1 text-xs rounded bg-blue-900/40 text-blue-200 border border-blue-700/50">
+                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
                     queen
                   </span>
-                  <span className="px-2 py-1 text-xs rounded bg-blue-900/40 text-blue-200 border border-blue-700/50">
+                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
                     prince
                   </span>
-                  <span className="px-2 py-1 text-xs rounded bg-blue-900/40 text-blue-200 border border-blue-700/50">
+                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
                     royal
                   </span>
                 </div>
               </div>
 
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-4">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-2">
-                  Dimensionality
+              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
+                  Emotions cluster
                 </div>
-                <div className="text-sm text-neutral-300 mb-2">
-                  Word embeddings typically exist in high-dimensional spaces (50-300+ dimensions). 
-                  The 3D visualization you see is a projection that preserves relationships while 
-                  making the space visually interpretable. Each dimension captures different 
-                  linguistic features.
-                </div>
-                <div className="text-xs text-neutral-400 mt-2">
-                  Current model: <span className="font-semibold text-neutral-200">{embeddingModel}</span>
+                <div className="text-sm text-white mb-1">Sentiment groups</div>
+                <div className="flex flex-wrap gap-1">
+                  <span className="px-2 py-0.5 text-xs rounded bg-green-900/60 text-green-100">
+                    happy
+                  </span>
+                  <span className="px-2 py-0.5 text-xs rounded bg-green-900/60 text-green-100">
+                    joyful
+                  </span>
+                  <span className="px-2 py-0.5 text-xs rounded bg-red-900/60 text-red-100">
+                    sad
+                  </span>
+                  <span className="px-2 py-0.5 text-xs rounded bg-red-900/60 text-red-100">
+                    miserable
+                  </span>
                 </div>
               </div>
 
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-4">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-2">
-                  Distance as Similarity
+              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
+                  High dimensions → 3D view
                 </div>
-                <div className="text-sm text-neutral-300">
-                  The distance between vectors in embedding space represents semantic similarity. 
-                  Closer vectors indicate more similar meanings. This property enables applications 
-                  like semantic search, recommendation systems, and word analogy tasks.
+                <div className="text-sm text-white mb-1">Projected from {embeddingModel.replace('glove_', '').toUpperCase()}</div>
+                <div className="flex flex-wrap gap-1">
+                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
+                    {embeddingModel.replace('glove_', '').toUpperCase()} dims
+                  </span>
+                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
+                    ↓
+                  </span>
+                  <span className="px-2 py-0.5 text-xs rounded bg-purple-900/60 text-purple-100">
+                    3D viz
+                  </span>
                 </div>
+              </div>
+
+              <div className="text-[11px] text-neutral-400">
+                Active model:{" "}
+                <span className="font-semibold text-neutral-200">
+                  {embeddingModel}
+                </span>
               </div>
             </div>
           </div>
