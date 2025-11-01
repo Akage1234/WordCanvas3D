@@ -13,8 +13,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
-function VectorPlaygroundControls({ embeddingModel, onEmbeddingModelChange, showGridlines, onShowGridlinesChange }) {
+function VectorPlaygroundControls({ embeddingModel, onEmbeddingModelChange, showGridlines, onShowGridlinesChange, wordsText, onWordsTextChange }) {
   return (
     <div>
       <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
@@ -95,6 +97,26 @@ function VectorPlaygroundControls({ embeddingModel, onEmbeddingModelChange, show
       </div>
 
       <Separator className="my-4" />
+
+      {/* Words Input */}
+      <div className="space-y-2">
+        <Label htmlFor="words-input" className="text-sm font-medium">
+          Words to Plot (up to 50)
+        </Label>
+        <Textarea
+          id="words-input"
+          value={wordsText}
+          onChange={(e) => onWordsTextChange(e.target.value)}
+          placeholder="Type words separated by spaces (e.g., man woman king queen)"
+          className="min-h-[100px] resize-none"
+          maxLength={1000}
+        />
+        <p className="text-xs text-muted-foreground">
+          {Math.min(wordsText.split(/\s+/).filter(w => w.trim().length > 0).length, 50)} / 50 words
+        </p>
+      </div>
+
+      <Separator className="my-4" />
       {/* Add controls for vector operations */}
     </div>
   );
@@ -103,6 +125,14 @@ function VectorPlaygroundControls({ embeddingModel, onEmbeddingModelChange, show
 export default function PlaygroundPage() {
   const [embeddingModel, setEmbeddingModel] = useState("glove_50d");
   const [showGridlines, setShowGridlines] = useState(true);
+  const [wordsText, setWordsText] = useState("");
+
+  // Parse words from text, limit to 50
+  const words = wordsText
+    .split(/\s+/)
+    .map(w => w.trim().toLowerCase())
+    .filter(w => w.length > 0)
+    .slice(0, 50);
 
   return (
     <VisualizerLayout
@@ -112,12 +142,15 @@ export default function PlaygroundPage() {
           onEmbeddingModelChange={setEmbeddingModel}
           showGridlines={showGridlines}
           onShowGridlinesChange={setShowGridlines}
+          wordsText={wordsText}
+          onWordsTextChange={setWordsText}
         />
       }
       rightCanvas={
         <VectorPlaygroundCanvas
           embeddingModel={embeddingModel}
           showGridlines={showGridlines}
+          words={words}
         />
       }
     />

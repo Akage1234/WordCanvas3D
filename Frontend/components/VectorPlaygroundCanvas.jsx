@@ -4,18 +4,17 @@ import * as THREE from "three";
 import { ungzip } from "pako";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", showGridlines = true }) {
+export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", showGridlines = true, words = [] }) {
   const ref = useRef(null);
   const rafRef = useRef(0);
   const sceneRef = useRef(null);
   const gridHelperRef = useRef(null);
   const axesHelperRef = useRef(null);
-  const manVectorRef = useRef(null);
-  const manVectorLabelRef = useRef(null);
-  const manVectorHoverTubeRef = useRef(null); // Invisible tube for hover detection
-  const manVectorOriginalColor = useRef(0x00aaff);
+  const vectorsRef = useRef(new Map()); // Map of word -> { arrow, label, hoverTube, originalColor }
+  const embeddingsDataRef = useRef(null); // Store loaded embeddings
   const raycasterRef = useRef(null);
   const mouseRef = useRef(new THREE.Vector2());
+  const hoveredVectorRef = useRef(null); // Currently hovered vector
 
   useEffect(() => {
     const container = ref.current;
@@ -200,8 +199,22 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
       }
     }
 
+    // Color palette for vectors
+    const vectorColors = [
+      0x00aaff, // Blue
+      0xff6b6b, // Red
+      0x4ecdc4, // Teal
+      0x45b7d1, // Light Blue
+      0xf9ca24, // Yellow
+      0x6c5ce7, // Purple
+      0xa55eea, // Violet
+      0x26de81, // Green
+      0xfd79a8, // Pink
+      0xfa8231, // Orange
+    ];
+
     // Helper function to create vector arrow
-    function createVectorArrow(vector, color = 0xff0000, label = "") {
+    function createVectorArrow(vector, color = 0xff0000, word = "") {
       const direction = new THREE.Vector3().fromArray(vector);
       const length = direction.length();
       
@@ -227,7 +240,8 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
       arrowHelper.userData = {
         originalColor: color,
         lineMaterial: arrowHelper.line.material,
-        coneMaterial: arrowHelper.cone.material
+        coneMaterial: arrowHelper.cone.material,
+        word: word
       };
 
       // Create invisible tube along the arrow for hover detection (like EmbeddingCanvas uses Points)
@@ -268,7 +282,7 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
     createOriginMarker();
     createGridHelper();
 
-    // Load full embeddings and plot "Man" vector
+    // Load full embeddings
     async function loadFullEmbeddings() {
       try {
         // Normalize model name to lowercase for folder path
@@ -285,48 +299,9 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
         const data = JSON.parse(text);
         
         console.log(`Loaded full embeddings for ${embeddingModel}:`, Object.keys(data).length, "words");
+        embeddingsDataRef.current = data;
         
-        // Get "Man" vector (using first 3 dimensions for 3D visualization)
-        if (data["man"] || data["Man"]) {
-          const manVector = data["man"] || data["Man"];
-          // Use first 3 dimensions for 3D visualization
-          const manVector3D = [manVector[0] || 0, manVector[1] || 0, manVector[2] || 0];
-          const vectorEnd = new THREE.Vector3().fromArray(manVector3D);
-          
-          // Remove previous vector and label if exists
-          if (manVectorRef.current) {
-            scene.remove(manVectorRef.current);
-            manVectorRef.current.dispose();
-          }
-          if (manVectorLabelRef.current) {
-            scene.remove(manVectorLabelRef.current);
-            manVectorLabelRef.current.material.map.dispose();
-            manVectorLabelRef.current.material.dispose();
-          }
-
-          // Create and add vector arrow
-          const manArrow = createVectorArrow(manVector3D, 0x00aaff, "Man");
-          if (manArrow) {
-            manVectorRef.current = manArrow;
-            manVectorOriginalColor.current = 0x00aaff;
-            scene.add(manArrow);
-            
-            // Add hover tube for raycasting (like EmbeddingCanvas)
-            if (manArrow.userData.hoverTube) {
-              manVectorHoverTubeRef.current = manArrow.userData.hoverTube;
-              scene.add(manVectorHoverTubeRef.current);
-            }
-            
-            // Create label for "Man"
-            const manLabel = createTextSprite("Man", 0x00aaff);
-            // Position label at the end of the vector with slight offset
-            const labelOffset = vectorEnd.clone().normalize().multiplyScalar(0.15);
-            manLabel.position.copy(vectorEnd).add(labelOffset);
-            manLabel.renderOrder = 1000;
-            manVectorLabelRef.current = manLabel;
-            scene.add(manLabel);
-          }
-        }
+        // Words will be plotted by the useEffect that watches the words prop
       } catch (error) {
         console.error("Error loading full embeddings:", error);
       }
@@ -340,8 +315,8 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
 
     // Hover detection using raycaster (same approach as EmbeddingCanvas)
     const onPointerMove = (event) => {
-      if (!manVectorRef.current || !manVectorHoverTubeRef.current || !container) {
-        updateVectorColor(manVectorRef.current, manVectorOriginalColor.current);
+      if (!container || vectorsRef.current.size === 0) {
+        container.style.cursor = "default";
         return;
       }
 
@@ -354,18 +329,40 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
       // Set raycaster from camera (same as EmbeddingCanvas)
       raycaster.setFromCamera(mouseRef.current, camera);
       
-      // Intersect with hover tube (same as EmbeddingCanvas uses intersectObject with Points)
-      const intersects = raycaster.intersectObject(manVectorHoverTubeRef.current, false);
+      // Collect all hover tubes
+      const allHoverTubes = Array.from(vectorsRef.current.values()).map(v => v.hoverTube).filter(Boolean);
+      
+      // Intersect with all hover tubes
+      const intersects = raycaster.intersectObjects(allHoverTubes, false);
+
+      // Reset previously hovered vector
+      if (hoveredVectorRef.current && hoveredVectorRef.current !== null) {
+        const prevData = hoveredVectorRef.current;
+        updateVectorColor(prevData.arrow, prevData.originalColor);
+      }
 
       if (intersects.length > 0) {
-        // Hovering - change color to yellow
-        updateVectorColor(manVectorRef.current, 0xffff00);
-        container.style.cursor = "pointer";
-      } else {
-        // Not hovering - restore original color
-        updateVectorColor(manVectorRef.current, manVectorOriginalColor.current);
-        container.style.cursor = "default";
+        // Find which vector was hovered
+        const hoveredTube = intersects[0].object;
+        const hoveredWord = Array.from(vectorsRef.current.entries()).find(
+          ([word, data]) => data.hoverTube === hoveredTube
+        )?.[0];
+
+        if (hoveredWord) {
+          const vectorData = vectorsRef.current.get(hoveredWord);
+          if (vectorData) {
+            // Highlight hovered vector in yellow
+            updateVectorColor(vectorData.arrow, 0xffff00);
+            hoveredVectorRef.current = vectorData;
+            container.style.cursor = "pointer";
+            return;
+          }
+        }
       }
+
+      // Not hovering over any vector
+      hoveredVectorRef.current = null;
+      container.style.cursor = "default";
     };
 
     // Add event listeners to the renderer canvas, not container (same as EmbeddingCanvas)
@@ -420,19 +417,24 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
         });
         scene.remove(axesHelperRef.current);
       }
-      if (manVectorRef.current) {
-        manVectorRef.current.dispose();
+      // Clean up all vectors
+      for (const [word, vectorData] of vectorsRef.current.entries()) {
+        if (vectorData.arrow) {
+          scene.remove(vectorData.arrow);
+          vectorData.arrow.dispose();
+        }
+        if (vectorData.label) {
+          scene.remove(vectorData.label);
+          vectorData.label.material.map.dispose();
+          vectorData.label.material.dispose();
+        }
+        if (vectorData.hoverTube) {
+          scene.remove(vectorData.hoverTube);
+          vectorData.hoverTube.geometry.dispose();
+          vectorData.hoverTube.material.dispose();
+        }
       }
-      if (manVectorHoverTubeRef.current) {
-        scene.remove(manVectorHoverTubeRef.current);
-        manVectorHoverTubeRef.current.geometry.dispose();
-        manVectorHoverTubeRef.current.material.dispose();
-      }
-      if (manVectorLabelRef.current) {
-        scene.remove(manVectorLabelRef.current);
-        manVectorLabelRef.current.material.map.dispose();
-        manVectorLabelRef.current.material.dispose();
-      }
+      vectorsRef.current.clear();
       // Dispose all geometries and materials in scene
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
@@ -454,6 +456,183 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
       container.removeChild(renderer.domElement);
     };
   }, [embeddingModel]);
+
+  // Update vectors when words or embeddings change
+  useEffect(() => {
+    if (!sceneRef.current || !embeddingsDataRef.current) {
+      // Clear all vectors if scene or embeddings not ready
+      if (sceneRef.current) {
+        for (const [word, vectorData] of vectorsRef.current.entries()) {
+          if (vectorData.arrow) sceneRef.current.remove(vectorData.arrow);
+          if (vectorData.label) sceneRef.current.remove(vectorData.label);
+          if (vectorData.hoverTube) sceneRef.current.remove(vectorData.hoverTube);
+          vectorData.arrow?.dispose();
+          vectorData.label?.material?.map?.dispose();
+          vectorData.label?.material?.dispose();
+          vectorData.hoverTube?.geometry?.dispose();
+          vectorData.hoverTube?.material?.dispose();
+        }
+        vectorsRef.current.clear();
+      }
+      return;
+    }
+
+    // When embedding model changes, clear existing vectors first to force re-plot
+    if (words.length === 0) {
+      // Clear all vectors if no words
+      for (const [word, vectorData] of vectorsRef.current.entries()) {
+        if (vectorData.arrow) sceneRef.current.remove(vectorData.arrow);
+        if (vectorData.label) sceneRef.current.remove(vectorData.label);
+        if (vectorData.hoverTube) sceneRef.current.remove(vectorData.hoverTube);
+        vectorData.arrow?.dispose();
+        vectorData.label?.material?.map?.dispose();
+        vectorData.label?.material?.dispose();
+        vectorData.hoverTube?.geometry?.dispose();
+        vectorData.hoverTube?.material?.dispose();
+      }
+      vectorsRef.current.clear();
+      return;
+    }
+
+    const vectorColors = [
+      0x00aaff, 0xff6b6b, 0x4ecdc4, 0x45b7d1, 0xf9ca24,
+      0x6c5ce7, 0xa55eea, 0x26de81, 0xfd79a8, 0xfa8231,
+    ];
+
+    // Helper to create vector arrow (inline to access scene)
+    const createVectorArrow = (vector, color, word) => {
+      const direction = new THREE.Vector3().fromArray(vector);
+      const length = direction.length();
+      if (length === 0) return null;
+      direction.normalize();
+      const vectorEnd = new THREE.Vector3().fromArray(vector);
+
+      const arrowHelper = new THREE.ArrowHelper(
+        direction, new THREE.Vector3(0, 0, 0), length, color,
+        length * 0.1, length * 0.05
+      );
+      arrowHelper.userData = {
+        originalColor: color,
+        lineMaterial: arrowHelper.line.material,
+        coneMaterial: arrowHelper.cone.material,
+        word: word
+      };
+
+      const tubeGeometry = new THREE.CylinderGeometry(0.08, 0.08, length, 8, 1);
+      const tubeMaterial = new THREE.MeshBasicMaterial({
+        visible: false, transparent: true, opacity: 0
+      });
+      const hoverTube = new THREE.Mesh(tubeGeometry, tubeMaterial);
+      const midpoint = vectorEnd.clone().multiplyScalar(0.5);
+      hoverTube.position.copy(midpoint);
+      const upVector = new THREE.Vector3(0, 1, 0);
+      const quaternion = new THREE.Quaternion();
+      quaternion.setFromUnitVectors(upVector, direction);
+      hoverTube.setRotationFromQuaternion(quaternion);
+      arrowHelper.userData.hoverTube = hoverTube;
+      return arrowHelper;
+    };
+
+    // Helper to create text sprite (inline)
+    const createTextSprite = (text, color) => {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      const padding = 20;
+      context.font = 'Bold 64px Arial';
+      const metrics = context.measureText(text);
+      const textWidth = metrics.width;
+      canvas.width = textWidth + padding * 2;
+      canvas.height = 64 + padding * 2;
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
+      context.font = 'Bold 64px Arial';
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      context.fillText(text, canvas.width / 2, canvas.height / 2);
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.needsUpdate = true;
+      const spriteMaterial = new THREE.SpriteMaterial({
+        map: texture, transparent: true, alphaTest: 0.1
+      });
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.scale.set(0.3, 0.3, 1);
+      return sprite;
+    };
+
+    // Remove vectors that are no longer in the words list OR when embedding model changes (force re-plot)
+    const currentWords = new Set(words);
+    for (const [word, vectorData] of vectorsRef.current.entries()) {
+      if (!currentWords.has(word)) {
+        if (vectorData.arrow) sceneRef.current.remove(vectorData.arrow);
+        if (vectorData.label) sceneRef.current.remove(vectorData.label);
+        if (vectorData.hoverTube) sceneRef.current.remove(vectorData.hoverTube);
+        vectorData.arrow?.dispose();
+        vectorData.label?.material?.map?.dispose();
+        vectorData.label?.material?.dispose();
+        vectorData.hoverTube?.geometry?.dispose();
+        vectorData.hoverTube?.material?.dispose();
+        vectorsRef.current.delete(word);
+      }
+    }
+
+    // When embedding model changes, clear all existing vectors and re-plot with new embeddings
+    // This ensures vectors are updated with the correct embeddings from the new model
+    const wordsToReplot = words.filter(word => vectorsRef.current.has(word));
+    if (wordsToReplot.length > 0) {
+      wordsToReplot.forEach(word => {
+        const vectorData = vectorsRef.current.get(word);
+        if (vectorData) {
+          if (vectorData.arrow) sceneRef.current.remove(vectorData.arrow);
+          if (vectorData.label) sceneRef.current.remove(vectorData.label);
+          if (vectorData.hoverTube) sceneRef.current.remove(vectorData.hoverTube);
+          vectorData.arrow?.dispose();
+          vectorData.label?.material?.map?.dispose();
+          vectorData.label?.material?.dispose();
+          vectorData.hoverTube?.geometry?.dispose();
+          vectorData.hoverTube?.material?.dispose();
+          vectorsRef.current.delete(word);
+        }
+      });
+    }
+
+    // Add vectors for new words or re-plot existing ones
+    words.forEach((word, index) => {
+      // Always re-plot if embedding model changed (word will no longer be in vectorsRef)
+      if (vectorsRef.current.has(word)) return;
+      if (!embeddingsDataRef.current[word]) {
+        console.warn(`Word "${word}" not found in embeddings`);
+        return;
+      }
+
+      const embedding = embeddingsDataRef.current[word];
+      const vector3D = [embedding[0] || 0, embedding[1] || 0, embedding[2] || 0];
+      const vectorEnd = new THREE.Vector3().fromArray(vector3D);
+      const color = vectorColors[index % vectorColors.length];
+
+      const arrow = createVectorArrow(vector3D, color, word);
+      if (!arrow) return;
+
+      sceneRef.current.add(arrow);
+
+      const hoverTube = arrow.userData.hoverTube;
+      if (hoverTube) {
+        sceneRef.current.add(hoverTube);
+      }
+
+      const label = createTextSprite(word, color);
+      const labelOffset = vectorEnd.clone().normalize().multiplyScalar(0.15);
+      label.position.copy(vectorEnd).add(labelOffset);
+      label.renderOrder = 1000;
+      sceneRef.current.add(label);
+
+      vectorsRef.current.set(word, {
+        arrow,
+        label,
+        hoverTube,
+        originalColor: color
+      });
+      });
+  }, [words, embeddingModel]);
 
   // Update gridlines when showGridlines changes
   useEffect(() => {
