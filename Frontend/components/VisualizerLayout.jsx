@@ -4,8 +4,10 @@ export default function VisualizerLayout({ leftPanel, rightCanvas }) {
     return (
       <div className="flex gap-4 p-4 h-screen">
         {/* Left Panel */}
-        <aside className="w-64 bg-white/5 rounded-xl p-4 border border-white/10 backdrop-blur">
-          {leftPanel}
+        <aside className="w-64 bg-white/5 rounded-xl p-4 border border-white/10 backdrop-blur overflow-hidden min-w-0">
+          <div className="w-full min-w-0 overflow-hidden">
+            {leftPanel}
+          </div>
         </aside>
   
         {/* Right Canvas Area */}

@@ -4,7 +4,15 @@ import * as THREE from "three";
 import { ungzip } from "pako";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", showGridlines = true, words = [] }) {
+export default function VectorPlaygroundCanvas({
+  embeddingModel = "glove_50d",
+  showGridlines = true,
+  words = [],
+  resultVector = null,
+  resultLabel = "Result",
+  resultInfo = null,
+  onEmbeddingsLoaded = null,
+}) {
   const ref = useRef(null);
   const rafRef = useRef(0);
   const sceneRef = useRef(null);
@@ -15,6 +23,9 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
   const raycasterRef = useRef(null);
   const mouseRef = useRef(new THREE.Vector2());
   const hoveredVectorRef = useRef(null); // Currently hovered vector
+  const resultVectorRef = useRef(null); // Store result vector object
+  const rendererRef = useRef(null); // Store renderer reference
+  const cameraRef = useRef(null); // Store camera reference
 
   useEffect(() => {
     const container = ref.current;
@@ -40,6 +51,27 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
     renderer.depthTest = true;
     renderer.depthWrite = true;
     container.appendChild(renderer.domElement);
+
+    // Result info box element (shown in canvas)
+    const resultInfoBox = document.createElement("div");
+    resultInfoBox.setAttribute("data-result-info-box", "true");
+    resultInfoBox.style.position = "absolute";
+    resultInfoBox.style.top = "20px";
+    resultInfoBox.style.right = "20px";
+    resultInfoBox.style.pointerEvents = "none";
+    resultInfoBox.style.padding = "12px 16px";
+    resultInfoBox.style.borderRadius = "8px";
+    resultInfoBox.style.background = "rgba(0, 0, 0, 0.85)";
+    resultInfoBox.style.color = "white";
+    resultInfoBox.style.fontSize = "12px";
+    resultInfoBox.style.fontFamily = "system-ui, sans-serif";
+    resultInfoBox.style.zIndex = "1000";
+    resultInfoBox.style.minWidth = "200px";
+    resultInfoBox.style.boxShadow = "0 4px 12px rgba(0,0,0,0.4)";
+    resultInfoBox.style.display = "none";
+    resultInfoBox.style.lineHeight = "1.6";
+    container.style.position = "relative";
+    container.appendChild(resultInfoBox);
 
     // Add OrbitControls for camera manipulation
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -301,6 +333,11 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
         console.log(`Loaded full embeddings for ${embeddingModel}:`, Object.keys(data).length, "words");
         embeddingsDataRef.current = data;
         
+        // Notify parent that embeddings are loaded
+        if (onEmbeddingsLoaded) {
+          onEmbeddingsLoaded(data);
+        }
+        
         // Words will be plotted by the useEffect that watches the words prop
       } catch (error) {
         console.error("Error loading full embeddings:", error);
@@ -315,7 +352,7 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
 
     // Hover detection using raycaster (same approach as EmbeddingCanvas)
     const onPointerMove = (event) => {
-      if (!container || vectorsRef.current.size === 0) {
+      if (!container || (vectorsRef.current.size === 0 && !resultVectorRef.current)) {
         container.style.cursor = "default";
         return;
       }
@@ -329,8 +366,11 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
       // Set raycaster from camera (same as EmbeddingCanvas)
       raycaster.setFromCamera(mouseRef.current, camera);
       
-      // Collect all hover tubes
+      // Collect all hover tubes (including result vector)
       const allHoverTubes = Array.from(vectorsRef.current.values()).map(v => v.hoverTube).filter(Boolean);
+      if (resultVectorRef.current?.hoverTube) {
+        allHoverTubes.push(resultVectorRef.current.hoverTube);
+      }
       
       // Intersect with all hover tubes
       const intersects = raycaster.intersectObjects(allHoverTubes, false);
@@ -344,6 +384,16 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
       if (intersects.length > 0) {
         // Find which vector was hovered
         const hoveredTube = intersects[0].object;
+        
+        // Check if it's the result vector
+        if (resultVectorRef.current && resultVectorRef.current.hoverTube === hoveredTube) {
+          updateVectorColor(resultVectorRef.current.arrow, 0xffff00);
+          hoveredVectorRef.current = resultVectorRef.current;
+          container.style.cursor = "pointer";
+          return;
+        }
+        
+        // Check regular vectors
         const hoveredWord = Array.from(vectorsRef.current.entries()).find(
           ([word, data]) => data.hoverTube === hoveredTube
         )?.[0];
@@ -435,6 +485,25 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
         }
       }
       vectorsRef.current.clear();
+      
+      // Clean up result vector
+      if (resultVectorRef.current) {
+        if (resultVectorRef.current.arrow) {
+          scene.remove(resultVectorRef.current.arrow);
+          resultVectorRef.current.arrow.dispose();
+        }
+        if (resultVectorRef.current.label) {
+          scene.remove(resultVectorRef.current.label);
+          resultVectorRef.current.label.material.map.dispose();
+          resultVectorRef.current.label.material.dispose();
+        }
+        if (resultVectorRef.current.hoverTube) {
+          scene.remove(resultVectorRef.current.hoverTube);
+          resultVectorRef.current.hoverTube.geometry.dispose();
+          resultVectorRef.current.hoverTube.material.dispose();
+        }
+        resultVectorRef.current = null;
+      }
       // Dispose all geometries and materials in scene
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
@@ -454,6 +523,10 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
       const gl = renderer.getContext?.();
       gl?.getExtension?.('WEBGL_lose_context')?.loseContext?.();
       container.removeChild(renderer.domElement);
+      const resultInfoBox = container.querySelector('[data-result-info-box]');
+      if (resultInfoBox && resultInfoBox.parentElement === container) {
+        container.removeChild(resultInfoBox);
+      }
     };
   }, [embeddingModel]);
 
@@ -656,6 +729,144 @@ export default function VectorPlaygroundCanvas({ embeddingModel = "glove_50d", s
       sceneRef.current.add(gridHelper);
     }
   }, [showGridlines]);
+
+  // Update result vector when resultVector prop changes
+  useEffect(() => {
+    if (!sceneRef.current) return;
+
+    // Remove existing result vector
+    if (resultVectorRef.current) {
+      if (resultVectorRef.current.arrow) sceneRef.current.remove(resultVectorRef.current.arrow);
+      if (resultVectorRef.current.label) sceneRef.current.remove(resultVectorRef.current.label);
+      if (resultVectorRef.current.hoverTube) sceneRef.current.remove(resultVectorRef.current.hoverTube);
+      resultVectorRef.current.arrow?.dispose();
+      resultVectorRef.current.label?.material?.map?.dispose();
+      resultVectorRef.current.label?.material?.dispose();
+      resultVectorRef.current.hoverTube?.geometry?.dispose();
+      resultVectorRef.current.hoverTube?.material?.dispose();
+      resultVectorRef.current = null;
+    }
+
+    // Add new result vector if provided
+    if (resultVector && Array.isArray(resultVector) && resultVector.length >= 3) {
+      const vector3D = [resultVector[0] || 0, resultVector[1] || 0, resultVector[2] || 0];
+      const vectorEnd = new THREE.Vector3().fromArray(vector3D);
+      const resultColor = 0x00ff00; // Green color for result vector
+
+      // Helper to create vector arrow
+      const createResultArrow = (vector, color, word) => {
+        const direction = new THREE.Vector3().fromArray(vector);
+        const length = direction.length();
+        if (length === 0) return null;
+        direction.normalize();
+
+        const arrowHelper = new THREE.ArrowHelper(
+          direction, new THREE.Vector3(0, 0, 0), length, color,
+          length * 0.1, length * 0.05
+        );
+        
+        arrowHelper.userData = {
+          originalColor: color,
+          lineMaterial: arrowHelper.line.material,
+          coneMaterial: arrowHelper.cone.material,
+          word: word
+        };
+
+        const tubeGeometry = new THREE.CylinderGeometry(0.12, 0.12, length, 8, 1); // Slightly thicker for result
+        const tubeMaterial = new THREE.MeshBasicMaterial({
+          visible: false, transparent: true, opacity: 0
+        });
+        const hoverTube = new THREE.Mesh(tubeGeometry, tubeMaterial);
+        const midpoint = vectorEnd.clone().multiplyScalar(0.5);
+        hoverTube.position.copy(midpoint);
+        const upVector = new THREE.Vector3(0, 1, 0);
+        const quaternion = new THREE.Quaternion();
+        quaternion.setFromUnitVectors(upVector, direction);
+        hoverTube.setRotationFromQuaternion(quaternion);
+        arrowHelper.userData.hoverTube = hoverTube;
+        return arrowHelper;
+      };
+
+      // Helper to create text sprite
+      const createTextSprite = (text, color) => {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        const padding = 20;
+        context.font = 'Bold 64px Arial';
+        const metrics = context.measureText(text);
+        const textWidth = metrics.width;
+        canvas.width = textWidth + padding * 2;
+        canvas.height = 64 + padding * 2;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
+        context.font = 'Bold 64px Arial';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText(text, canvas.width / 2, canvas.height / 2);
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.needsUpdate = true;
+        const spriteMaterial = new THREE.SpriteMaterial({
+          map: texture, transparent: true, alphaTest: 0.1
+        });
+        const sprite = new THREE.Sprite(spriteMaterial);
+        sprite.scale.set(0.3, 0.3, 1);
+        return sprite;
+      };
+
+      const arrow = createResultArrow(vector3D, resultColor, resultLabel);
+      if (arrow) {
+        sceneRef.current.add(arrow);
+
+        const hoverTube = arrow.userData.hoverTube;
+        if (hoverTube) {
+          sceneRef.current.add(hoverTube);
+        }
+
+        const label = createTextSprite(resultLabel, resultColor);
+        const labelOffset = vectorEnd.clone().normalize().multiplyScalar(0.15);
+        label.position.copy(vectorEnd).add(labelOffset);
+        label.renderOrder = 1000;
+        sceneRef.current.add(label);
+
+        resultVectorRef.current = {
+          arrow,
+          label,
+          hoverTube,
+          originalColor: resultColor
+        };
+      }
+    }
+  }, [resultVector, resultLabel]);
+
+  // Update result info box when resultInfo prop changes
+  useEffect(() => {
+    const container = ref.current;
+    if (!container) return;
+    
+    const resultInfoBox = container.querySelector('[data-result-info-box]');
+    if (!resultInfoBox) return;
+
+    if (resultInfo && resultInfo.closestWord) {
+      resultInfoBox.innerHTML = `
+        <div style="font-weight: 600; margin-bottom: 8px; font-size: 13px;">Result:</div>
+        <div style="margin-bottom: 6px;">
+          <span style="color: rgba(255,255,255,0.7);">Closest word: </span>
+          <span style="font-weight: 600; color: #00ff00;">${resultInfo.closestWord}</span>
+        </div>
+        <div style="margin-bottom: 6px; font-family: monospace; font-size: 11px; color: rgba(255,255,255,0.7);">
+          3D: (${resultInfo.vector3D[0].toFixed(3)}, ${resultInfo.vector3D[1].toFixed(3)}, ${resultInfo.vector3D[2].toFixed(3)})
+        </div>
+        ${resultInfo.similarity !== undefined ? `
+          <div style="font-family: monospace; font-size: 11px; color: rgba(255,255,255,0.7);">
+            Similarity: ${resultInfo.similarity.toFixed(4)}
+          </div>
+        ` : ''}
+      `;
+      resultInfoBox.style.display = "block";
+    } else {
+      resultInfoBox.style.display = "none";
+    }
+  }, [resultInfo]);
 
   return <div ref={ref} className="w-full h-full" />;
 }
