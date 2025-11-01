@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import VisualizerLayout from "@/components/VisualizerLayout";
 import VectorPlaygroundCanvas from "@/components/VectorPlaygroundCanvas";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
@@ -412,6 +412,52 @@ export default function PlaygroundPage() {
   const [errorMessage, setErrorMessage] = useState(null);
   const [errorField, setErrorField] = useState(null); // 'a', 'b', 'c', or null
   const [embeddingsData, setEmbeddingsData] = useState(null);
+  const shouldAutoRecalculateRef = useRef(false); // Track if we should auto-recalculate when embeddings load
+
+  // Clear calculation result when embedding model changes, but mark for auto-recalculate if we had a result
+  useEffect(() => {
+    if (calculationResult && vectorA && vectorB && vectorC) {
+      // Had a calculation - mark to auto-recalculate when new embeddings load
+      shouldAutoRecalculateRef.current = true;
+    }
+    setCalculationResult(null);
+    setErrorMessage(null);
+    setErrorField(null);
+    setEmbeddingsData(null); // Clear old embeddings to ensure we wait for new ones
+  }, [embeddingModel]);
+
+  // Auto-recalculate when embeddings finish loading (if we had a previous calculation)
+  useEffect(() => {
+    if (shouldAutoRecalculateRef.current && embeddingsData && vectorA && vectorB && vectorC) {
+      shouldAutoRecalculateRef.current = false;
+      // Use handleCalculate logic inline to avoid circular dependency
+      const { result: resultVectorFull, missingWords, inputWords, errorField: field } = parseVectorEquation(
+        vectorA,
+        vectorB,
+        vectorC,
+        embeddingsData
+      );
+      
+      if (missingWords.length === 0 && resultVectorFull && Array.isArray(resultVectorFull)) {
+        const vector3D = [
+          resultVectorFull[0] || 0,
+          resultVectorFull[1] || 0,
+          resultVectorFull[2] || 0
+        ];
+        const closest = findClosestWord(resultVectorFull, embeddingsData, inputWords);
+        
+        setCalculationResult({
+          vector3D: vector3D,
+          vectorFull: resultVectorFull,
+          closestWord: closest?.word,
+          closestDistance: closest?.distance,
+          similarity: closest?.similarity,
+        });
+        setErrorMessage(null);
+        setErrorField(null);
+      }
+    }
+  }, [embeddingsData, vectorA, vectorB, vectorC]);
 
   // Parse words from text, limit to 50
   const manualWords = wordsText
@@ -518,6 +564,9 @@ export default function PlaygroundPage() {
             distance: calculationResult.closestDistance,
           } : null}
           onEmbeddingsLoaded={setEmbeddingsData}
+          vectorA={vectorA.trim().toLowerCase() || null}
+          vectorB={vectorB.trim().toLowerCase() || null}
+          vectorC={vectorC.trim().toLowerCase() || null}
         />
       }
     />

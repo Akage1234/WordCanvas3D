@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { ungzip } from "pako";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -12,6 +12,9 @@ export default function VectorPlaygroundCanvas({
   resultLabel = "Result",
   resultInfo = null,
   onEmbeddingsLoaded = null,
+  vectorA = null,
+  vectorB = null,
+  vectorC = null,
 }) {
   const ref = useRef(null);
   const rafRef = useRef(0);
@@ -26,6 +29,8 @@ export default function VectorPlaygroundCanvas({
   const resultVectorRef = useRef(null); // Store result vector object
   const rendererRef = useRef(null); // Store renderer reference
   const cameraRef = useRef(null); // Store camera reference
+  const distanceVectorsRef = useRef([]); // Store distance vector arrows (a->b, b->c, c->output)
+  const [embeddingsReady, setEmbeddingsReady] = useState(false); // Track when embeddings are loaded
 
   useEffect(() => {
     const container = ref.current;
@@ -338,12 +343,18 @@ export default function VectorPlaygroundCanvas({
           onEmbeddingsLoaded(data);
         }
         
+        // Signal that embeddings are ready (triggers distance vectors update)
+        setEmbeddingsReady(true);
+        
         // Words will be plotted by the useEffect that watches the words prop
       } catch (error) {
         console.error("Error loading full embeddings:", error);
       }
     }
 
+    // Reset embeddings ready state when embedding model changes
+    setEmbeddingsReady(false);
+    
     loadFullEmbeddings();
 
     // Initialize raycaster for hover detection (same as EmbeddingCanvas)
@@ -504,6 +515,15 @@ export default function VectorPlaygroundCanvas({
         }
         resultVectorRef.current = null;
       }
+      
+      // Clean up distance vectors
+      for (const arrow of distanceVectorsRef.current) {
+        if (arrow) {
+          scene.remove(arrow);
+          arrow.dispose();
+        }
+      }
+      distanceVectorsRef.current = [];
       // Dispose all geometries and materials in scene
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
@@ -705,7 +725,7 @@ export default function VectorPlaygroundCanvas({
         originalColor: color
       });
       });
-  }, [words, embeddingModel]);
+  }, [words, embeddingModel, embeddingsReady]);
 
   // Update gridlines when showGridlines changes
   useEffect(() => {
@@ -867,6 +887,105 @@ export default function VectorPlaygroundCanvas({
       resultInfoBox.style.display = "none";
     }
   }, [resultInfo]);
+
+  // Create/update distance vectors (a->b, b->c, c->output) when calculation is complete
+  useEffect(() => {
+    if (!sceneRef.current || !embeddingsDataRef.current) {
+      // Clean up distance vectors if scene or embeddings not ready
+      if (sceneRef.current) {
+        for (const arrow of distanceVectorsRef.current) {
+          if (arrow) {
+            sceneRef.current.remove(arrow);
+            arrow.dispose();
+          }
+        }
+        distanceVectorsRef.current = [];
+      }
+      return;
+    }
+
+    // Remove existing distance vectors
+    for (const arrow of distanceVectorsRef.current) {
+      if (arrow) {
+        sceneRef.current.remove(arrow);
+        arrow.dispose();
+      }
+    }
+    distanceVectorsRef.current = [];
+
+    // Only create distance vectors if we have all required vectors: a, b, c, and resultVector
+    if (!vectorA || !vectorB || !vectorC || !resultVector) {
+      return;
+    }
+
+    // Check if all words exist in embeddings
+    if (!embeddingsDataRef.current[vectorA] || !embeddingsDataRef.current[vectorB] || !embeddingsDataRef.current[vectorC]) {
+      return;
+    }
+
+    // Get 3D positions for a, b, c, and result
+    const getVector3D = (word) => {
+      if (word === 'result' || word === null) {
+        return resultVector ? new THREE.Vector3(resultVector[0] || 0, resultVector[1] || 0, resultVector[2] || 0) : null;
+      }
+      const embedding = embeddingsDataRef.current[word];
+      if (!embedding) return null;
+      return new THREE.Vector3(embedding[0] || 0, embedding[1] || 0, embedding[2] || 0);
+    };
+
+    const posA = getVector3D(vectorA);
+    const posB = getVector3D(vectorB);
+    const posC = getVector3D(vectorC);
+    const posResult = getVector3D(null);
+
+    if (!posA || !posB || !posC || !posResult) {
+      return;
+    }
+
+    // Yellow color for distance vectors
+    const distanceColor = 0xffff00;
+
+    // Helper function to create distance arrow from start to end position
+    const createDistanceArrow = (startPos, endPos, color) => {
+      const direction = new THREE.Vector3().subVectors(endPos, startPos);
+      const length = direction.length();
+      
+      if (length === 0) return null;
+
+      const normalizedDir = direction.clone().normalize();
+
+      // Create arrow helper positioned at start, pointing toward end
+      const arrowHelper = new THREE.ArrowHelper(
+        normalizedDir,
+        startPos.clone(),
+        length,
+        color,
+        length * 0.15,
+        length * 0.08
+      );
+
+      return arrowHelper;
+    };
+
+    // Create distance vectors: a->b, b->c, c->output
+    const arrowAB = createDistanceArrow(posA, posB, distanceColor);
+    if (arrowAB) {
+      sceneRef.current.add(arrowAB);
+      distanceVectorsRef.current.push(arrowAB);
+    }
+
+    const arrowBC = createDistanceArrow(posB, posC, distanceColor);
+    if (arrowBC) {
+      sceneRef.current.add(arrowBC);
+      distanceVectorsRef.current.push(arrowBC);
+    }
+
+    const arrowCResult = createDistanceArrow(posC, posResult, distanceColor);
+    if (arrowCResult) {
+      sceneRef.current.add(arrowCResult);
+      distanceVectorsRef.current.push(arrowCResult);
+    }
+  }, [vectorA, vectorB, vectorC, resultVector, embeddingModel, words, embeddingsReady]);
 
   return <div ref={ref} className="w-full h-full" />;
 }
