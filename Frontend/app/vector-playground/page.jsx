@@ -404,7 +404,7 @@ function findClosestWord(resultVectorFull, embeddings, excludeWords = []) {
 export default function PlaygroundPage() {
   const [embeddingModel, setEmbeddingModel] = useState("glove_50d");
   const [showGridlines, setShowGridlines] = useState(true);
-  const [wordsText, setWordsText] = useState("");
+  const [wordsText, setWordsText] = useState("If the path be beautiful , let us not ask where it leads");
   const [vectorA, setVectorA] = useState("");
   const [vectorB, setVectorB] = useState("");
   const [vectorC, setVectorC] = useState("");
@@ -458,6 +458,29 @@ export default function PlaygroundPage() {
       }
     }
   }, [embeddingsData, vectorA, vectorB, vectorC]);
+
+  // Mutual exclusivity: If user types in words textbox, clear vector inputs and calculation
+  useEffect(() => {
+    if (wordsText.trim().length > 0) {
+      if (vectorA || vectorB || vectorC || calculationResult) {
+        setVectorA("");
+        setVectorB("");
+        setVectorC("");
+        setCalculationResult(null);
+        setErrorMessage(null);
+        setErrorField(null);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wordsText]);
+
+  // Mutual exclusivity: If user types in vector inputs, clear words textbox
+  useEffect(() => {
+    if ((vectorA.trim().length > 0 || vectorB.trim().length > 0 || vectorC.trim().length > 0) && wordsText.trim().length > 0) {
+      setWordsText("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vectorA, vectorB, vectorC]);
 
   // Parse words from text, limit to 50
   const manualWords = wordsText

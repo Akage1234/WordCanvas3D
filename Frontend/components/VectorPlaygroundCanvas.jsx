@@ -19,7 +19,7 @@ export default function VectorPlaygroundCanvas({
   const ref = useRef(null);
   const rafRef = useRef(0);
   const sceneRef = useRef(null);
-  const gridHelperRef = useRef(null);
+  const gridHelperRef = useRef(null); 
   const axesHelperRef = useRef(null);
   const vectorsRef = useRef(new Map()); // Map of word -> { arrow, label, hoverTube, originalColor }
   const embeddingsDataRef = useRef(null); // Store loaded embeddings
@@ -37,7 +37,7 @@ export default function VectorPlaygroundCanvas({
     if (!container) return;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a1a);
+    scene.background = new THREE.Color(0x090a12);
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(
