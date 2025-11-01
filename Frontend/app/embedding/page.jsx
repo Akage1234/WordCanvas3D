@@ -7,6 +7,16 @@ import {
   HoverCardTrigger,
   HoverCardContent,
 } from "@/components/ui/hover-card";
+import {
+  Drawer,
+  DrawerTrigger,
+  DrawerContent,
+  DrawerHeader,
+  DrawerFooter,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerClose,
+} from "@/components/ui/drawer";
 import { HelpCircle, Check, ChevronsUpDown } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -330,32 +340,122 @@ export default function EmbeddingPage() {
   }, [embeddingModel, wordCount]); // Removed wordsList.length dependency to avoid re-running effect
 
   return (
-    <VisualizerLayout
-      leftPanel={
-        <EmbeddingControls
-          embeddingModel={embeddingModel}
-          onEmbeddingModelChange={setEmbeddingModel}
-          wordCount={wordCount}
-          onWordCountChange={setWordCount}
-          searchWord={searchWord}
-          onSearchWordChange={setSearchWord}
-          useClusterColors={useClusterColors}
-          onUseClusterColorsChange={setUseClusterColors}
-          showClusterEdges={showClusterEdges}
-          onShowClusterEdgesChange={setShowClusterEdges}
-          wordsList={wordsList}
-        />
-      }
-      rightCanvas={
-        <EmbeddingCanvas
-          ref={canvasRef}
-          embeddingModel={embeddingModel}
-          wordCount={wordCount}
-          searchWord={searchWord}
-          useClusterColors={useClusterColors}
-          showClusterEdges={showClusterEdges}
-        />
-      }
-    />
+    <>
+      <Drawer>
+
+          <div className="justify-self-end me-4">
+            <DrawerTrigger asChild>
+              <button className="inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900/60 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800">
+                Learn about Embedding Space
+              </button>
+            </DrawerTrigger>
+          </div>
+
+        <DrawerContent className="flex flex-col max-h-[90vh] custom-scroll">
+          <div className="mx-auto w-full max-w-2xl overflow-y-auto flex-1 px-4 pt-4">
+            <DrawerHeader>
+              <DrawerTitle>What is Embedding Space?</DrawerTitle>
+              <DrawerDescription>
+                Embedding space is a high-dimensional mathematical space where words, 
+                sentences, or other linguistic units are represented as vectors. These 
+                vectors capture semantic and syntactic relationships, allowing similar 
+                meanings to be positioned close together in the space. Word embeddings 
+                transform discrete text into continuous vectors that machine learning 
+                models can understand and manipulate.
+              </DrawerDescription>
+            </DrawerHeader>
+
+            <div className="space-y-4 pb-4">
+              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-4">
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-2">
+                  Semantic Clustering
+                </div>
+                <div className="text-sm text-neutral-300 mb-2">
+                  Words with similar meanings naturally cluster together in embedding space. 
+                  For example, words like "king", "queen", "prince" would be positioned 
+                  close to each other because they share semantic relationships.
+                </div>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  <span className="px-2 py-1 text-xs rounded bg-blue-900/40 text-blue-200 border border-blue-700/50">
+                    king
+                  </span>
+                  <span className="px-2 py-1 text-xs rounded bg-blue-900/40 text-blue-200 border border-blue-700/50">
+                    queen
+                  </span>
+                  <span className="px-2 py-1 text-xs rounded bg-blue-900/40 text-blue-200 border border-blue-700/50">
+                    prince
+                  </span>
+                  <span className="px-2 py-1 text-xs rounded bg-blue-900/40 text-blue-200 border border-blue-700/50">
+                    royal
+                  </span>
+                </div>
+              </div>
+
+              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-4">
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-2">
+                  Dimensionality
+                </div>
+                <div className="text-sm text-neutral-300 mb-2">
+                  Word embeddings typically exist in high-dimensional spaces (50-300+ dimensions). 
+                  The 3D visualization you see is a projection that preserves relationships while 
+                  making the space visually interpretable. Each dimension captures different 
+                  linguistic features.
+                </div>
+                <div className="text-xs text-neutral-400 mt-2">
+                  Current model: <span className="font-semibold text-neutral-200">{embeddingModel}</span>
+                </div>
+              </div>
+
+              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-4">
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-2">
+                  Distance as Similarity
+                </div>
+                <div className="text-sm text-neutral-300">
+                  The distance between vectors in embedding space represents semantic similarity. 
+                  Closer vectors indicate more similar meanings. This property enables applications 
+                  like semantic search, recommendation systems, and word analogy tasks.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DrawerFooter className="mx-auto w-full max-w-2xl px-4 pb-4">
+            <DrawerClose asChild>
+              <button className="rounded-md border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800">
+                Close
+              </button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      <VisualizerLayout
+        leftPanel={
+          <EmbeddingControls
+            embeddingModel={embeddingModel}
+            onEmbeddingModelChange={setEmbeddingModel}
+            wordCount={wordCount}
+            onWordCountChange={setWordCount}
+            searchWord={searchWord}
+            onSearchWordChange={setSearchWord}
+            useClusterColors={useClusterColors}
+            onUseClusterColorsChange={setUseClusterColors}
+            showClusterEdges={showClusterEdges}
+            onShowClusterEdgesChange={setShowClusterEdges}
+            wordsList={wordsList}
+          />
+        }
+        rightCanvas={
+          <EmbeddingCanvas
+            ref={canvasRef}
+            embeddingModel={embeddingModel}
+            wordCount={wordCount}
+            searchWord={searchWord}
+            useClusterColors={useClusterColors}
+            showClusterEdges={showClusterEdges}
+          />
+        }
+      />
+    </>
   );
 }

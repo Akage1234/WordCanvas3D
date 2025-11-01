@@ -2,7 +2,21 @@
 import { useState, useEffect, useRef } from "react";
 import VisualizerLayout from "@/components/VisualizerLayout";
 import VectorPlaygroundCanvas from "@/components/VectorPlaygroundCanvas";
-import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
+import {
+  HoverCard,
+  HoverCardTrigger,
+  HoverCardContent,
+} from "@/components/ui/hover-card";
+import {
+  Drawer,
+  DrawerTrigger,
+  DrawerContent,
+  DrawerHeader,
+  DrawerFooter,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerClose,
+} from "@/components/ui/drawer";
 import { HelpCircle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -17,7 +31,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 function VectorPlaygroundControls({
@@ -55,24 +73,26 @@ function VectorPlaygroundControls({
           </HoverCardTrigger>
           <HoverCardContent>
             <div className="text-sm space-y-3">
-              <div className="font-semibold text-white">
-                Vector Playground
-              </div>
-                <ul className="list-disc pl-5 space-y-1 text-neutral-300">
-                  <li>
-                    Experiment with vector arithmetic (addition, subtraction, scaling).
-                  </li>
-                  <li>
-                    Visualize the results of analogy operations like:
-                    <span className="font-mono"> <code className="text-red-400">king - man + woman = ?</code></span>
-                  </li>
-                  <li>
-                    Analyze distances and directions between selected points.
-                  </li>
-                  <li>
-                    Get intuition for how vector math underpins word analogies.
-                  </li>
-                </ul>
+              <div className="font-semibold text-white">Vector Playground</div>
+              <ul className="list-disc pl-5 space-y-1 text-neutral-300">
+                <li>
+                  Experiment with vector arithmetic (addition, subtraction,
+                  scaling).
+                </li>
+                <li>
+                  Visualize the results of analogy operations like:
+                  <span className="font-mono">
+                    {" "}
+                    <code className="text-red-400">king - man + woman = ?</code>
+                  </span>
+                </li>
+                <li>
+                  Analyze distances and directions between selected points.
+                </li>
+                <li>
+                  Get intuition for how vector math underpins word analogies.
+                </li>
+              </ul>
             </div>
           </HoverCardContent>
         </HoverCard>
@@ -133,7 +153,11 @@ function VectorPlaygroundControls({
           maxLength={1000}
         />
         <p className="text-xs text-muted-foreground">
-          {Math.min(wordsText.split(/\s+/).filter(w => w.trim().length > 0).length, 50)} / 50 words
+          {Math.min(
+            wordsText.split(/\s+/).filter((w) => w.trim().length > 0).length,
+            50
+          )}{" "}
+          / 50 words
         </p>
       </div>
 
@@ -141,9 +165,7 @@ function VectorPlaygroundControls({
 
       {/* Vector Calculation */}
       <div className="space-y-2 max-w-full overflow-hidden">
-        <Label className="text-sm font-medium">
-          Vector Calculation
-        </Label>
+        <Label className="text-sm font-medium">Vector Calculation</Label>
         <HoverCard>
           <HoverCardTrigger asChild>
             <HelpCircle className="inline-block ml-1 h-3 w-3 text-muted-foreground cursor-help" />
@@ -151,18 +173,30 @@ function VectorPlaygroundControls({
           <HoverCardContent>
             <div className="text-sm space-y-3">
               <div>
-                <p className="font-semibold mb-2">Vector Calculation: a - b + c</p>
+                <p className="font-semibold mb-2">
+                  Vector Calculation: a - b + c
+                </p>
                 <p className="text-xs text-muted-foreground mb-2">
-                  This performs word analogy calculations using vector arithmetic. The result finds the word that has the same relationship to 'c' as 'a' has to 'b'.
+                  This performs word analogy calculations using vector
+                  arithmetic. The result finds the word that has the same
+                  relationship to 'c' as 'a' has to 'b'.
                 </p>
               </div>
               <div>
                 <p className="font-medium mb-1">Example:</p>
                 <div className="font-mono text-xs space-y-1">
-                  <p>• <strong>a:</strong> king (starting word)</p>
-                  <p>• <strong>b:</strong> man (reference word)</p>
-                  <p>• <strong>c:</strong> woman (target word)</p>
-                  <p>• <strong>Result:</strong> queen</p>
+                  <p>
+                    • <strong>a:</strong> king (starting word)
+                  </p>
+                  <p>
+                    • <strong>b:</strong> man (reference word)
+                  </p>
+                  <p>
+                    • <strong>c:</strong> woman (target word)
+                  </p>
+                  <p>
+                    • <strong>Result:</strong> queen
+                  </p>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 italic">
                   "What is to woman as king is to man?" → queen
@@ -170,7 +204,10 @@ function VectorPlaygroundControls({
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">
-                  <strong>How it works:</strong> The calculation (a - b + c) finds the direction from b to a, then applies that same direction starting from c. All input words and the result are automatically plotted on the canvas.
+                  <strong>How it works:</strong> The calculation (a - b + c)
+                  finds the direction from b to a, then applies that same
+                  direction starting from c. All input words and the result are
+                  automatically plotted on the canvas.
                 </p>
               </div>
             </div>
@@ -191,7 +228,8 @@ function VectorPlaygroundControls({
                 placeholder="king"
                 className={cn(
                   "flex-1",
-                  errorField === "a" && "border-destructive focus-visible:ring-destructive"
+                  errorField === "a" &&
+                    "border-destructive focus-visible:ring-destructive"
                 )}
               />
             </TooltipTrigger>
@@ -216,7 +254,8 @@ function VectorPlaygroundControls({
                 placeholder="man"
                 className={cn(
                   "flex-1",
-                  errorField === "b" && "border-destructive focus-visible:ring-destructive"
+                  errorField === "b" &&
+                    "border-destructive focus-visible:ring-destructive"
                 )}
               />
             </TooltipTrigger>
@@ -241,7 +280,8 @@ function VectorPlaygroundControls({
                 placeholder="woman"
                 className={cn(
                   "flex-1",
-                  errorField === "c" && "border-destructive focus-visible:ring-destructive"
+                  errorField === "c" &&
+                    "border-destructive focus-visible:ring-destructive"
                 )}
               />
             </TooltipTrigger>
@@ -265,10 +305,13 @@ function VectorPlaygroundControls({
 // Vector equation parser for format: a - b + c
 // IMPORTANT: Perform arithmetic on FULL vectors, not just first 3 dimensions
 function parseVectorEquation(a, b, c, embeddings) {
-  if (!embeddings) return { result: null, missingWords: [], inputWords: [], errorField: null };
+  if (!embeddings)
+    return { result: null, missingWords: [], inputWords: [], errorField: null };
 
   const missingWords = [];
-  const inputWords = [a, b, c].filter(w => w && w.trim().length > 0).map(w => w.trim().toLowerCase());
+  const inputWords = [a, b, c]
+    .filter((w) => w && w.trim().length > 0)
+    .map((w) => w.trim().toLowerCase());
   let errorField = null;
 
   // Check if all words exist
@@ -277,13 +320,28 @@ function parseVectorEquation(a, b, c, embeddings) {
   const cWord = c?.trim().toLowerCase();
 
   if (!aWord) {
-    return { result: null, missingWords: ["First word (a) is required"], inputWords, errorField: "a" };
+    return {
+      result: null,
+      missingWords: ["First word (a) is required"],
+      inputWords,
+      errorField: "a",
+    };
   }
   if (!bWord) {
-    return { result: null, missingWords: ["Second word (b) is required"], inputWords, errorField: "b" };
+    return {
+      result: null,
+      missingWords: ["Second word (b) is required"],
+      inputWords,
+      errorField: "b",
+    };
   }
   if (!cWord) {
-    return { result: null, missingWords: ["Third word (c) is required"], inputWords, errorField: "c" };
+    return {
+      result: null,
+      missingWords: ["Third word (c) is required"],
+      inputWords,
+      errorField: "c",
+    };
   }
 
   // Check each word exists in embeddings
@@ -309,37 +367,52 @@ function parseVectorEquation(a, b, c, embeddings) {
   const vectorB = embeddings[bWord];
   const vectorC = embeddings[cWord];
 
-  if (!Array.isArray(vectorA) || !Array.isArray(vectorB) || !Array.isArray(vectorC)) {
-    return { result: null, missingWords: ["Invalid vector format"], inputWords, errorField: null };
+  if (
+    !Array.isArray(vectorA) ||
+    !Array.isArray(vectorB) ||
+    !Array.isArray(vectorC)
+  ) {
+    return {
+      result: null,
+      missingWords: ["Invalid vector format"],
+      inputWords,
+      errorField: null,
+    };
   }
 
   // Calculate: a - b + c
   // Ensure same dimensionality
   const dims = Math.max(vectorA.length, vectorB.length, vectorC.length);
-  
+
   const resultVector = new Array(dims).fill(0);
-  
+
   // Add a
   for (let i = 0; i < Math.min(vectorA.length, dims); i++) {
     resultVector[i] += vectorA[i] || 0;
   }
-  
+
   // Subtract b
   for (let i = 0; i < Math.min(vectorB.length, dims); i++) {
     resultVector[i] -= vectorB[i] || 0;
   }
-  
+
   // Add c
   for (let i = 0; i < Math.min(vectorC.length, dims); i++) {
     resultVector[i] += vectorC[i] || 0;
   }
 
-  return { result: resultVector, missingWords: [], inputWords, errorField: null };
+  return {
+    result: resultVector,
+    missingWords: [],
+    inputWords,
+    errorField: null,
+  };
 }
 
 // Find closest word to a vector using cosine similarity (better for word embeddings)
 function findClosestWord(resultVectorFull, embeddings, excludeWords = []) {
-  if (!resultVectorFull || !embeddings || !Array.isArray(resultVectorFull)) return null;
+  if (!resultVectorFull || !embeddings || !Array.isArray(resultVectorFull))
+    return null;
 
   let maxSimilarity = -Infinity;
   let closestWord = null;
@@ -353,35 +426,36 @@ function findClosestWord(resultVectorFull, embeddings, excludeWords = []) {
   if (resultMagnitude === 0) return null;
 
   // Create a set of words to exclude (case-insensitive)
-  const excludeSet = new Set(excludeWords.map(w => w.toLowerCase()));
+  const excludeSet = new Set(excludeWords.map((w) => w.toLowerCase()));
 
   for (const [word, embedding] of Object.entries(embeddings)) {
     // Skip excluded words (input words)
     if (excludeSet.has(word.toLowerCase())) continue;
-    
+
     if (!Array.isArray(embedding) || embedding.length === 0) continue;
 
     // Ensure same dimensionality
     const dims = Math.min(resultVectorFull.length, embedding.length);
-    
+
     // Calculate dot product for cosine similarity
     let dotProduct = 0;
     let embeddingMagnitude = 0;
-    
+
     for (let i = 0; i < dims; i++) {
       const rVal = resultVectorFull[i] || 0;
       const eVal = embedding[i] || 0;
       dotProduct += rVal * eVal;
       embeddingMagnitude += eVal * eVal;
     }
-    
+
     embeddingMagnitude = Math.sqrt(embeddingMagnitude);
-    
+
     if (embeddingMagnitude === 0) continue;
-    
+
     // Cosine similarity (range: -1 to 1)
-    const cosineSimilarity = dotProduct / (resultMagnitude * embeddingMagnitude);
-    
+    const cosineSimilarity =
+      dotProduct / (resultMagnitude * embeddingMagnitude);
+
     // Also calculate Euclidean distance for reference
     let euclideanDistance = 0;
     for (let i = 0; i < dims; i++) {
@@ -389,7 +463,7 @@ function findClosestWord(resultVectorFull, embeddings, excludeWords = []) {
       euclideanDistance += diff * diff;
     }
     euclideanDistance = Math.sqrt(euclideanDistance);
-    
+
     // Use cosine similarity to find closest (higher is better)
     if (cosineSimilarity > maxSimilarity) {
       maxSimilarity = cosineSimilarity;
@@ -398,13 +472,19 @@ function findClosestWord(resultVectorFull, embeddings, excludeWords = []) {
     }
   }
 
-  return { word: closestWord, distance: closestDistance, similarity: maxSimilarity };
+  return {
+    word: closestWord,
+    distance: closestDistance,
+    similarity: maxSimilarity,
+  };
 }
 
 export default function PlaygroundPage() {
   const [embeddingModel, setEmbeddingModel] = useState("glove_50d");
   const [showGridlines, setShowGridlines] = useState(true);
-  const [wordsText, setWordsText] = useState("If the path be beautiful , let us not ask where it leads");
+  const [wordsText, setWordsText] = useState(
+    "If the path be beautiful , let us not ask where it leads"
+  );
   const [vectorA, setVectorA] = useState("");
   const [vectorB, setVectorB] = useState("");
   const [vectorC, setVectorC] = useState("");
@@ -428,24 +508,38 @@ export default function PlaygroundPage() {
 
   // Auto-recalculate when embeddings finish loading (if we had a previous calculation)
   useEffect(() => {
-    if (shouldAutoRecalculateRef.current && embeddingsData && vectorA && vectorB && vectorC) {
+    if (
+      shouldAutoRecalculateRef.current &&
+      embeddingsData &&
+      vectorA &&
+      vectorB &&
+      vectorC
+    ) {
       shouldAutoRecalculateRef.current = false;
       // Use handleCalculate logic inline to avoid circular dependency
-      const { result: resultVectorFull, missingWords, inputWords, errorField: field } = parseVectorEquation(
-        vectorA,
-        vectorB,
-        vectorC,
-        embeddingsData
-      );
-      
-      if (missingWords.length === 0 && resultVectorFull && Array.isArray(resultVectorFull)) {
+      const {
+        result: resultVectorFull,
+        missingWords,
+        inputWords,
+        errorField: field,
+      } = parseVectorEquation(vectorA, vectorB, vectorC, embeddingsData);
+
+      if (
+        missingWords.length === 0 &&
+        resultVectorFull &&
+        Array.isArray(resultVectorFull)
+      ) {
         const vector3D = [
           resultVectorFull[0] || 0,
           resultVectorFull[1] || 0,
-          resultVectorFull[2] || 0
+          resultVectorFull[2] || 0,
         ];
-        const closest = findClosestWord(resultVectorFull, embeddingsData, inputWords);
-        
+        const closest = findClosestWord(
+          resultVectorFull,
+          embeddingsData,
+          inputWords
+        );
+
         setCalculationResult({
           vector3D: vector3D,
           vectorFull: resultVectorFull,
@@ -476,7 +570,12 @@ export default function PlaygroundPage() {
 
   // Mutual exclusivity: If user types in vector inputs, clear words textbox
   useEffect(() => {
-    if ((vectorA.trim().length > 0 || vectorB.trim().length > 0 || vectorC.trim().length > 0) && wordsText.trim().length > 0) {
+    if (
+      (vectorA.trim().length > 0 ||
+        vectorB.trim().length > 0 ||
+        vectorC.trim().length > 0) &&
+      wordsText.trim().length > 0
+    ) {
       setWordsText("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -485,8 +584,8 @@ export default function PlaygroundPage() {
   // Parse words from text, limit to 50
   const manualWords = wordsText
     .split(/\s+/)
-    .map(w => w.trim().toLowerCase())
-    .filter(w => w.length > 0)
+    .map((w) => w.trim().toLowerCase())
+    .filter((w) => w.length > 0)
     .slice(0, 50);
 
   // Combine manual words with vector calculation words (a, b, c)
@@ -513,15 +612,17 @@ export default function PlaygroundPage() {
     }
 
     // Parse equation to get full-dimensional result vector
-    const { result: resultVectorFull, missingWords, inputWords, errorField: field } = parseVectorEquation(
-      vectorA,
-      vectorB,
-      vectorC,
-      embeddingsData
-    );
-    
+    const {
+      result: resultVectorFull,
+      missingWords,
+      inputWords,
+      errorField: field,
+    } = parseVectorEquation(vectorA, vectorB, vectorC, embeddingsData);
+
     if (missingWords.length > 0) {
-      setErrorMessage(`Words not found in embeddings: ${missingWords.join(", ")}`);
+      setErrorMessage(
+        `Words not found in embeddings: ${missingWords.join(", ")}`
+      );
       setErrorField(field);
       return;
     }
@@ -536,12 +637,16 @@ export default function PlaygroundPage() {
     const vector3D = [
       resultVectorFull[0] || 0,
       resultVectorFull[1] || 0,
-      resultVectorFull[2] || 0
+      resultVectorFull[2] || 0,
     ];
 
     // Find closest word using FULL vectors (important for accuracy)
-    const closest = findClosestWord(resultVectorFull, embeddingsData, inputWords);
-    
+    const closest = findClosestWord(
+      resultVectorFull,
+      embeddingsData,
+      inputWords
+    );
+
     setCalculationResult({
       vector3D: vector3D, // 3D for visualization
       vectorFull: resultVectorFull, // Full vector for accurate calculations
@@ -552,46 +657,170 @@ export default function PlaygroundPage() {
   };
 
   return (
-    <VisualizerLayout
-      leftPanel={
-        <VectorPlaygroundControls
-          embeddingModel={embeddingModel}
-          onEmbeddingModelChange={setEmbeddingModel}
-          showGridlines={showGridlines}
-          onShowGridlinesChange={setShowGridlines}
-          wordsText={wordsText}
-          onWordsTextChange={setWordsText}
-          vectorA={vectorA}
-          onVectorAChange={setVectorA}
-          vectorB={vectorB}
-          onVectorBChange={setVectorB}
-          vectorC={vectorC}
-          onVectorCChange={setVectorC}
-          onCalculate={handleCalculate}
-          calculationResult={calculationResult}
-          errorMessage={errorMessage}
-          errorField={errorField}
-        />
-      }
-      rightCanvas={
-        <VectorPlaygroundCanvas
-          embeddingModel={embeddingModel}
-          showGridlines={showGridlines}
-          words={words}
-          resultVector={calculationResult ? calculationResult.vector3D : null}
-          resultLabel={calculationResult?.closestWord || "Result"}
-          resultInfo={calculationResult ? {
-            closestWord: calculationResult.closestWord,
-            vector3D: calculationResult.vector3D,
-            similarity: calculationResult.similarity,
-            distance: calculationResult.closestDistance,
-          } : null}
-          onEmbeddingsLoaded={setEmbeddingsData}
-          vectorA={vectorA.trim().toLowerCase() || null}
-          vectorB={vectorB.trim().toLowerCase() || null}
-          vectorC={vectorC.trim().toLowerCase() || null}
-        />
-      }
-    />
+    <>
+      <Drawer>
+        <div className="justify-self-end me-4">
+          <DrawerTrigger asChild>
+            <button className="inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900/60 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800">
+              Learn about Vector Geometry
+            </button>
+          </DrawerTrigger>
+        </div>
+
+        <DrawerContent className="flex flex-col max-h-[90vh] custom-scroll">
+          <div className="mx-auto w-full max-w-2xl overflow-y-auto flex-1 px-4 pt-4">
+            <DrawerHeader>
+              <DrawerTitle>Geometric Meaning of Embedding Vectors</DrawerTitle>
+              <DrawerDescription>
+                Word embeddings represent words as vectors in a high-dimensional
+                space. The geometric relationships between these vectors encode
+                semantic meaning, allowing us to perform mathematical operations
+                that reveal linguistic patterns and solve word analogies through
+                vector arithmetic.
+              </DrawerDescription>
+            </DrawerHeader>
+
+            <div className="space-y-4 pb-4">
+              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-4">
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-2">
+                  Vector Addition & Subtraction
+                </div>
+                <div className="text-sm text-neutral-300 mb-2">
+                  Adding and subtracting vectors in embedding space captures
+                  semantic relationships. The classic example is:
+                </div>
+                <div className="font-mono text-sm text-neutral-200 bg-neutral-900/60 p-2 rounded mt-2 mb-2">
+                  king - man + woman ≈ queen
+                </div>
+                <div className="text-sm text-neutral-300">
+                  This works because the vector (king - man) represents the
+                  "royalty without gender" concept, and adding "woman" applies
+                  that concept to get "queen". The yellow distance vectors show
+                  these geometric relationships.
+                </div>
+              </div>
+
+              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-4">
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-2">
+                  Distance Vectors
+                </div>
+                <div className="text-sm text-neutral-300 mb-2">
+                  The yellow arrows you see represent distance
+                  vectors—directional relationships between word positions.
+                  These vectors encode semantic transitions:
+                </div>
+                <ul className="list-disc pl-5 space-y-1 text-sm text-neutral-300 mt-2">
+                  <li>
+                    <strong>a → b:</strong> The semantic difference from word a
+                    to word b
+                  </li>
+                  <li>
+                    <strong>b → c:</strong> The transition from word b to word c
+                  </li>
+                  <li>
+                    <strong>c → result:</strong> How the final calculated vector
+                    relates to c
+                  </li>
+                </ul>
+                <div className="text-sm text-neutral-300 mt-2">
+                  When these vectors are parallel or similar in direction, it
+                  indicates consistent semantic relationships, which is why word
+                  analogies work so well in embedding space.
+                </div>
+              </div>
+
+              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-4">
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-2">
+                  Geometric Intuition
+                </div>
+                <div className="text-sm text-neutral-300">
+                  In embedding space, words form geometric structures: similar
+                  words cluster together, opposite concepts are positioned
+                  across from each other, and hierarchical relationships form
+                  geometric patterns. By visualizing these structures and
+                  performing vector operations, you can gain intuition about how
+                  AI models understand language through geometry.
+                </div>
+              </div>
+
+              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-4">
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-2">
+                  Try It Yourself
+                </div>
+                <div className="text-sm text-neutral-300 mb-2">
+                  Experiment with different word combinations to see how
+                  geometric relationships reveal semantic patterns:
+                </div>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <span className="px-2 py-1 text-xs rounded bg-yellow-900/40 text-yellow-200 border border-yellow-700/50">
+                    king - man + woman
+                  </span>
+                  <span className="px-2 py-1 text-xs rounded bg-yellow-900/40 text-yellow-200 border border-yellow-700/50">
+                    paris - france + italy
+                  </span>
+                  <span className="px-2 py-1 text-xs rounded bg-yellow-900/40 text-yellow-200 border border-yellow-700/50">
+                    happy - sad + joy
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DrawerFooter className="mx-auto w-full max-w-2xl px-4 pb-4">
+            <DrawerClose asChild>
+              <button className="rounded-md border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800">
+                Close
+              </button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      <VisualizerLayout
+        leftPanel={
+          <VectorPlaygroundControls
+            embeddingModel={embeddingModel}
+            onEmbeddingModelChange={setEmbeddingModel}
+            showGridlines={showGridlines}
+            onShowGridlinesChange={setShowGridlines}
+            wordsText={wordsText}
+            onWordsTextChange={setWordsText}
+            vectorA={vectorA}
+            onVectorAChange={setVectorA}
+            vectorB={vectorB}
+            onVectorBChange={setVectorB}
+            vectorC={vectorC}
+            onVectorCChange={setVectorC}
+            onCalculate={handleCalculate}
+            calculationResult={calculationResult}
+            errorMessage={errorMessage}
+            errorField={errorField}
+          />
+        }
+        rightCanvas={
+          <VectorPlaygroundCanvas
+            embeddingModel={embeddingModel}
+            showGridlines={showGridlines}
+            words={words}
+            resultVector={calculationResult ? calculationResult.vector3D : null}
+            resultLabel={calculationResult?.closestWord || "Result"}
+            resultInfo={
+              calculationResult
+                ? {
+                    closestWord: calculationResult.closestWord,
+                    vector3D: calculationResult.vector3D,
+                    similarity: calculationResult.similarity,
+                    distance: calculationResult.closestDistance,
+                  }
+                : null
+            }
+            onEmbeddingsLoaded={setEmbeddingsData}
+            vectorA={vectorA.trim().toLowerCase() || null}
+            vectorB={vectorB.trim().toLowerCase() || null}
+            vectorC={vectorC.trim().toLowerCase() || null}
+          />
+        }
+      />
+    </>
   );
 }

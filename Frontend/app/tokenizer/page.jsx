@@ -244,7 +244,7 @@ export default function TokenizerPage() {
         <div className="mx-auto w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch h-[70vh]">
           {/* Left: input */}
           <section className="h-full">
-            <div className="h-full flex flex-col rounded-lg border border-neutral-800/90 bg-neutral-800/60 p-4">
+            <div className="h-full flex flex-col rounded-lg border border-white/10 bg-white/5 p-4  backdrop-blur">
               <div className="flex items-center justify-between mb-2">
                 <div className="text-sm text-neutral-400 text-white">Input</div>
                 {/* Tokenizer selection */}
@@ -280,7 +280,7 @@ export default function TokenizerPage() {
           {/* Right: outputs */}
           <section className="flex flex-col gap-6 h-full min-h-0">
             {/* Highlighted tokens */}
-            <div className="flex-[2] min-h-0 rounded-lg border border-neutral-800/60 bg-neutral-800/60 p-4 flex flex-col">
+            <div className="flex-[2] min-h-0 rounded-lg border p-4 flex flex-col border-white/10 bg-white/5 p-4  backdrop-blur">
               <div className="text-sm text-neutral-400 mb-2 text-white">
                 Tokens (colored)
               </div>
@@ -318,7 +318,7 @@ export default function TokenizerPage() {
             </div>
 
             {/* Numeric IDs */}
-            <div className="flex-[1] min-h-0 rounded-lg border border-neutral-800/60 bg-neutral-800/60 p-4 flex flex-col">
+            <div className="flex-[1] min-h-0 rounded-lg border p-4 flex flex-col border-white/10 bg-white/5 p-4  backdrop-blur">
               <div className="text-sm text-neutral-400 mb-2 text-white">
                 Token IDs
               </div>
