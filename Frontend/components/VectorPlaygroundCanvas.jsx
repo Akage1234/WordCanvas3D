@@ -686,32 +686,7 @@ export default function VectorPlaygroundCanvas({
     // Remove vectors that are no longer in the words list
     const currentWords = new Set(words);
 
-    // Calculate centroid of all vectors (words + result) to center the plot
-    const allVectorPositions = [];
-    words.forEach((word) => {
-      if (embeddingsDataRef.current[word]) {
-        const embedding = embeddingsDataRef.current[word];
-        allVectorPositions.push([embedding[0] || 0, embedding[1] || 0, embedding[2] || 0]);
-      }
-    });
-    if (resultVector && Array.isArray(resultVector) && resultVector.length >= 3) {
-      allVectorPositions.push([resultVector[0] || 0, resultVector[1] || 0, resultVector[2] || 0]);
-    }
-    
-    // Calculate centroid
-    let centroidX = 0, centroidY = 0, centroidZ = 0;
-    if (allVectorPositions.length > 0) {
-      allVectorPositions.forEach(pos => {
-        centroidX += pos[0];
-        centroidY += pos[1];
-        centroidZ += pos[2];
-      });
-      centroidX /= allVectorPositions.length;
-      centroidY /= allVectorPositions.length;
-      centroidZ /= allVectorPositions.length;
-    }
-
-    // Add vectors for all words (always re-plot to ensure correct centering)
+    // Add vectors for all words using RAW embedding positions (no centering)
     words.forEach((word, index) => {
       // Skip words not in the current words list
       if (!currentWords.has(word)) return;
@@ -722,11 +697,11 @@ export default function VectorPlaygroundCanvas({
       }
 
       const embedding = embeddingsDataRef.current[word];
-      // Center the vector by subtracting centroid
+      // Use raw embedding positions directly (no centering operation)
       const vector3D = [
-        (embedding[0] || 0) - centroidX,
-        (embedding[1] || 0) - centroidY,
-        (embedding[2] || 0) - centroidZ
+        embedding[0] || 0,
+        embedding[1] || 0,
+        embedding[2] || 0
       ];
       const vectorEnd = new THREE.Vector3().fromArray(vector3D);
       const color = vectorColors[index % vectorColors.length];
@@ -798,34 +773,11 @@ export default function VectorPlaygroundCanvas({
 
     // Add new result vector if provided
     if (resultVector && Array.isArray(resultVector) && resultVector.length >= 3) {
-      // Calculate centroid of all vectors (words + result) to center the plot - MUST match word vectors calculation
-      const allVectorPositions = [];
-      words.forEach((word) => {
-        if (embeddingsDataRef.current[word]) {
-          const embedding = embeddingsDataRef.current[word];
-          allVectorPositions.push([embedding[0] || 0, embedding[1] || 0, embedding[2] || 0]);
-        }
-      });
-      allVectorPositions.push([resultVector[0] || 0, resultVector[1] || 0, resultVector[2] || 0]);
-      
-      // Calculate centroid (same calculation as in word vectors useEffect)
-      let centroidX = 0, centroidY = 0, centroidZ = 0;
-      if (allVectorPositions.length > 0) {
-        allVectorPositions.forEach(pos => {
-          centroidX += pos[0];
-          centroidY += pos[1];
-          centroidZ += pos[2];
-        });
-        centroidX /= allVectorPositions.length;
-        centroidY /= allVectorPositions.length;
-        centroidZ /= allVectorPositions.length;
-      }
-
-      // Center the result vector by subtracting centroid
+      // Use raw resultVector position directly (no centering operation)
       const vector3D = [
-        (resultVector[0] || 0) - centroidX,
-        (resultVector[1] || 0) - centroidY,
-        (resultVector[2] || 0) - centroidZ
+        resultVector[0] || 0,
+        resultVector[1] || 0,
+        resultVector[2] || 0
       ];
       const vectorEnd = new THREE.Vector3().fromArray(vector3D);
       const resultColor = 0x00ff00; // Green color for result vector
@@ -980,48 +932,22 @@ export default function VectorPlaygroundCanvas({
       return;
     }
 
-    // Calculate centroid of all vectors (a, b, c, result, and other words) to center the plot
-    // MUST use the same calculation as word vectors and result vector useEffects
-    const allVectorPositions = [];
-    words.forEach((word) => {
-      if (embeddingsDataRef.current[word]) {
-        const embedding = embeddingsDataRef.current[word];
-        allVectorPositions.push([embedding[0] || 0, embedding[1] || 0, embedding[2] || 0]);
-      }
-    });
-    if (resultVector && Array.isArray(resultVector) && resultVector.length >= 3) {
-      allVectorPositions.push([resultVector[0] || 0, resultVector[1] || 0, resultVector[2] || 0]);
-    }
-    
-    // Calculate centroid (same calculation as other useEffects)
-    let centroidX = 0, centroidY = 0, centroidZ = 0;
-    if (allVectorPositions.length > 0) {
-      allVectorPositions.forEach(pos => {
-        centroidX += pos[0];
-        centroidY += pos[1];
-        centroidZ += pos[2];
-      });
-      centroidX /= allVectorPositions.length;
-      centroidY /= allVectorPositions.length;
-      centroidZ /= allVectorPositions.length;
-    }
-
-    // Get 3D positions for a, b, c, and result (centered)
+    // Get 3D positions for a, b, c, and result using RAW embedding positions (no centering)
     const getVector3D = (word) => {
       if (word === 'result' || word === null) {
         if (!resultVector) return null;
         return new THREE.Vector3(
-          (resultVector[0] || 0) - centroidX,
-          (resultVector[1] || 0) - centroidY,
-          (resultVector[2] || 0) - centroidZ
+          resultVector[0] || 0,
+          resultVector[1] || 0,
+          resultVector[2] || 0
         );
       }
       const embedding = embeddingsDataRef.current[word];
       if (!embedding) return null;
       return new THREE.Vector3(
-        (embedding[0] || 0) - centroidX,
-        (embedding[1] || 0) - centroidY,
-        (embedding[2] || 0) - centroidZ
+        embedding[0] || 0,
+        embedding[1] || 0,
+        embedding[2] || 0
       );
     };
 
