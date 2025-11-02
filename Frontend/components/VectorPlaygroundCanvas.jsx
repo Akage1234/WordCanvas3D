@@ -704,7 +704,39 @@ export default function VectorPlaygroundCanvas({
     // Remove vectors that are no longer in the words list
     const currentWords = new Set(words);
 
-    // Add vectors for all words using RAW embedding positions (no centering)
+    // Calculate scale factor based on all vectors (words + result) to make them more visible
+    let maxDistance = 0;
+    const targetRadius = 2.5; // Target radius for the furthest vector
+    
+    // Check all word vectors
+    words.forEach((word) => {
+      if (!embeddingsDataRef.current[word]) return;
+      const embedding = embeddingsDataRef.current[word];
+      const vector3D = new THREE.Vector3(
+        embedding[0] || 0,
+        embedding[1] || 0,
+        embedding[2] || 0
+      );
+      const distance = vector3D.length();
+      if (distance > maxDistance) maxDistance = distance;
+    });
+    
+    // Check result vector if present
+    if (resultVector && Array.isArray(resultVector) && resultVector.length >= 3) {
+      const resultVector3D = new THREE.Vector3(
+        resultVector[0] || 0,
+        resultVector[1] || 0,
+        resultVector[2] || 0
+      );
+      const distance = resultVector3D.length();
+      if (distance > maxDistance) maxDistance = distance;
+    }
+    
+    // Calculate scale factor - if vectors are very small, scale them up
+    // If maxDistance is 0 or very small, use a default scale
+    const scaleFactor = maxDistance > 0.01 ? targetRadius / maxDistance : 100;
+    
+    // Add vectors for all words using scaled embedding positions
     words.forEach((word, index) => {
       // Skip words not in the current words list
       if (!currentWords.has(word)) return;
@@ -715,11 +747,11 @@ export default function VectorPlaygroundCanvas({
       }
 
       const embedding = embeddingsDataRef.current[word];
-      // Use raw embedding positions directly (no centering operation)
+      // Apply scale factor to make vectors more visible
       const vector3D = [
-        embedding[0] || 0,
-        embedding[1] || 0,
-        embedding[2] || 0
+        (embedding[0] || 0) * scaleFactor,
+        (embedding[1] || 0) * scaleFactor,
+        (embedding[2] || 0) * scaleFactor
       ];
       const vectorEnd = new THREE.Vector3().fromArray(vector3D);
       const color = vectorColors[index % vectorColors.length];
@@ -791,11 +823,40 @@ export default function VectorPlaygroundCanvas({
 
     // Add new result vector if provided
     if (resultVector && Array.isArray(resultVector) && resultVector.length >= 3) {
-      // Use raw resultVector position directly (no centering operation)
-      const vector3D = [
+      // Calculate scale factor (same logic as in words effect for consistency)
+      let maxDistance = 0;
+      const targetRadius = 2.5;
+      
+      // Check all word vectors
+      words.forEach((word) => {
+        if (!embeddingsDataRef.current[word]) return;
+        const embedding = embeddingsDataRef.current[word];
+        const vector3D = new THREE.Vector3(
+          embedding[0] || 0,
+          embedding[1] || 0,
+          embedding[2] || 0
+        );
+        const distance = vector3D.length();
+        if (distance > maxDistance) maxDistance = distance;
+      });
+      
+      // Check result vector
+      const resultVector3D = new THREE.Vector3(
         resultVector[0] || 0,
         resultVector[1] || 0,
         resultVector[2] || 0
+      );
+      const distance = resultVector3D.length();
+      if (distance > maxDistance) maxDistance = distance;
+      
+      // Calculate scale factor
+      const scaleFactor = maxDistance > 0.01 ? targetRadius / maxDistance : 100;
+      
+      // Apply scale factor to result vector
+      const vector3D = [
+        (resultVector[0] || 0) * scaleFactor,
+        (resultVector[1] || 0) * scaleFactor,
+        (resultVector[2] || 0) * scaleFactor
       ];
       const vectorEnd = new THREE.Vector3().fromArray(vector3D);
       const resultColor = 0x00ff00; // Green color for result vector
@@ -950,22 +1011,54 @@ export default function VectorPlaygroundCanvas({
       return;
     }
 
-    // Get 3D positions for a, b, c, and result using RAW embedding positions (no centering)
+    // Calculate scale factor (same logic as in other effects for consistency)
+    let maxDistance = 0;
+    const targetRadius = 2.5;
+    
+    // Check all word vectors (including a, b, c)
+    const allWords = [vectorA, vectorB, vectorC];
+    allWords.forEach((word) => {
+      if (!embeddingsDataRef.current[word]) return;
+      const embedding = embeddingsDataRef.current[word];
+      const vector3D = new THREE.Vector3(
+        embedding[0] || 0,
+        embedding[1] || 0,
+        embedding[2] || 0
+      );
+      const distance = vector3D.length();
+      if (distance > maxDistance) maxDistance = distance;
+    });
+    
+    // Check result vector
+    if (resultVector && Array.isArray(resultVector) && resultVector.length >= 3) {
+      const resultVector3D = new THREE.Vector3(
+        resultVector[0] || 0,
+        resultVector[1] || 0,
+        resultVector[2] || 0
+      );
+      const distance = resultVector3D.length();
+      if (distance > maxDistance) maxDistance = distance;
+    }
+    
+    // Calculate scale factor
+    const scaleFactor = maxDistance > 0.01 ? targetRadius / maxDistance : 100;
+
+    // Get 3D positions for a, b, c, and result using SCALED embedding positions
     const getVector3D = (word) => {
       if (word === 'result' || word === null) {
         if (!resultVector) return null;
         return new THREE.Vector3(
-          resultVector[0] || 0,
-          resultVector[1] || 0,
-          resultVector[2] || 0
+          (resultVector[0] || 0) * scaleFactor,
+          (resultVector[1] || 0) * scaleFactor,
+          (resultVector[2] || 0) * scaleFactor
         );
       }
       const embedding = embeddingsDataRef.current[word];
       if (!embedding) return null;
       return new THREE.Vector3(
-        embedding[0] || 0,
-        embedding[1] || 0,
-        embedding[2] || 0
+        (embedding[0] || 0) * scaleFactor,
+        (embedding[1] || 0) * scaleFactor,
+        (embedding[2] || 0) * scaleFactor
       );
     };
 

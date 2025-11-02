@@ -5,7 +5,7 @@ import JSZip from "jszip";
 import { ungzip } from "pako";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "glove_300D", wordCount = "1000", searchWord = "", useClusterColors = false, showClusterEdges = false }, ref) {
+const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "glove_300D", wordCount = "1000", reductionMethod = "pca", searchWord = "", useClusterColors = false, showClusterEdges = false }, ref) {
   const containerRef = useRef(null);
   const rafRef = useRef(0);
   const canvasFunctionsRef = useRef({ searchForWord: null, updateClusterColors: null, resetColors: null, getWords: null });
@@ -125,20 +125,20 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
             // GloVe models: glove_300D -> glove_300d folder, but files use uppercase D
             modelFolder = embeddingModel.toLowerCase();
             const modelNum = embeddingModel.replace("glove_", ""); // Keep original case (300D)
-            // Files use uppercase D in filename: glove_300D_1000_pca_3d.json.gz
-            fileName = `glove_${modelNum}_${wordCount}_pca_3d.json.gz`;
+            // Files use uppercase D in filename: glove_300D_1000_pca_3d.json.gz or glove_300D_1000_umap_3d.json.gz
+            fileName = `glove_${modelNum}_${wordCount}_${reductionMethod}_3d.json.gz`;
           } else if (embeddingModel.startsWith("fasttext_")) {
             // FastText models: fasttext_300d -> FastText_300D folder
             modelFolder = "FastText_300D";
-            fileName = `FastText_300D_${wordCount}_pca_3d.json.gz`;
+            fileName = `FastText_300D_${wordCount}_${reductionMethod}_3d.json.gz`;
           } else if (embeddingModel.startsWith("word2vec_")) {
             // Word2Vec models: word2vec_300d -> Word2Vec_300D folder
             modelFolder = "Word2Vec_300D";
-            fileName = `Word2Vec_300D_${wordCount}_pca_3d.json.gz`;
+            fileName = `Word2Vec_300D_${wordCount}_${reductionMethod}_3d.json.gz`;
           } else {
             // Default fallback
             modelFolder = embeddingModel.toLowerCase();
-            fileName = `${embeddingModel}_${wordCount}_pca_3d.json.gz`;
+            fileName = `${embeddingModel}_${wordCount}_${reductionMethod}_3d.json.gz`;
           }
           
           fetchUrl = `/${modelFolder}/${fileName}`;
@@ -888,7 +888,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
         container.removeChild(tooltip);
       }
     };
-  }, [embeddingModel, wordCount]); // Re-run when embedding model or word count changes
+  }, [embeddingModel, wordCount, reductionMethod]); // Re-run when embedding model, word count, or reduction method changes
 
   // Update ref when prop changes
   useEffect(() => {

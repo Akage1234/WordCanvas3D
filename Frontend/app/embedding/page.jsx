@@ -42,12 +42,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 function EmbeddingControls({
   embeddingModel,
   onEmbeddingModelChange,
   wordCount,
   onWordCountChange,
+  reductionMethod,
+  onReductionMethodChange,
   searchWord,
   onSearchWordChange,
   useClusterColors,
@@ -177,6 +181,29 @@ function EmbeddingControls({
 
       <Separator className="my-4" />
 
+      {/* Reduction Method Selector */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">
+          Dimensionality Reduction
+        </label>
+        <RadioGroup value={reductionMethod} onValueChange={onReductionMethodChange}>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="pca" id="pca" />
+            <Label htmlFor="pca" className="text-sm font-normal cursor-pointer">
+              PCA
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="umap" id="umap" />
+            <Label htmlFor="umap" className="text-sm font-normal cursor-pointer">
+              UMAP
+            </Label>
+          </div>
+        </RadioGroup>
+      </div>
+
+      <Separator className="my-4" />
+
       {/* Word Search */}
       {/* Word Search */}
       <div className="space-y-2">
@@ -301,6 +328,7 @@ function EmbeddingControls({
 export default function EmbeddingPage() {
   const [embeddingModel, setEmbeddingModel] = useState("glove_300D");
   const [wordCount, setWordCount] = useState("1000");
+  const [reductionMethod, setReductionMethod] = useState("pca");
   const [searchWord, setSearchWord] = useState("");
   const [useClusterColors, setUseClusterColors] = useState(true);
   const [showClusterEdges, setShowClusterEdges] = useState(true);
@@ -336,7 +364,7 @@ export default function EmbeddingPage() {
     const interval = setInterval(checkWords, intervalMs);
 
     return () => clearInterval(interval);
-  }, [embeddingModel, wordCount]); // Removed wordsList.length dependency to avoid re-running effect
+  }, [embeddingModel, wordCount, reductionMethod]); // Removed wordsList.length dependency to avoid re-running effect
 
   return (
     <>
@@ -446,6 +474,8 @@ export default function EmbeddingPage() {
             onEmbeddingModelChange={setEmbeddingModel}
             wordCount={wordCount}
             onWordCountChange={setWordCount}
+            reductionMethod={reductionMethod}
+            onReductionMethodChange={setReductionMethod}
             searchWord={searchWord}
             onSearchWordChange={setSearchWord}
             useClusterColors={useClusterColors}
@@ -460,6 +490,7 @@ export default function EmbeddingPage() {
             ref={canvasRef}
             embeddingModel={embeddingModel}
             wordCount={wordCount}
+            reductionMethod={reductionMethod}
             searchWord={searchWord}
             useClusterColors={useClusterColors}
             showClusterEdges={showClusterEdges}
