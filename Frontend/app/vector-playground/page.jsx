@@ -112,10 +112,9 @@ function VectorPlaygroundControls({
             <SelectValue placeholder="Select embedding model" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="glove_50d">GloVe 50D</SelectItem>
-            <SelectItem value="glove_100D">GloVe 100D</SelectItem>
-            <SelectItem value="glove_200D">GloVe 200D</SelectItem>
             <SelectItem value="glove_300D">GloVe 300D</SelectItem>
+            <SelectItem value="fasttext_300D">FastText 300D</SelectItem>
+            <SelectItem value="word2vec_300D">Word2Vec 300D</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -481,7 +480,7 @@ function findClosestWord(resultVectorFull, embeddings, excludeWords = []) {
 }
 
 export default function PlaygroundPage() {
-  const [embeddingModel, setEmbeddingModel] = useState("glove_50d");
+  const [embeddingModel, setEmbeddingModel] = useState("glove_300D");
   const [showGridlines, setShowGridlines] = useState(true);
   const [wordsText, setWordsText] = useState(
     "If the path be beautiful , let us not ask where it leads"

@@ -149,10 +149,9 @@ function EmbeddingControls({
             <SelectValue placeholder="Select embedding model" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="glove_50d">GloVe 50D</SelectItem>
-            <SelectItem value="glove_100D">GloVe 100D</SelectItem>
-            <SelectItem value="glove_200D">GloVe 200D</SelectItem>
             <SelectItem value="glove_300D">GloVe 300D</SelectItem>
+            <SelectItem value="fasttext_300D">FastText 300D</SelectItem>
+            <SelectItem value="word2vec_300D">Word2Vec 300D</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -300,7 +299,7 @@ function EmbeddingControls({
 }
 
 export default function EmbeddingPage() {
-  const [embeddingModel, setEmbeddingModel] = useState("glove_50d");
+  const [embeddingModel, setEmbeddingModel] = useState("glove_300D");
   const [wordCount, setWordCount] = useState("1000");
   const [searchWord, setSearchWord] = useState("");
   const [useClusterColors, setUseClusterColors] = useState(true);

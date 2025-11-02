@@ -158,8 +158,8 @@ export default function TokenizerPage() {
           </div>
         </div>
 
-        <DrawerContent>
-          <div className="mx-auto w-full max-w-2xl p-4">
+        <DrawerContent className="flex flex-col max-h-[90vh] custom-scroll">
+          <div className="mx-auto w-full max-w-2xl overflow-y-auto flex-1 px-4 pt-4">
             <DrawerHeader>
               <DrawerTitle>What is tokenization?</DrawerTitle>
               <DrawerDescription>
@@ -228,15 +228,15 @@ export default function TokenizerPage() {
                 </span>
               </div>
             </div>
-
-            <DrawerFooter>
-              <DrawerClose asChild>
-                <button className="rounded-md border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800">
-                  Close
-                </button>
-              </DrawerClose>
-            </DrawerFooter>
           </div>
+
+          <DrawerFooter className="mx-auto w-full max-w-2xl px-4 pb-4">
+            <DrawerClose asChild>
+              <button className="rounded-md border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800">
+                Close
+              </button>
+            </DrawerClose>
+          </DrawerFooter>
         </DrawerContent>
       </Drawer>
 

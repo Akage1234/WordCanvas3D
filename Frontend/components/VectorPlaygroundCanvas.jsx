@@ -5,7 +5,7 @@ import { ungzip } from "pako";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 export default function VectorPlaygroundCanvas({
-  embeddingModel = "glove_50d",
+  embeddingModel = "glove_300D",
   showGridlines = true,
   words = [],
   resultVector = null,
@@ -336,12 +336,30 @@ export default function VectorPlaygroundCanvas({
     // Load full embeddings
     async function loadFullEmbeddings() {
       try {
-        // Normalize model name to lowercase for folder path
-        const modelFolder = embeddingModel.toLowerCase();
-        const modelNum = embeddingModel.replace("glove_", "").toLowerCase();
+        // Determine model type and folder name
+        let modelFolder;
+        let fileName;
         
-        // Load the full embeddings file (highest word count: 10000)
-        const fileName = `wiki_giga_${modelNum}_10000_full.json.gz`;
+        if (embeddingModel.startsWith("glove_")) {
+          // GloVe models: glove_300D -> glove_300d folder, but files use uppercase D
+          modelFolder = embeddingModel.toLowerCase();
+          const modelNum = embeddingModel.replace("glove_", ""); // Keep original case (300D)
+          // Files use uppercase D in filename: glove_300D_full.json.gz
+          fileName = `glove_${modelNum}_full.json.gz`;
+        } else if (embeddingModel.startsWith("fasttext_")) {
+          // FastText models: fasttext_300d -> FastText_300D folder
+          modelFolder = "FastText_300D";
+          fileName = `FastText_300D_full.json.gz`;
+        } else if (embeddingModel.startsWith("word2vec_")) {
+          // Word2Vec models: word2vec_300d -> Word2Vec_300D folder
+          modelFolder = "Word2Vec_300D";
+          fileName = `Word2Vec_300D_full.json.gz`;
+        } else {
+          // Default fallback
+          modelFolder = embeddingModel.toLowerCase();
+          fileName = `${embeddingModel}_full.json.gz`;
+        }
+        
         const fetchUrl = `/${modelFolder}/${fileName}`;
         
         const res = await fetch(fetchUrl);
