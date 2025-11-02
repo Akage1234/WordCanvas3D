@@ -113,10 +113,9 @@ export default function TokenizerPage() {
   return (
     <>
       <Drawer>
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center mb-6 max-w-7xl mx-auto w-full">
-          <div />
-          <div className="justify-self-center flex items-center gap-2">
-            <h1 className="text-3xl font-bold tracking-tight">Tokenizer</h1>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0 mb-4 md:mb-6 max-w-7xl mx-auto w-full px-4 md:px-6">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Tokenizer</h1>
             <HoverCard>
               <HoverCardTrigger asChild>
                 <button
@@ -125,7 +124,7 @@ export default function TokenizerPage() {
                   style={{ lineHeight: 0 }}
                   tabIndex={0}
                 >
-                  <HelpCircle size={20} />
+                  <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </HoverCardTrigger>
               <HoverCardContent>
@@ -149,9 +148,9 @@ export default function TokenizerPage() {
               </HoverCardContent>
             </HoverCard>
           </div>
-          <div className="justify-self-end">
+          <div className="w-full sm:w-auto">
             <DrawerTrigger asChild>
-              <button className="inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900/60 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800">
+              <button className="inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900/60 px-2 md:px-3 py-1.5 text-xs md:text-sm text-neutral-200 hover:bg-neutral-800 w-full sm:w-auto justify-center">
                 Learn about tokenization
               </button>
             </DrawerTrigger>
@@ -240,22 +239,22 @@ export default function TokenizerPage() {
         </DrawerContent>
       </Drawer>
 
-      <main className="px-6 md:px-10 lg:px-14 py-6 min-h-screen items-center justify-center">
-        <div className="mx-auto w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch h-[70vh]">
+      <main className="px-4 sm:px-6 md:px-10 lg:px-14 py-4 md:py-6 min-h-screen landscape:min-h-[100dvh] items-center justify-center">
+        <div className="mx-auto w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-stretch min-h-[70vh] landscape:min-h-[85vh] md:h-[70vh]">
           {/* Left: input */}
-          <section className="h-full">
-            <div className="h-full flex flex-col rounded-lg border border-white/10 bg-white/5 p-4  backdrop-blur">
-              <div className="flex items-center justify-between mb-2">
-                <div className="text-sm text-neutral-400 text-white">Input</div>
+          <section className="h-full min-h-[300px] landscape:min-h-[250px] md:min-h-0">
+            <div className="h-full flex flex-col rounded-lg border border-white/10 bg-white/5 p-3 md:p-4 backdrop-blur">
+              <div className="flex items-center justify-between mb-2 gap-2">
+                <div className="text-xs md:text-sm text-neutral-400 text-white">Input</div>
                 {/* Tokenizer selection */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="inline-flex items-center gap-1 rounded border border-neutral-700 px-3 py-1 text-sm font-medium bg-neutral-900 hover:bg-neutral-800 transition-colors">
-                      {TOKENIZERS.find((t) => t.value === tokenizer)?.label}
-                      <ChevronDown className="w-4 h-4 ml-1" />
+                    <button className="inline-flex items-center gap-1 rounded border border-neutral-700 px-2 md:px-3 py-1 text-xs md:text-sm font-medium bg-neutral-900 hover:bg-neutral-800 transition-colors truncate max-w-full">
+                      <span className="truncate">{TOKENIZERS.find((t) => t.value === tokenizer)?.label}</span>
+                      <ChevronDown className="w-3 h-3 md:w-4 md:h-4 ml-1 flex-shrink-0" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent>
+                  <DropdownMenuContent className="max-w-[90vw] md:max-w-none">
                     {TOKENIZERS.map((t) => (
                       <DropdownMenuItem
                         key={t.value}
@@ -271,22 +270,22 @@ export default function TokenizerPage() {
               <Textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                className=" h-[62vh] md:h-[70vh] resize-none overflow-auto custom-scroll" // or hide-scrollbar
+                className="flex-1 min-h-[250px] landscape:min-h-[200px] md:min-h-0 md:h-[62vh] lg:h-[70vh] resize-none overflow-auto custom-scroll"
                 placeholder="Type or paste text…"
               />
             </div>
           </section>
 
           {/* Right: outputs */}
-          <section className="flex flex-col gap-6 h-full min-h-0">
+          <section className="flex flex-col gap-4 md:gap-6 h-full min-h-0">
             {/* Highlighted tokens */}
-            <div className="flex-[2] min-h-0 rounded-lg border p-4 flex flex-col border-white/10 bg-white/5 p-4  backdrop-blur">
-              <div className="text-sm text-neutral-400 mb-2 text-white">
+            <div className="flex-[2] min-h-[250px] landscape:min-h-[200px] md:min-h-0 rounded-lg border p-3 md:p-4 flex flex-col border-white/10 bg-white/5 backdrop-blur">
+              <div className="text-xs md:text-sm text-neutral-400 mb-2 text-white">
                 Tokens (colored)
               </div>
               <div
                 ref={coloredContainerRef}
-                className="flex-1 min-h-0 overflow-auto leading-7 border border-neutral-500/80 rounded-lg p-1 custom-scroll"
+                className="flex-1 min-h-0 overflow-auto leading-6 md:leading-7 border border-neutral-500/80 rounded-lg p-1 custom-scroll text-xs md:text-sm"
               >
                 {tokens.length === 0 ? (
                   <span className="text-neutral-500">No tokens</span>
@@ -318,8 +317,8 @@ export default function TokenizerPage() {
             </div>
 
             {/* Numeric IDs */}
-            <div className="flex-[1] min-h-0 rounded-lg border p-4 flex flex-col border-white/10 bg-white/5 p-4  backdrop-blur">
-              <div className="text-sm text-neutral-400 mb-2 text-white">
+            <div className="flex-[1] min-h-[150px] landscape:min-h-[120px] md:min-h-0 rounded-lg border p-3 md:p-4 flex flex-col border-white/10 bg-white/5 backdrop-blur">
+              <div className="text-xs md:text-sm text-neutral-400 mb-2 text-white">
                 Token IDs
               </div>
               <div
@@ -327,9 +326,9 @@ export default function TokenizerPage() {
                 className="flex-1 min-h-0 overflow-auto border border-neutral-500/80 rounded-lg p-1 custom-scroll"
               >
                 {ids.length === 0 ? (
-                  <span className="text-neutral-500">[]</span>
+                  <span className="text-neutral-500 text-xs md:text-sm">[]</span>
                 ) : (
-                  <code className="text-sm text-neutral-200 break-words">
+                  <code className="text-xs md:text-sm text-neutral-200 break-words">
                     [{" "}
                     {ids.map((id, i) => (
                       <span
@@ -354,7 +353,7 @@ export default function TokenizerPage() {
                   </code>
                 )}
               </div>
-              <div className="mt-2 text-xs text-neutral-400">
+              <div className="mt-2 text-[10px] md:text-xs text-neutral-400">
                 Encoding: <span className="text-blue-400 font-medium">{tokenizer}</span> • Tokens: <span className="text-emerald-400 font-medium">{tokens.length}</span>
               </div>
             </div>

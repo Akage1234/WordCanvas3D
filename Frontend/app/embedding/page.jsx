@@ -17,7 +17,7 @@ import {
   DrawerDescription,
   DrawerClose,
 } from "@/components/ui/drawer";
-import { HelpCircle, Check, ChevronsUpDown } from "lucide-react";
+import { HelpCircle, Check, ChevronsUpDown, Database, Search, Palette, Info } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import {
   Select,
@@ -333,6 +333,7 @@ export default function EmbeddingPage() {
   const [useClusterColors, setUseClusterColors] = useState(true);
   const [showClusterEdges, setShowClusterEdges] = useState(true);
   const [wordsList, setWordsList] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(""); // For searching while typing
   const canvasRef = useRef(null);
 
   // Get words list from canvas component
@@ -368,17 +369,17 @@ export default function EmbeddingPage() {
 
   return (
     <>
+      {/* Info Icon - Top Right */}
       <Drawer>
+        <div className="fixed top-20 landscape:top-16 right-4 landscape:right-2 z-50">
+          <DrawerTrigger asChild>
+            <button className="flex items-center justify-center rounded-full p-2 landscape:p-1.5 bg-white/50 dark:bg-black/40 backdrop-blur-lg supports-[backdrop-filter]:bg-white/40 dark:supports-[backdrop-filter]:bg-black/30 border-b border-white/20 dark:border-white/10 shadow-xl outline outline-white/20 dark:outline-white/10 text-neutral-200 hover:bg-neutral-800/50 transition-colors">
+              <Info className="h-4 w-4 landscape:h-3.5 landscape:w-3.5" />
+            </button>
+          </DrawerTrigger>
+        </div>
 
-          <div className="justify-self-end me-4">
-            <DrawerTrigger asChild>
-              <button className="inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900/60 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800">
-                Learn about Embedding Space
-              </button>
-            </DrawerTrigger>
-          </div>
-
-        <DrawerContent className="flex flex-col max-h-[90vh] custom-scroll">
+        <DrawerContent className="flex flex-col max-h-[90vh] landscape:max-h-[80vh] custom-scroll">
           <div className="mx-auto w-full max-w-2xl overflow-y-auto flex-1 px-4 pt-4">
             <DrawerHeader>
               <DrawerTitle>What is Embedding Space?</DrawerTitle>
@@ -485,6 +486,210 @@ export default function EmbeddingPage() {
             wordsList={wordsList}
           />
         }
+        mobileControlSections={[
+          {
+            id: "model",
+            icon: Database,
+            label: "Model",
+            content: (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Model & Configuration</h3>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label htmlFor="mobile-embedding-select" className="text-sm font-medium">
+                        Embedding Model
+                      </label>
+                      <Select value={embeddingModel} onValueChange={setEmbeddingModel}>
+                        <SelectTrigger id="mobile-embedding-select" className="w-full">
+                          <SelectValue placeholder="Select embedding model" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="glove_300D">GloVe 300D</SelectItem>
+                          <SelectItem value="fasttext_300D">FastText 300D</SelectItem>
+                          <SelectItem value="word2vec_300D">Word2Vec 300D</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="mobile-word-count-select" className="text-sm font-medium">
+                        Word Count
+                      </label>
+                      <Select value={wordCount} onValueChange={setWordCount}>
+                        <SelectTrigger id="mobile-word-count-select" className="w-full">
+                          <SelectValue placeholder="Select word count" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1000">1,000 words</SelectItem>
+                          <SelectItem value="5000">5,000 words</SelectItem>
+                          <SelectItem value="10000">10,000 words</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Dimensionality Reduction
+                      </label>
+                      <RadioGroup value={reductionMethod} onValueChange={setReductionMethod}>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="pca" id="mobile-pca" />
+                          <Label htmlFor="mobile-pca" className="text-sm font-normal cursor-pointer">
+                            PCA
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="umap" id="mobile-umap" />
+                          <Label htmlFor="mobile-umap" className="text-sm font-normal cursor-pointer">
+                            UMAP
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ),
+          },
+          {
+            id: "search",
+            icon: Search,
+            label: "Search",
+            content: (closeDrawer) => (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Word Search</h3>
+                  <div className="space-y-3">
+                    {/* Current search word display */}
+                    {searchWord && (
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-blue-400">Highlighted:</span>
+                          <span className="text-sm font-semibold text-white">{searchWord}</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSearchWord("");
+                            setSearchQuery("");
+                          }}
+                          className="h-6 px-2 text-xs"
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {/* Search input - built into drawer, no popover */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Type to search words</label>
+                      <Command shouldFilter={false} className="rounded-lg border">
+                        <CommandInput 
+                          placeholder="Type to search words..." 
+                          className="h-11"
+                          value={searchQuery}
+                          onValueChange={setSearchQuery}
+                        />
+                        <CommandList className="max-h-[300px]">
+                          <CommandEmpty>
+                            {wordsList.length > 0 ? "No words found. Try a different search." : "Loading words..."}
+                          </CommandEmpty>
+                          <CommandGroup>
+                            {wordsList
+                              .filter(word => 
+                                !searchQuery || 
+                                word.toLowerCase().includes(searchQuery.toLowerCase())
+                              )
+                              .slice(0, 50)
+                              .map((word) => (
+                                <CommandItem
+                                  key={word}
+                                  value={word}
+                                  onSelect={() => {
+                                    setSearchWord(word);
+                                    setSearchQuery("");
+                                    // Close the drawer when word is selected
+                                    setTimeout(() => closeDrawer(), 200);
+                                  }}
+                                  className="cursor-pointer"
+                                >
+                                  <span className={cn(
+                                    "flex-1",
+                                    searchWord === word && "font-semibold text-blue-400"
+                                  )}>
+                                    {word}
+                                  </span>
+                                  {searchWord === word && (
+                                    <Check className="ml-auto h-4 w-4 text-blue-400" />
+                                  )}
+                                </CommandItem>
+                              ))}
+                            {wordsList.filter(word => 
+                              !searchQuery || 
+                              word.toLowerCase().includes(searchQuery.toLowerCase())
+                            ).length > 50 && (
+                              <div className="px-2 py-1.5 text-xs text-muted-foreground text-center">
+                                Showing first 50 results. Keep typing to refine search...
+                              </div>
+                            )}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </div>
+                    
+                    <div className="text-xs text-muted-foreground pt-2">
+                      {wordsList.length > 0 ? (
+                        <span>Search through {wordsList.length} words. Select a word to highlight it on the canvas.</span>
+                      ) : (
+                        <span>Loading word list...</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ),
+          },
+          {
+            id: "display",
+            icon: Palette,
+            label: "Display",
+            content: (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Display Options</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="mobile-cluster-colors"
+                        checked={useClusterColors}
+                        onCheckedChange={setUseClusterColors}
+                      />
+                      <label
+                        htmlFor="mobile-cluster-colors"
+                        className="text-sm font-medium cursor-pointer"
+                      >
+                        Color by Similarity Cluster
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="mobile-cluster-edges"
+                        checked={showClusterEdges}
+                        onCheckedChange={setShowClusterEdges}
+                      />
+                      <label
+                        htmlFor="mobile-cluster-edges"
+                        className="text-sm font-medium cursor-pointer"
+                      >
+                        Connect Clusters with Edges
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ),
+          },
+        ]}
         rightCanvas={
           <EmbeddingCanvas
             ref={canvasRef}

@@ -300,7 +300,7 @@ const Home = () => {
           {/* Right: interactive 3D */}
           <section className="relative flex-1 max-w-[860px] w-full order-1 md:order-2">
             <div className="absolute inset-0 rounded-lg md:rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-950" />
-            <div className="relative w-full h-[50vh] sm:h-[55vh] md:h-[62dvh] lg:h-[68dvh] rounded-lg md:rounded-xl overflow-hidden border border-neutral-800">
+            <div className="relative w-full h-[50vh] landscape:h-[60vh] sm:h-[55vh] md:h-[62dvh] lg:h-[68dvh] rounded-lg md:rounded-xl overflow-hidden border border-neutral-800">
                 <Canvas className="h-full w-full" camera={{ position: [1.8, 1.4, 1.8], fov: 55 }}>
                 <ambientLight intensity={0.6} />
                 <pointLight position={[4, 4, 4]} intensity={1.2} />

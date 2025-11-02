@@ -17,7 +17,7 @@ import {
   DrawerDescription,
   DrawerClose,
 } from "@/components/ui/drawer";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Info, Database, Grid, FileText, Calculator } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import {
   Select,
@@ -680,16 +680,17 @@ export default function PlaygroundPage() {
 
   return (
     <>
+      {/* Info Icon - Top Right */}
       <Drawer>
-        <div className="flex justify-end mb-2 md:mb-0 md:me-4 px-2 md:px-0">
+        <div className="fixed top-20 landscape:top-16 right-4 landscape:right-2 z-50">
           <DrawerTrigger asChild>
-            <button className="inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900/60 px-2 md:px-3 py-1.5 text-xs md:text-sm text-neutral-200 hover:bg-neutral-800">
-              Learn about Vector Geometry
+            <button className="flex items-center justify-center rounded-full p-2 landscape:p-1.5 bg-white/50 dark:bg-black/40 backdrop-blur-lg supports-[backdrop-filter]:bg-white/40 dark:supports-[backdrop-filter]:bg-black/30 border-b border-white/20 dark:border-white/10 shadow-xl outline outline-white/20 dark:outline-white/10 text-neutral-200 hover:bg-neutral-800/50 transition-colors">
+              <Info className="h-4 w-4 landscape:h-3.5 landscape:w-3.5" />
             </button>
           </DrawerTrigger>
         </div>
 
-        <DrawerContent className="flex flex-col max-h-[90vh] custom-scroll">
+        <DrawerContent className="flex flex-col max-h-[90vh] landscape:max-h-[80vh] custom-scroll">
           <div className="mx-auto w-full max-w-2xl overflow-y-auto flex-1 px-4 pt-4">
             <DrawerHeader>
               <DrawerTitle>Geometric Meaning of Embedding Vectors</DrawerTitle>
@@ -792,6 +793,200 @@ export default function PlaygroundPage() {
             errorField={errorField}
           />
         }
+        mobileControlSections={[
+          {
+            id: "model",
+            icon: Database,
+            label: "Model",
+            content: (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Embedding Model</h3>
+                  <div className="space-y-2">
+                    <label htmlFor="mobile-embedding-select" className="text-sm font-medium">
+                      Embedding Model
+                    </label>
+                    <Select value={embeddingModel} onValueChange={setEmbeddingModel}>
+                      <SelectTrigger id="mobile-embedding-select" className="w-full">
+                        <SelectValue placeholder="Select embedding model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="glove_300D">GloVe 300D</SelectItem>
+                        <SelectItem value="fasttext_300D">FastText 300D</SelectItem>
+                        <SelectItem value="word2vec_300D">Word2Vec 300D</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            ),
+          },
+          {
+            id: "display",
+            icon: Grid,
+            label: "Display",
+            content: (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Display Options</h3>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="mobile-gridlines"
+                      checked={showGridlines}
+                      onCheckedChange={setShowGridlines}
+                    />
+                    <label
+                      htmlFor="mobile-gridlines"
+                      className="text-sm font-medium cursor-pointer"
+                    >
+                      Show Gridlines
+                    </label>
+                  </div>
+                </div>
+              </div>
+            ),
+          },
+          {
+            id: "words",
+            icon: FileText,
+            label: "Words",
+            content: (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Words to Plot</h3>
+                  <div className="space-y-2">
+                    <Label htmlFor="mobile-words-input" className="text-sm font-medium">
+                      Words to Plot (up to 50)
+                    </Label>
+                    <Textarea
+                      id="mobile-words-input"
+                      value={wordsText}
+                      onChange={(e) => setWordsText(e.target.value)}
+                      placeholder="Type words separated by spaces (e.g., man woman king queen)"
+                      className="min-h-[120px] resize-none"
+                      maxLength={1000}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {Math.min(
+                        wordsText.split(/\s+/).filter((w) => w.trim().length > 0).length,
+                        50
+                      )}{" "}
+                      / 50 words
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ),
+          },
+          {
+            id: "calculation",
+            icon: Calculator,
+            label: "Calc",
+            content: (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Vector Calculation</h3>
+                  <div className="space-y-4">
+                    {/* Formula Display */}
+                    <div className="p-4 rounded-lg bg-neutral-800/40 border border-neutral-700/50">
+                      <div className="flex items-center justify-center gap-2 flex-wrap text-lg font-mono">
+                        <Input
+                          id="mobile-vector-a"
+                          value={vectorA}
+                          onChange={(e) => setVectorA(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleCalculate();
+                            }
+                          }}
+                          placeholder="king"
+                          className={cn(
+                            "w-20 text-center text-base font-semibold",
+                            errorField === "a" &&
+                              "border-destructive focus-visible:ring-destructive"
+                          )}
+                        />
+                        <span className="text-neutral-400">-</span>
+                        <Input
+                          id="mobile-vector-b"
+                          value={vectorB}
+                          onChange={(e) => setVectorB(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleCalculate();
+                            }
+                          }}
+                          placeholder="man"
+                          className={cn(
+                            "w-20 text-center text-base font-semibold",
+                            errorField === "b" &&
+                              "border-destructive focus-visible:ring-destructive"
+                          )}
+                        />
+                        <span className="text-neutral-400">+</span>
+                        <Input
+                          id="mobile-vector-c"
+                          value={vectorC}
+                          onChange={(e) => setVectorC(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleCalculate();
+                            }
+                          }}
+                          placeholder="woman"
+                          className={cn(
+                            "w-20 text-center text-base font-semibold",
+                            errorField === "c" &&
+                              "border-destructive focus-visible:ring-destructive"
+                          )}
+                        />
+                        <span className="text-neutral-400">=</span>
+                        {calculationResult ? (
+                          <div className="px-3 py-1.5 rounded bg-blue-500/20 text-blue-400 font-semibold min-w-[80px] text-center">
+                            {calculationResult.closestWord}
+                          </div>
+                        ) : (
+                          <div className="px-3 py-1.5 rounded bg-neutral-700/40 text-neutral-500 font-semibold min-w-[80px] text-center">
+                            ?
+                          </div>
+                        )}
+                      </div>
+                      {(errorField && errorMessage) && (
+                        <p className="text-xs text-destructive mt-2 text-center">
+                          {errorMessage}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Calculate Button */}
+                    <Button 
+                      onClick={handleCalculate} 
+                      variant="default" 
+                      className="w-full"
+                      disabled={!vectorA || !vectorB || !vectorC}
+                    >
+                      Calculate
+                    </Button>
+
+                    {/* Result Details */}
+                    {calculationResult && (
+                      <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                        <p className="text-sm font-medium text-blue-400 mb-1">Result:</p>
+                        <p className="text-lg font-semibold text-white mb-2">
+                          {calculationResult.closestWord}
+                        </p>
+                        <div className="text-xs text-muted-foreground space-y-1">
+                          <p>Similarity: {(calculationResult.similarity * 100).toFixed(1)}%</p>
+                          <p>Distance: {calculationResult.closestDistance.toFixed(3)}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ),
+          },
+        ]}
         rightCanvas={
           <VectorPlaygroundCanvas
             embeddingModel={embeddingModel}
