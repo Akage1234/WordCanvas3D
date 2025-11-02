@@ -58,7 +58,7 @@ function VectorPlaygroundControls({
 }) {
   return (
     <div className="w-full min-w-0 overflow-hidden">
-      <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
+      <h2 className="text-lg md:text-xl font-semibold mb-2 flex items-center gap-2">
         Vector Playground{" "}
         <HoverCard>
           <HoverCardTrigger asChild>
@@ -68,7 +68,7 @@ function VectorPlaygroundControls({
               style={{ lineHeight: 0 }}
               tabIndex={0}
             >
-              <HelpCircle size={20} />
+              <HelpCircle className="w-4 h-4 md:w-5 md:h-5" />
             </button>
           </HoverCardTrigger>
           <HoverCardContent>
@@ -97,10 +97,10 @@ function VectorPlaygroundControls({
           </HoverCardContent>
         </HoverCard>
       </h2>
-      <p className="text-xs text-muted-foreground mb-4">
+      <p className="text-xs text-muted-foreground mb-3 md:mb-4">
         Perform vector math and analogy experiments here.
       </p>
-      <Separator className="my-4" />
+      <Separator className="my-3 md:my-4" />
 
       {/* Embedding Selector */}
       <div className="space-y-2">
@@ -119,7 +119,7 @@ function VectorPlaygroundControls({
         </Select>
       </div>
 
-      <Separator className="my-4" />
+      <Separator className="my-3 md:my-4" />
 
       {/* Gridlines Toggle */}
       <div className="flex items-center space-x-2">
@@ -136,7 +136,7 @@ function VectorPlaygroundControls({
         </label>
       </div>
 
-      <Separator className="my-4" />
+      <Separator className="my-3 md:my-4" />
 
       {/* Words Input */}
       <div className="space-y-2">
@@ -148,7 +148,7 @@ function VectorPlaygroundControls({
           value={wordsText}
           onChange={(e) => onWordsTextChange(e.target.value)}
           placeholder="Type words separated by spaces (e.g., man woman king queen)"
-          className="min-h-[100px] resize-none"
+          className="min-h-[80px] md:min-h-[100px] resize-none"
           maxLength={1000}
         />
         <p className="text-xs text-muted-foreground">
@@ -160,7 +160,7 @@ function VectorPlaygroundControls({
         </p>
       </div>
 
-      <Separator className="my-4" />
+      <Separator className="my-3 md:my-4" />
 
       {/* Vector Calculation */}
       <div className="space-y-2 max-w-full overflow-hidden">
@@ -213,25 +213,29 @@ function VectorPlaygroundControls({
           </HoverCardContent>
         </HoverCard>
         </Label>
-        <div className="flex items-center gap-2">
+        {/* Mobile: Stack vertically for better UX. Desktop: Horizontal layout */}
+        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-2">
           <Tooltip open={errorField === "a" && errorMessage ? true : false}>
             <TooltipTrigger asChild>
-              <Input
-                id="vector-a"
-                value={vectorA}
-                onChange={(e) => onVectorAChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    onCalculate();
-                  }
-                }}
-                placeholder="king"
-                className={cn(
-                  "flex-1",
-                  errorField === "a" &&
-                    "border-destructive focus-visible:ring-destructive"
-                )}
-              />
+              <div className="flex items-center gap-2 md:flex-1">
+                <Input
+                  id="vector-a"
+                  value={vectorA}
+                  onChange={(e) => onVectorAChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      onCalculate();
+                    }
+                  }}
+                  placeholder="king"
+                  className={cn(
+                    "flex-1",
+                    errorField === "a" &&
+                      "border-destructive focus-visible:ring-destructive"
+                  )}
+                />
+                <span className="text-sm font-semibold md:hidden">a</span>
+              </div>
             </TooltipTrigger>
             {errorField === "a" && errorMessage && (
               <TooltipContent className="bg-destructive text-destructive-foreground border-destructive">
@@ -239,25 +243,28 @@ function VectorPlaygroundControls({
               </TooltipContent>
             )}
           </Tooltip>
-          <span className="text-sm font-semibold">-</span>
+          <span className="text-sm font-semibold self-center md:self-auto">-</span>
           <Tooltip open={errorField === "b" && errorMessage ? true : false}>
             <TooltipTrigger asChild>
-              <Input
-                id="vector-b"
-                value={vectorB}
-                onChange={(e) => onVectorBChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    onCalculate();
-                  }
-                }}
-                placeholder="man"
-                className={cn(
-                  "flex-1",
-                  errorField === "b" &&
-                    "border-destructive focus-visible:ring-destructive"
-                )}
-              />
+              <div className="flex items-center gap-2 md:flex-1">
+                <Input
+                  id="vector-b"
+                  value={vectorB}
+                  onChange={(e) => onVectorBChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      onCalculate();
+                    }
+                  }}
+                  placeholder="man"
+                  className={cn(
+                    "flex-1",
+                    errorField === "b" &&
+                      "border-destructive focus-visible:ring-destructive"
+                  )}
+                />
+                <span className="text-sm font-semibold md:hidden">b</span>
+              </div>
             </TooltipTrigger>
             {errorField === "b" && errorMessage && (
               <TooltipContent className="bg-destructive text-destructive-foreground border-destructive">
@@ -265,25 +272,28 @@ function VectorPlaygroundControls({
               </TooltipContent>
             )}
           </Tooltip>
-          <span className="text-sm font-semibold">+</span>
+          <span className="text-sm font-semibold self-center md:self-auto">+</span>
           <Tooltip open={errorField === "c" && errorMessage ? true : false}>
             <TooltipTrigger asChild>
-              <Input
-                id="vector-c"
-                value={vectorC}
-                onChange={(e) => onVectorCChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    onCalculate();
-                  }
-                }}
-                placeholder="woman"
-                className={cn(
-                  "flex-1",
-                  errorField === "c" &&
-                    "border-destructive focus-visible:ring-destructive"
-                )}
-              />
+              <div className="flex items-center gap-2 md:flex-1">
+                <Input
+                  id="vector-c"
+                  value={vectorC}
+                  onChange={(e) => onVectorCChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      onCalculate();
+                    }
+                  }}
+                  placeholder="woman"
+                  className={cn(
+                    "flex-1",
+                    errorField === "c" &&
+                      "border-destructive focus-visible:ring-destructive"
+                  )}
+                />
+                <span className="text-sm font-semibold md:hidden">c</span>
+              </div>
             </TooltipTrigger>
             {errorField === "c" && errorMessage && (
               <TooltipContent className="bg-destructive text-destructive-foreground border-destructive">
@@ -297,7 +307,7 @@ function VectorPlaygroundControls({
         </Button>
       </div>
 
-      <Separator className="my-4" />
+      <Separator className="my-3 md:my-4" />
     </div>
   );
 }
@@ -671,9 +681,9 @@ export default function PlaygroundPage() {
   return (
     <>
       <Drawer>
-        <div className="justify-self-end me-4">
+        <div className="flex justify-end mb-2 md:mb-0 md:me-4 px-2 md:px-0">
           <DrawerTrigger asChild>
-            <button className="inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900/60 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800">
+            <button className="inline-flex items-center gap-2 rounded-md border border-neutral-800 bg-neutral-900/60 px-2 md:px-3 py-1.5 text-xs md:text-sm text-neutral-200 hover:bg-neutral-800">
               Learn about Vector Geometry
             </button>
           </DrawerTrigger>
