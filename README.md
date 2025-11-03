@@ -43,10 +43,9 @@ Zoom, spin, and tap your way through semantic space. Compare how different model
 
 <div align="center" style="width: 100%; margin-top: 16px;">
   <img src="Frontend/public/mobile_ui.gif" alt="Mobile UI preview"
-       width="100%" style="max-width: 420px; height: auto; display: block;" />
+       style="display: block; margin: 0 auto;" />
   <em>Mobile UI: bottom tray controls and full‑screen canvas</em>
 </div>
-
 ---
 
 ## ✨ Highlights
