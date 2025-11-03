@@ -41,7 +41,7 @@ Zoom, spin, and tap your way through semantic space. Compare how different model
   <em>Tokenizer: compare how models split the same text</em>
 </div>
 
-<figure style="margin: 16px 0; text-align: center;">
+<figure align="center" style="margin: 16px 0; text-align: center;">
   <img src="Frontend/public/mobile_ui.gif" alt="Mobile UI preview"
        style="display: inline-block;" />
   <figcaption><em>Mobile UI: bottom tray controls and full‑screen canvas</em></figcaption>
