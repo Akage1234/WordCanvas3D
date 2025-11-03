@@ -8,7 +8,7 @@ WordCanvas3D drops you inside the embedding universe — where words float like 
 ---
 
 <p align="center">
-  <img src="Frontend/public/home_page.gif" alt="Home preview" width="700" />
+  <img src="Frontend/public/home_page.gif" alt="Home preview" width="100%" />
   <br/>
   <em>Home page</em>
 </p>
@@ -43,7 +43,7 @@ Zoom, spin, and tap your way through semantic space. Compare how different model
 
 <div align="center" style="width: 100%; margin-top: 16px;">
   <img src="Frontend/public/mobile_ui.gif" alt="Mobile UI preview"
-       width="100%" style="max-width: 500px; height: auto; display: block;" />
+       width="100%" style="max-width: 420px; height: auto; display: block;" />
   <em>Mobile UI: bottom tray controls and full‑screen canvas</em>
 </div>
 
@@ -92,7 +92,7 @@ Zoom, spin, and tap your way through semantic space. Compare how different model
 ## 🏃‍♂️ Run it locally
 
 ```bash
-git clone https://github.com/yourname/wordcanvas3d.git
+git clone https://github.com/Akage1234/WordCanvas3D.git
 cd Frontend
 npm install
 npm run dev
