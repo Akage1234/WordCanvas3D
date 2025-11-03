@@ -243,10 +243,10 @@ const Home = () => {
 
   return (
     <>
-     <main className="px-4 sm:px-6 md:px-10 lg:px-14 overflow-hidden min-h-[calc(100dvh-96px)] flex items-center justify-center py-6 md:py-0">
+     <main className="px-4 sm:px-6 md:px-10 lg:px-14 overflow-x-hidden min-h-[calc(100dvh-96px)] flex items-center justify-center py-6 md:py-0 pb-8 md:pb-0">
      <div className="mx-auto flex flex-col md:flex-row w-full max-w-7xl items-center justify-center gap-6 md:gap-6 lg:gap-10">
           {/* Left: headline + brief explanation + actions */}
-          <section className="relative flex-1 flex flex-col justify-center order-2 md:order-1 w-full md:w-auto">
+          <section className="relative flex-1 flex flex-col justify-center order-2 md:order-1 w-full md:w-auto min-w-0">
             <div className="pointer-events-none absolute -inset-10 opacity-40 blur-3xl"
                  aria-hidden
                  style={{
@@ -254,19 +254,19 @@ const Home = () => {
                      'radial-gradient(1200px 500px at 0% 0%, rgba(59,130,246,0.20), rgba(0,0,0,0))'
                  }}
             />
-            <div className="relative">
+            <div className="relative w-full">
               <div className="inline-flex items-center gap-2 rounded-full border border-neutral-800/60 px-2 md:px-3 py-1 text-[10px] md:text-xs text-neutral-400 mb-3 md:mb-4">
                 <span className="h-1.5 w-1.5 md:h-2 md:w-2 rounded-full bg-blue-500 animate-pulse" />
                 Live playground
               </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight break-words">
                 Understand text through
                 {' '}
                 <span className="bg-gradient-to-r from-blue-400 via-sky-300 to-cyan-300 bg-clip-text text-transparent">
                   tokens and vectors
                 </span>
               </h1>
-              <p className="mt-3 md:mt-4 text-sm sm:text-base max-w-xl text-neutral-400 leading-relaxed">
+              <p className="mt-3 md:mt-4 text-sm sm:text-base max-w-xl text-neutral-400 leading-relaxed break-words">
                 WordCanvas helps you see how text becomes numbers, and how those numbers
                 arrange in space. Tokenize inputs, explore embeddings, and build intuition—
                 all in your browser.
@@ -277,7 +277,7 @@ const Home = () => {
                 <span className="ml-1 inline-block h-4 md:h-5 w-[2px] align-middle bg-sky-300 animate-pulse" />
               </div>
 
-              <div className="mt-6 md:mt-8 flex flex-wrap gap-2 md:gap-3">
+              <div className="mt-6 md:mt-8 mb-4 md:mb-0 flex flex-wrap gap-2 md:gap-3">
                 <Link href="/tokenizer" className="w-full sm:w-auto">
                   <Button className="bg-blue-600 hover:bg-blue-500 text-white w-full sm:w-auto">
                     Try Tokenizer
@@ -300,7 +300,7 @@ const Home = () => {
           {/* Right: interactive 3D */}
           <section className="relative flex-1 max-w-[860px] w-full order-1 md:order-2">
             <div className="absolute inset-0 rounded-lg md:rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-950" />
-            <div className="relative w-full h-[50vh] landscape:h-[60vh] sm:h-[55vh] md:h-[62dvh] lg:h-[68dvh] rounded-lg md:rounded-xl overflow-hidden border border-neutral-800">
+            <div className="relative w-full h-[50vh] min-h-[280px] max-h-[90vh] landscape:h-[60vh] sm:h-[55vh] md:h-[62dvh] md:min-h-[400px] lg:h-[68dvh] rounded-lg md:rounded-xl overflow-hidden border border-neutral-800">
                 <Canvas className="h-full w-full" camera={{ position: [1.8, 1.4, 1.8], fov: 55 }}>
                 <ambientLight intensity={0.6} />
                 <pointLight position={[4, 4, 4]} intensity={1.2} />

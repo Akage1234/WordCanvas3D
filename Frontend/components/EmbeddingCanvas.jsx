@@ -5,7 +5,7 @@ import JSZip from "jszip";
 import { ungzip } from "pako";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "glove_300D", wordCount = "1000", reductionMethod = "pca", searchWord = "", useClusterColors = false, showClusterEdges = false }, ref) {
+const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "glove_300D", wordCount = "1000", reductionMethod = "pca", searchWord = "", useClusterColors = false, showClusterEdges = false, onLoadingChange = null }, ref) {
   const containerRef = useRef(null);
   const rafRef = useRef(0);
   const canvasFunctionsRef = useRef({ searchForWord: null, updateClusterColors: null, resetColors: null, getWords: null });
@@ -111,9 +111,95 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     tooltipCoords.style.fontFamily = "monospace";
     tooltip.appendChild(tooltipCoords);
 
+    // --- Touch handling for mobile: tap to identify point ---
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchMoved = false;
+
+    const getNormalizedFromClient = (clientX, clientY) => {
+      const pickRect = renderer.domElement.getBoundingClientRect();
+      const x = ((clientX - pickRect.left) / pickRect.width) * 2 - 1;
+      const y = -((clientY - pickRect.top) / pickRect.height) * 2 + 1;
+      return { x, y };
+    };
+
+    const onTouchStart = (e) => {
+      if (!e.touches || e.touches.length !== 1) return;
+      const t = e.touches[0];
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+      touchMoved = false;
+    };
+
+    const onTouchMove = (e) => {
+      if (!e.touches || e.touches.length !== 1) return;
+      const t = e.touches[0];
+      const dx = t.clientX - touchStartX;
+      const dy = t.clientY - touchStartY;
+      if (dx * dx + dy * dy > 64) {
+        // movement > 8px ⇒ treat as orbit gesture
+        touchMoved = true;
+      }
+    };
+
+    const onTouchEnd = (e) => {
+      // If it was a drag, don't treat as tap
+      if (touchMoved) return;
+      const t = (e.changedTouches && e.changedTouches[0]) || null;
+      if (!t) return;
+
+      // Raycast at touch position
+      const ndc = getNormalizedFromClient(t.clientX, t.clientY);
+      mouse.set(ndc.x, ndc.y);
+      raycaster.setFromCamera(mouse, camera);
+      if (!points || labels.length === 0 || !geometry) return;
+      const intersects = raycaster.intersectObject(points, false);
+      if (intersects.length === 0 || typeof intersects[0].index !== 'number') return;
+
+      const idx = intersects[0].index;
+      const label = labels[idx];
+      const coord = coordinates[idx];
+
+      // Show tooltip near the tapped point by projecting to screen
+      if (label && coord) {
+        const world = new THREE.Vector3(coord.x, coord.y, coord.z).addScalar(0.1);
+        const projected = world.clone().project(camera);
+        const rect = container.getBoundingClientRect();
+        const sx = (projected.x * 0.5 + 0.5) * rect.width;
+        const sy = (-projected.y * 0.5 + 0.5) * rect.height;
+
+        tooltipName.textContent = label;
+        tooltipCoords.textContent = `(${coord.x.toFixed(3)}, ${coord.y.toFixed(3)}, ${coord.z.toFixed(3)})`;
+        tooltip.style.left = `${sx}px`;
+        tooltip.style.top = `${sy}px`;
+        tooltip.style.display = 'block';
+
+        // Add or move a persistent search sphere at the tapped point
+        if (searchSphere) {
+          scene.remove(searchSphere);
+          searchSphere.geometry.dispose();
+          searchSphere.material.dispose();
+          searchSphere = null;
+        }
+        const sphereGeometry = new THREE.SphereGeometry(0.035, 16, 16);
+        const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff00ff, transparent: true, opacity: 0.7 });
+        searchSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        searchSphere.position.set(coord.x, coord.y, coord.z);
+        scene.add(searchSphere);
+
+        // Remember selected index so hover won't fight tooltip
+        searchedIndex = idx;
+      }
+    };
+
     // --- Load and plot embeddings ---
     async function loadEmbeddings() {
         try {
+          // Notify parent that loading started
+          if (onLoadingChange) {
+            onLoadingChange(true);
+          }
+          
           // Build file path based on model and word count
           let fetchUrl;
           
@@ -247,8 +333,18 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
           console.log(`Loaded ${data.length} embeddings`);
           console.log("Sample labels:", labels.slice(0, 5));
           console.log("First data item:", data[0]);
+          
+          // Notify parent that loading completed
+          if (onLoadingChange) {
+            onLoadingChange(false);
+          }
         } catch (error) {
           console.error("Error loading embeddings:", error);
+          
+          // Notify parent that loading failed
+          if (onLoadingChange) {
+            onLoadingChange(false);
+          }
         }
       }
 
@@ -545,6 +641,11 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
         createClusterEdges();
       }
     });
+
+    // Attach touch listeners for tap-to-identify
+    renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: true });
+    renderer.domElement.addEventListener('touchmove', onTouchMove, { passive: true });
+    renderer.domElement.addEventListener('touchend', onTouchEnd, { passive: true });
 
     // --- Animate ---
     const animate = () => {
@@ -880,6 +981,9 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       renderer.domElement.removeEventListener("pointerup", onPointerUp);
       renderer.domElement.removeEventListener("pointermove", onPointerMove);
       renderer.domElement.removeEventListener("pointerleave", onPointerLeave);
+      renderer.domElement.removeEventListener('touchstart', onTouchStart);
+      renderer.domElement.removeEventListener('touchmove', onTouchMove);
+      renderer.domElement.removeEventListener('touchend', onTouchEnd);
       renderer.dispose();
       const gl = renderer.getContext?.();
       gl?.getExtension?.("WEBGL_lose_context")?.loseContext?.();

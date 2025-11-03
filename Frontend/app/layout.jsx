@@ -3,6 +3,7 @@ import { LayoutProvider } from '@/components/LayoutProvider';
 import { Navbar } from '@/components/Navbar';
 import DotCanvas from '@/components/DotCanvas';
 import AuthorHoverCard from '@/components/AuthorHoverCard';
+import { Analytics } from '@vercel/analytics/react';
 
 export const metadata = {
   title: 'WordCanvas3D',
@@ -22,6 +23,7 @@ export default function RootLayout({ children }) {
           {children}
           <AuthorHoverCard />
         </LayoutProvider>
+        <Analytics />
       </body>
     </html>
   );

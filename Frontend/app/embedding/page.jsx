@@ -334,6 +334,7 @@ export default function EmbeddingPage() {
   const [showClusterEdges, setShowClusterEdges] = useState(true);
   const [wordsList, setWordsList] = useState([]);
   const [searchQuery, setSearchQuery] = useState(""); // For searching while typing
+  const [isLoading, setIsLoading] = useState(true); // Canvas loading state
   const canvasRef = useRef(null);
 
   // Get words list from canvas component
@@ -691,15 +692,26 @@ export default function EmbeddingPage() {
           },
         ]}
         rightCanvas={
-          <EmbeddingCanvas
-            ref={canvasRef}
-            embeddingModel={embeddingModel}
-            wordCount={wordCount}
-            reductionMethod={reductionMethod}
-            searchWord={searchWord}
-            useClusterColors={useClusterColors}
-            showClusterEdges={showClusterEdges}
-          />
+          <div className="relative w-full h-full">
+            {isLoading && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-neutral-950/80 backdrop-blur-sm">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-8 h-8 border-4 border-neutral-700 border-t-blue-500 rounded-full animate-spin" />
+                  <p className="text-sm text-neutral-300">Loading embeddings...</p>
+                </div>
+              </div>
+            )}
+            <EmbeddingCanvas
+              ref={canvasRef}
+              embeddingModel={embeddingModel}
+              wordCount={wordCount}
+              reductionMethod={reductionMethod}
+              searchWord={searchWord}
+              useClusterColors={useClusterColors}
+              showClusterEdges={showClusterEdges}
+              onLoadingChange={setIsLoading}
+            />
+          </div>
         }
       />
     </>

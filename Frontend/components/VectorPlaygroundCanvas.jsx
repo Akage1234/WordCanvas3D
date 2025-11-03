@@ -12,6 +12,7 @@ export default function VectorPlaygroundCanvas({
   resultLabel = "Result",
   resultInfo = null,
   onEmbeddingsLoaded = null,
+  onLoadingChange = null,
   vectorA = null,
   vectorB = null,
   vectorC = null,
@@ -66,13 +67,15 @@ export default function VectorPlaygroundCanvas({
     renderer.domElement.style.outline = 'none';
     
     container.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
 
     // Result info box element (shown in canvas)
     const resultInfoBox = document.createElement("div");
     resultInfoBox.setAttribute("data-result-info-box", "true");
     resultInfoBox.style.position = "absolute";
-    resultInfoBox.style.top = "20px";
-    resultInfoBox.style.right = "20px";
+    // Will be positioned near the result point dynamically
+    resultInfoBox.style.top = "0px";
+    resultInfoBox.style.left = "0px";
     resultInfoBox.style.pointerEvents = "none";
     resultInfoBox.style.padding = "12px 16px";
     resultInfoBox.style.borderRadius = "8px";
@@ -80,7 +83,8 @@ export default function VectorPlaygroundCanvas({
     resultInfoBox.style.color = "white";
     resultInfoBox.style.fontSize = "12px";
     resultInfoBox.style.fontFamily = "system-ui, sans-serif";
-    resultInfoBox.style.zIndex = "1000";
+    // Keep under global controls/drawers (which are around z-50)
+    resultInfoBox.style.zIndex = "20";
     resultInfoBox.style.minWidth = "200px";
     resultInfoBox.style.boxShadow = "0 4px 12px rgba(0,0,0,0.4)";
     resultInfoBox.style.display = "none";
@@ -97,6 +101,7 @@ export default function VectorPlaygroundCanvas({
     controls.target.set(0, 0, 0);
     // Ensure camera looks at origin
     camera.lookAt(0, 0, 0);
+    cameraRef.current = camera;
 
     // Add ambient light
     scene.add(new THREE.AmbientLight(0xffffff, 0.8));
@@ -336,6 +341,11 @@ export default function VectorPlaygroundCanvas({
     // Load full embeddings
     async function loadFullEmbeddings() {
       try {
+        // Notify parent that loading started
+        if (onLoadingChange) {
+          onLoadingChange(true);
+        }
+        
         // Determine model type and folder name
         let modelFolder;
         let fileName;
@@ -375,12 +385,22 @@ export default function VectorPlaygroundCanvas({
           onEmbeddingsLoaded(data);
         }
         
+        // Notify parent that loading completed
+        if (onLoadingChange) {
+          onLoadingChange(false);
+        }
+        
         // Signal that embeddings are ready (triggers distance vectors update)
         setEmbeddingsReady(true);
         
         // Words will be plotted by the useEffect that watches the words prop
       } catch (error) {
         console.error("Error loading full embeddings:", error);
+        
+        // Notify parent that loading failed
+        if (onLoadingChange) {
+          onLoadingChange(false);
+        }
       }
     }
 
@@ -465,6 +485,27 @@ export default function VectorPlaygroundCanvas({
     const animate = () => {
       controls.update();
       renderer.render(scene, camera);
+
+      // Reposition the result info box near the result vector's end point (if visible)
+      const resultInfoBox = container.querySelector('[data-result-info-box]');
+      if (resultInfoBox && resultInfoBox.style.display !== 'none' && resultVectorRef.current) {
+        const cam = cameraRef.current || camera;
+        const end = resultVectorRef.current.end;
+        if (end && cam) {
+          const worldPos = end.clone();
+          worldPos.project(cam);
+          const rect = container.getBoundingClientRect();
+          let x = (worldPos.x * 0.5 + 0.5) * rect.width;
+          let y = (-worldPos.y * 0.5 + 0.5) * rect.height;
+          x += 10; y += 10;
+          x = Math.max(8, Math.min(rect.width - 208, x));
+          y = Math.max(8, Math.min(rect.height - 120, y));
+          resultInfoBox.style.left = `${x}px`;
+          resultInfoBox.style.top = `${y}px`;
+          resultInfoBox.style.right = 'auto';
+        }
+      }
+
       rafRef.current = requestAnimationFrame(animate);
     };
     rafRef.current = requestAnimationFrame(animate);
@@ -940,7 +981,8 @@ export default function VectorPlaygroundCanvas({
           arrow,
           label,
           hoverTube,
-          originalColor: resultColor
+          originalColor: resultColor,
+          end: vectorEnd.clone()
         };
       }
     }

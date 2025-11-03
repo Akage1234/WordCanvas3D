@@ -502,6 +502,7 @@ export default function PlaygroundPage() {
   const [errorMessage, setErrorMessage] = useState(null);
   const [errorField, setErrorField] = useState(null); // 'a', 'b', 'c', or null
   const [embeddingsData, setEmbeddingsData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // Canvas loading state
   const shouldAutoRecalculateRef = useRef(false); // Track if we should auto-recalculate when embeddings load
 
   // Auto-dismiss error messages after 5 seconds
@@ -988,27 +989,38 @@ export default function PlaygroundPage() {
           },
         ]}
         rightCanvas={
-          <VectorPlaygroundCanvas
-            embeddingModel={embeddingModel}
-            showGridlines={showGridlines}
-            words={words}
-            resultVector={calculationResult ? calculationResult.vector3D : null}
-            resultLabel={calculationResult?.closestWord || "Result"}
-            resultInfo={
-              calculationResult
-                ? {
-                    closestWord: calculationResult.closestWord,
-                    vector3D: calculationResult.vector3D,
-                    similarity: calculationResult.similarity,
-                    distance: calculationResult.closestDistance,
-                  }
-                : null
-            }
-            onEmbeddingsLoaded={setEmbeddingsData}
-            vectorA={vectorA.trim().toLowerCase() || null}
-            vectorB={vectorB.trim().toLowerCase() || null}
-            vectorC={vectorC.trim().toLowerCase() || null}
-          />
+          <div className="relative w-full h-full">
+            {isLoading && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-neutral-950/80 backdrop-blur-sm">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-8 h-8 border-4 border-neutral-700 border-t-blue-500 rounded-full animate-spin" />
+                  <p className="text-sm text-neutral-300">Loading embeddings...</p>
+                </div>
+              </div>
+            )}
+            <VectorPlaygroundCanvas
+              embeddingModel={embeddingModel}
+              showGridlines={showGridlines}
+              words={words}
+              resultVector={calculationResult ? calculationResult.vector3D : null}
+              resultLabel={calculationResult?.closestWord || "Result"}
+              resultInfo={
+                calculationResult
+                  ? {
+                      closestWord: calculationResult.closestWord,
+                      vector3D: calculationResult.vector3D,
+                      similarity: calculationResult.similarity,
+                      distance: calculationResult.closestDistance,
+                    }
+                  : null
+              }
+              onEmbeddingsLoaded={setEmbeddingsData}
+              onLoadingChange={setIsLoading}
+              vectorA={vectorA.trim().toLowerCase() || null}
+              vectorB={vectorB.trim().toLowerCase() || null}
+              vectorC={vectorC.trim().toLowerCase() || null}
+            />
+          </div>
         }
       />
     </>
