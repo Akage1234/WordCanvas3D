@@ -46,7 +46,9 @@ Zoom, spin, and tap your way through semantic space. Compare how different model
   <img src="Frontend/public/mobile_ui.gif" alt="Mobile UI preview"
        style="display: inline-block;" />
 </figure>
-  <em>Mobile UI: bottom tray controls and full‑screen canvas</em>
+</div>
+<div align="center" style='margin-top: 16px;'>
+   <em>Mobile UI: bottom tray controls and full‑screen canvas</em>
 </div>
 
 ---
