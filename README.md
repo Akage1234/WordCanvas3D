@@ -8,9 +8,9 @@ WordCanvas3D drops you inside the embedding universe — where words float like 
 ---
 
 <p align="center">
-  <img src="Frontend/public/home_page.gif" alt="Home preview" width="700" />
+  <img src="Frontend/public/home_page.gif" alt="Home preview" width="100%" />
   <br/>
-  <em>Home: hero canvas · quick start · mobile‑first layout</em>
+  <em>Home page</em>
 </p>
 
 ---
@@ -26,26 +26,30 @@ Zoom, spin, and tap your way through semantic space. Compare how different model
 
 ## 📸 Previews
 
-<p>
-  <img src="Frontend/public/embedding_space.gif" alt="Embedding space preview" width="420" />
-  <br/>
+<div align="center" style="width: 100%;">
+  <img src="Frontend/public/embedding_space.gif" alt="Embedding space preview" width="100%" style="max-width: 1200px; height: auto; display: block;" />
   <em>Embedding space: rotate, search, and tap to inspect words</em>
- </p>
-<p>
-  <img src="Frontend/public/vector_playground.gif" alt="Vector playground preview" width="420" />
-  <br/>
+</div>
+
+<div align="center" style="width: 100%; margin-top: 16px;">
+  <img src="Frontend/public/vector_playground.gif" alt="Vector playground preview" width="100%" style="max-width: 1200px; height: auto; display: block;" />
   <em>Vector playground: a − b + c → result with nearest neighbors</em>
- </p>
-<p>
-  <img src="Frontend/public/tokenizer.gif" alt="Tokenizer preview" width="420" />
-  <br/>
+</div>
+
+<div align="center" style="width: 100%; margin-top: 16px;">
+  <img src="Frontend/public/tokenizer.gif" alt="Tokenizer preview" width="100%" style="max-width: 1200px; height: auto; display: block;" />
   <em>Tokenizer: compare how models split the same text</em>
- </p>
-<p>
-  <img src="Frontend/public/mobile_ui.gif" alt="Mobile UI preview" width="420" />
-  <br/>
-  <em>Mobile UI: bottom tray controls and full‑screen canvas</em>
- </p>
+</div>
+
+<div align="center">
+<figure style="margin: 16px 0; text-align: center;">
+  <img src="Frontend/public/mobile_ui.gif" alt="Mobile UI preview"
+       style="display: inline-block;" />
+</figure>
+</div>
+<div align="center" style='margin-top: 16px;'>
+   <em>Mobile UI: bottom tray controls and full‑screen canvas</em>
+</div>
 
 ---
 
@@ -92,7 +96,7 @@ Zoom, spin, and tap your way through semantic space. Compare how different model
 ## 🏃‍♂️ Run it locally
 
 ```bash
-git clone https://github.com/yourname/wordcanvas3d.git
+git clone https://github.com/Akage1234/WordCanvas3D.git
 cd Frontend
 npm install
 npm run dev
