@@ -43,6 +43,11 @@ import {
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { badgeColor, clusterColor, DEFAULT_POINT_COLOR } from "@/components/embedding/embeddingPalette.mjs";
+import ExplorationTray from "@/components/embedding/ExplorationTray";
+import { clusterSummaries, exploreNetwork } from "@/components/embedding/exploration.mjs";
+import explorationStyles from "@/components/embedding/exploration.module.css";
+import { useLayoutMode } from "@/components/LayoutContext";
 
 const MODEL_LABELS = { glove_300D: "GloVe 300D", fasttext_300D: "FastText 300D", word2vec_300D: "Word2Vec 300D" };
 const COUNT_LABELS = { "1000": "1,000 words", "5000": "5,000 words", "10000": "10,000 words" };
@@ -115,58 +120,36 @@ function StatusNotice({ status, onRetry, onReloadScene, compact = false }) {
   return null;
 }
 
-// Details for the selected word, read from the loaded dataset (works without WebGL).
-function SelectedWordCard({ info, onClear, onSelectWord }) {
+function selectionColor(info) {
+  return info?.state === "found" ? clusterColor(info.cluster) : DEFAULT_POINT_COLOR;
+}
+
+function SelectedWordPill({ info, onClear }) {
   if (!info) {
     return <p className="text-xs text-muted-foreground">Search or click a point to see its details.</p>;
   }
+
+  const hue = selectionColor(info);
+
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.04] p-3 text-sm" aria-live="polite">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-            Selected {info.source === "canvas" ? "· from canvas" : ""}
-          </p>
-          <p className="break-words text-base font-semibold text-white">{info.word}</p>
-        </div>
-        <Button variant="ghost" size="sm" onClick={onClear} className="h-7 shrink-0 px-2 text-xs" aria-label={`Clear selection ${info.word}`}>
-          <X className="mr-1 h-3 w-3" aria-hidden="true" />Clear
+    <div
+      className="rounded-md px-2.5 py-2"
+      style={{ backgroundColor: badgeColor(hue), boxShadow: `0 0 0 1px ${hue}59` }}
+      aria-live="polite"
+    >
+      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-white/70">Selected</p>
+      <div className="mt-0.5 flex items-center gap-2">
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold text-white">{info.word}</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClear}
+          className="-mr-1.5 h-6 shrink-0 rounded px-1.5 text-[11px] font-medium text-white/80 hover:bg-white/15 hover:text-white"
+          aria-label={`Clear selection ${info.word}`}
+        >
+          Clear
         </Button>
       </div>
-      {info.state === "pending" && <p className="mt-1 text-xs text-muted-foreground">Details appear when the dataset loads.</p>}
-      {info.state === "missing" && <p className="mt-1 text-xs text-amber-300">Not in this dataset ({info.datasetName}).</p>}
-      {info.state === "found" && (
-        <div className="mt-2 space-y-2">
-          <p className="text-xs text-neutral-300">Cluster {info.cluster} · {info.datasetName}</p>
-          <div>
-            <p className="font-mono text-xs text-neutral-200">
-              x {info.coords[0].toFixed(3)} · y {info.coords[1].toFixed(3)} · z {info.coords[2].toFixed(3)}
-            </p>
-            <p className="text-[11px] text-muted-foreground">Centred 3D projection coordinates</p>
-          </div>
-          {info.links.length > 0 && (
-            <div>
-              <p className="text-xs font-medium text-neutral-200">Stored links ({info.links.length})</p>
-              <ul className="mt-1 flex flex-wrap gap-1" aria-label={`Stored links for ${info.word}`}>
-                {info.links.map((w) => (
-                  <li key={w}>
-                    <button
-                      type="button"
-                      onClick={() => onSelectWord(w)}
-                      className="rounded bg-neutral-700/60 px-2 py-0.5 text-xs text-neutral-100 hover:bg-neutral-600/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-                    >
-                      {w}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-1 text-[11px] text-muted-foreground">
-                Neighbour links saved in this dataset. Not the exact lines drawn, and not a similarity score.
-              </p>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -205,8 +188,51 @@ function EmbeddingControls({
   onClearSelection,
   statusLine,
 }) {
+  const controlsRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const scrollRegion = controlsRef.current?.parentElement;
+    if (!scrollRegion) return;
+
+    const previousTabIndex = scrollRegion.getAttribute("tabindex");
+    const previousRole = scrollRegion.getAttribute("role");
+    const previousLabel = scrollRegion.getAttribute("aria-label");
+    scrollRegion.classList.add("hide-scrollbar");
+    scrollRegion.setAttribute("tabindex", "0");
+    scrollRegion.setAttribute("role", "region");
+    scrollRegion.setAttribute("aria-label", "Embedding controls");
+    const handleScrollKey = (event) => {
+      if (event.target !== scrollRegion) return;
+      const pageStep = Math.max(80, scrollRegion.clientHeight * 0.8);
+      const offsets = {
+        ArrowDown: 40,
+        ArrowUp: -40,
+        PageDown: pageStep,
+        PageUp: -pageStep,
+      };
+      if (event.key === "Home" || event.key === "End") {
+        event.preventDefault();
+        scrollRegion.scrollTop = event.key === "Home" ? 0 : scrollRegion.scrollHeight;
+      } else if (offsets[event.key] !== undefined) {
+        event.preventDefault();
+        scrollRegion.scrollBy({ top: offsets[event.key] });
+      }
+    };
+    scrollRegion.addEventListener("keydown", handleScrollKey);
+
+    return () => {
+      scrollRegion.removeEventListener("keydown", handleScrollKey);
+      scrollRegion.classList.remove("hide-scrollbar");
+      if (previousTabIndex === null) scrollRegion.removeAttribute("tabindex");
+      else scrollRegion.setAttribute("tabindex", previousTabIndex);
+      if (previousRole === null) scrollRegion.removeAttribute("role");
+      else scrollRegion.setAttribute("role", previousRole);
+      if (previousLabel === null) scrollRegion.removeAttribute("aria-label");
+      else scrollRegion.setAttribute("aria-label", previousLabel);
+    };
+  }, []);
   
   // Memoize sorted words to avoid recalculation on every render
   const sortedWords = useMemo(() => {
@@ -246,7 +272,7 @@ function EmbeddingControls({
   }, [sortedWords, searchQuery, open, searchWord]);
 
   return (
-    <div className="flex min-h-full flex-col gap-6">
+    <div ref={controlsRef} className="flex min-h-full flex-col gap-6">
       <header>
         <h2 className="text-lg font-semibold flex items-center gap-2">
           Embedding Space
@@ -429,7 +455,7 @@ function EmbeddingControls({
           </PopoverContent>
         </Popover>
       </div>
-        <SelectedWordCard info={selectedInfo} onClear={onClearSelection} onSelectWord={onSearchWordChange} />
+        <SelectedWordPill info={selectedInfo} onClear={onClearSelection} />
       </section>
 
       {/* Display */}
@@ -493,7 +519,18 @@ export default function EmbeddingPage() {
   const [graphics, setGraphics] = useState("ok");
   const [picked, setPicked] = useState(null); // word clicked/tapped on the canvas (details only, no fly-to)
   const [sceneKey, setSceneKey] = useState(0); // bump = rebuild the 3D view (explained to the user first)
+  // In the fullscreen (minimalist) layout the canvas runs under the floating navbar, so the panel starts lower.
+  const { isMinimalistMode } = useLayoutMode();
   const canvasRef = useRef(null);
+  const [focus, setFocus] = useState(false);
+  const [pins, setPins] = useState([]);
+  const [showLabels, setShowLabels] = useState(false);
+  const [motion, setMotion] = useState(true);
+  const [spotlight, setSpotlight] = useState(null);
+  const resetExploration = () => { setFocus(false); setPins([]); setSpotlight(null); };
+  const changeModel = (value) => { resetExploration(); setEmbeddingModel(value); };
+  const changeCount = (value) => { resetExploration(); setWordCount(value); };
+  const changeMethod = (value) => { resetExploration(); setReductionMethod(value); };
 
   const dataset = data.state === "ready" ? data.dataset : null;
   const wordsList = dataset?.words ?? NO_WORDS;
@@ -501,13 +538,14 @@ export default function EmbeddingPage() {
   const datasetName = `${MODEL_LABELS[embeddingModel]} · ${COUNT_LABELS[wordCount]} · ${METHOD_LABELS[reductionMethod]}`;
 
   const selectSearchWord = useCallback((word) => {
-    setPicked(null);
+    setPicked(word);
     setSearchWord(word);
   }, []);
   const clearSelection = useCallback(() => {
     setPicked(null);
     setSearchWord("");
     setSearchQuery("");
+    setFocus(false);
     canvasRef.current?.clearSelection();
   }, []);
   const retry = useCallback(() => {
@@ -519,14 +557,28 @@ export default function EmbeddingPage() {
   const selectedInfo = useMemo(() => {
     const word = picked ?? searchWord;
     if (!word) return null;
-    const base = { word, source: picked ? "canvas" : "search", datasetName };
+    const base = {
+      word,
+      source: picked ? "canvas" : "search",
+      datasetName,
+      modelName: MODEL_LABELS[embeddingModel],
+      countName: COUNT_LABELS[wordCount],
+      methodName: METHOD_LABELS[reductionMethod],
+    };
     if (!dataset) return { ...base, state: "pending" };
     const i = wordIndex.get(word);
     if (i === undefined) return { ...base, state: "missing" };
     const p = dataset.positions;
     const links = [...new Set(dataset.edges[i])].filter((t) => t !== i).map((t) => dataset.words[t]);
     return { ...base, state: "found", cluster: dataset.clusters[i], coords: [p[i * 3], p[i * 3 + 1], p[i * 3 + 2]], links };
-  }, [picked, searchWord, dataset, wordIndex, datasetName]);
+  }, [picked, searchWord, dataset, wordIndex, datasetName, embeddingModel, wordCount, reductionMethod]);
+
+  const clusters = useMemo(() => clusterSummaries(dataset), [dataset]);
+  const current = picked ?? searchWord;
+  const validPins = useMemo(() => [...new Set([...pins, current])].filter((word) => word && wordIndex.has(word)).slice(0, pins.length ? 2 : 0), [pins, current, wordIndex]);
+  const shared = useMemo(() => dataset ? [...exploreNetwork(dataset.words, dataset.edges, "", validPins, false).shared].map((i) => dataset.words[i]) : [], [dataset, validPins]);
+  const setExplorationFocus = (value) => { setFocus(value); if (value) setSpotlight(null); };
+  const setClusterSpotlight = (value) => { setSpotlight(value); if (value !== null) { setFocus(false); setPins([]); } };
 
   const status = { data, graphics, datasetName };
   const statusText =
@@ -541,7 +593,7 @@ export default function EmbeddingPage() {
   const drawerNotice = <StatusNotice status={status} onRetry={retry} onReloadScene={reloadScene} compact />;
 
   return (
-    <>
+    <div className={explorationStyles.page}>
       {/* Info Icon - Top Right */}
       <Drawer>
         <div className="fixed top-20 landscape:top-16 right-4 landscape:right-2 z-50">
@@ -648,11 +700,11 @@ export default function EmbeddingPage() {
         leftPanel={
           <EmbeddingControls
             embeddingModel={embeddingModel}
-            onEmbeddingModelChange={setEmbeddingModel}
+            onEmbeddingModelChange={changeModel}
             wordCount={wordCount}
-            onWordCountChange={setWordCount}
+            onWordCountChange={changeCount}
             reductionMethod={reductionMethod}
-            onReductionMethodChange={setReductionMethod}
+            onReductionMethodChange={changeMethod}
             searchWord={searchWord}
             onSearchWordChange={selectSearchWord}
             useClusterColors={useClusterColors}
@@ -680,7 +732,7 @@ export default function EmbeddingPage() {
                       <label htmlFor="mobile-embedding-select" className="text-sm font-medium">
                         Embedding Model
                       </label>
-                      <Select value={embeddingModel} onValueChange={setEmbeddingModel}>
+                      <Select value={embeddingModel} onValueChange={changeModel}>
                         <SelectTrigger id="mobile-embedding-select" className="w-full">
                           <SelectValue placeholder="Select embedding model">{MODEL_LABELS[embeddingModel]}</SelectValue>
                         </SelectTrigger>
@@ -695,7 +747,7 @@ export default function EmbeddingPage() {
                       <label htmlFor="mobile-word-count-select" className="text-sm font-medium">
                         Word Count
                       </label>
-                      <Select value={wordCount} onValueChange={setWordCount}>
+                      <Select value={wordCount} onValueChange={changeCount}>
                         <SelectTrigger id="mobile-word-count-select" className="w-full">
                           <SelectValue placeholder="Select word count">{COUNT_LABELS[wordCount]}</SelectValue>
                         </SelectTrigger>
@@ -710,7 +762,7 @@ export default function EmbeddingPage() {
                       <span id="mobile-reduction-label" className="text-sm font-medium">
                         Dimensionality Reduction
                       </span>
-                      <RadioGroup value={reductionMethod} onValueChange={setReductionMethod} aria-labelledby="mobile-reduction-label" className="flex gap-6">
+                      <RadioGroup value={reductionMethod} onValueChange={changeMethod} aria-labelledby="mobile-reduction-label" className="flex gap-6">
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="pca" id="mobile-pca" />
                           <Label htmlFor="mobile-pca" className="text-sm font-normal cursor-pointer">
@@ -740,9 +792,9 @@ export default function EmbeddingPage() {
                 <div>
                   <h3 className="text-lg font-semibold mb-3">Word Search</h3>
                   <div className="space-y-3">
-                    {/* Current selection details */}
+                    {/* Current selection */}
                     {selectedInfo && (
-                      <SelectedWordCard info={selectedInfo} onClear={clearSelection} onSelectWord={selectSearchWord} />
+                      <SelectedWordPill info={selectedInfo} onClear={clearSelection} />
                     )}
                     
                     {/* Search input - built into drawer, no popover */}
@@ -881,10 +933,23 @@ export default function EmbeddingPage() {
               showClusterEdges={showClusterEdges}
                 onDataStatus={setData}
                 onGraphicsStatus={setGraphics}
-                onPick={setPicked}
+                onPick={(word) => (word ? selectSearchWord(word) : clearSelection())}
+                exploration={{ focus, pins: validPins, spotlight, showLabels }}
+                motion={motion}
                 ariaLabel={canvasLabel}
             />
             </VisibleOnly>
+            <ExplorationTray
+              info={selectedInfo} focus={focus} onFocus={setExplorationFocus}
+              pins={validPins} onPin={(word) => { setPins([word]); setSpotlight(null); }}
+              onUnpin={() => setPins([])}
+              shared={shared}
+              onSelect={selectSearchWord} onClear={clearSelection}
+              onFrame={() => canvasRef.current?.locate(selectedInfo?.word)}
+              showLabels={showLabels} onLabels={setShowLabels} motion={motion} onMotion={setMotion} clusters={clusters}
+              spotlight={spotlight} onSpotlight={setClusterSpotlight}
+              onFrameCluster={(id) => canvasRef.current?.frameCluster?.(id)} minimalist={isMinimalistMode}
+            />
             <p className="sr-only" role="status" aria-live="polite">{statusText}</p>
             {data.state === "loading" && (
               <div className="absolute inset-0 z-40 flex items-center justify-center bg-neutral-950/80 backdrop-blur-sm" aria-hidden="true">
@@ -906,6 +971,6 @@ export default function EmbeddingPage() {
           </div>
         }
       />
-    </>
+    </div>
   );
 }

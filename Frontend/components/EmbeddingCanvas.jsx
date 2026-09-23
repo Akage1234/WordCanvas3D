@@ -2,25 +2,42 @@
 import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import * as THREE from "three";
 import JSZip from "jszip";
+import { createExplorationLayer } from "@/components/embedding/explorationLayer.mjs";
+import { exploreNetwork } from "@/components/embedding/exploration.mjs";
 import { ungzip } from "pako";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { datasetUrl, parseDataset, DatasetError } from "@/components/embedding/embeddingData.mjs";
+import {
+  CLUSTER_COLORS,
+  DEFAULT_POINT_COLOR,
+  clusterColor,
+  darkenHex,
+} from "@/components/embedding/embeddingPalette.mjs";
 
 // Seconds of context loss before the page offers a manual 3D reload (restoration may still happen later).
 const CONTEXT_RESTORE_WAIT_MS = 5000;
 
-const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "glove_300D", wordCount = "1000", reductionMethod = "pca", searchWord = "", pickedWord = "", useClusterColors = false, showClusterEdges = false, onDataStatus = null, onGraphicsStatus = null, onPick = null, ariaLabel }, ref) {
+const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "glove_300D", wordCount = "1000", reductionMethod = "pca", searchWord = "", pickedWord = "", useClusterColors = false, showClusterEdges = false, onDataStatus = null, onGraphicsStatus = null, onPick = null, exploration, motion = true, ariaLabel }, ref) {
   const containerRef = useRef(null);
   const canvasFunctionsRef = useRef({ searchForWord: null, updateClusterColors: null, resetColors: null });
   const useClusterColorsRef = useRef(useClusterColors);
   const showClusterEdgesRef = useRef(showClusterEdges);
   const selectedWordRef = useRef(pickedWord || searchWord);
+  const explorationRef = useRef(exploration);
+  explorationRef.current = exploration;
   const callbacksRef = useRef({});
   callbacksRef.current = { onDataStatus, onGraphicsStatus, onPick };
   selectedWordRef.current = pickedWord || searchWord;
+  const motionRef = useRef(motion);
+  motionRef.current = motion;
+  const methodRef = useRef(reductionMethod);
+  methodRef.current = reductionMethod;
+  const flownWordRef = useRef(selectedWordRef.current);
 
   // Expose functions via ref
   useImperativeHandle(ref, () => ({
+    locate: (word) => canvasFunctionsRef.current?.frameSelection?.(word),
+    frameCluster: (id) => canvasFunctionsRef.current?.frameCluster?.(id),
     retry: () => canvasFunctionsRef.current?.retry?.(),
     clearSelection: () => canvasFunctionsRef.current?._internalSearchForWord?.(""),
   }), []);
@@ -35,6 +52,16 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     // --- Setup scene ---
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x090a12); // Even darker blue-black background
+    scene.fog = new THREE.Fog(0x090a12, 2, 8);
+    const drift = { uTime: { value: 0 }, uDrift: { value: 0 } };
+    const addDrift = (mat) => {
+      mat.onBeforeCompile = (shader) => {
+        Object.assign(shader.uniforms, drift);
+        shader.vertexShader = `uniform float uTime;\nuniform float uDrift;\n${shader.vertexShader}`.replace("#include <begin_vertex>",
+          "#include <begin_vertex>\ntransformed += uDrift * vec3(sin(uTime * 0.6 + position.y * 9.0), sin(uTime * 0.5 + position.z * 9.0), sin(uTime * 0.7 + position.x * 9.0));");
+      };
+      return mat;
+    };
     const camera = new THREE.PerspectiveCamera(
       75,
       Math.max(container.clientWidth, 1) / Math.max(container.clientHeight, 1),
@@ -72,7 +99,9 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
+    controls.minDistance = 0.65;
     controls.target.set(0, 0, 0);
+    controls.autoRotateSpeed = 0.5;
     }
     // Ensure camera looks at origin
     camera.lookAt(0, 0, 0);
@@ -88,15 +117,21 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     let coordinates = [];
     let hoveredIndex = null;
     let searchedIndex = null;
-    const defaultColor = new THREE.Color(0x00aaff);
+    const defaultColor = new THREE.Color(DEFAULT_POINT_COLOR);
     const highlightColor = new THREE.Color(0xffff00);
     const searchColor = new THREE.Color(0xff00ff); // Magenta for searched word
     let highlightSphere = null;
     let searchSphere = null;
+    let loadedDataset = null;
+    let morph = null;
+    let lastInput = performance.now();
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const explorationLayer = createExplorationLayer(scene, camera, container, (word) => callbacksRef.current.onPick?.(word));
     let clusters = null; // Array of cluster IDs (pre-computed from JSON)
     let edgesData = null; // Array of edge indices per point (pre-computed from JSON)
     let clusterEdges = null;
     let raf = 0; // render loop handle; 0 = not running
+    let isDragging = false;
     let cameraAnimRaf = 0;
     let finishCameraAnimation = null;
     let contextLost = false;
@@ -109,38 +144,46 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
 
     // Tooltip element
     const tooltip = document.createElement("div");
+    tooltip.dataset.wordTooltip = "true";
     tooltip.setAttribute("aria-hidden", "true"); // details are exposed as text in the page panel
     tooltip.style.position = "absolute";
     tooltip.style.pointerEvents = "none";
-    tooltip.style.padding = "10px 14px";
-    tooltip.style.borderRadius = "8px";
-    tooltip.style.background = "rgba(0,0,0,0.9)";
-    tooltip.style.color = "white";
-    tooltip.style.fontSize = "13px";
-    tooltip.style.fontFamily = "system-ui, sans-serif";
-    tooltip.style.zIndex = "1000";
-    tooltip.style.minWidth = "160px";
-    tooltip.style.maxWidth = "calc(100% - 8px)";
-    tooltip.style.overflowWrap = "anywhere";
-    tooltip.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
-    tooltip.style.display = "none";
-    tooltip.style.lineHeight = "1.5";
+    Object.assign(tooltip.style, {
+      padding: "2px 3px", color: "#fff", font: "650 15px/1.25 system-ui, sans-serif", letterSpacing: "0.01em",
+      WebkitTextStroke: "2px #05070d", paintOrder: "stroke fill", textShadow: "0 2px 5px #000", whiteSpace: "nowrap", zIndex: "20", display: "none",
+    });
     container.style.position = "relative";
     container.appendChild(tooltip);
     
     const tooltipName = document.createElement("div");
-    tooltipName.style.fontWeight = "600";
-    tooltipName.style.marginBottom = "6px";
+    tooltipName.style.letterSpacing = "0.005em";
+    tooltipName.style.marginBottom = "1px";
     tooltip.appendChild(tooltipName);
     
     const tooltipCoords = document.createElement("div");
-    tooltipCoords.style.fontSize = "11px";
-    tooltipCoords.style.color = "rgba(255,255,255,0.7)";
-    tooltipCoords.style.fontFamily = "monospace";
+    tooltipCoords.style.display = "none";
+    tooltipCoords.style.fontSize = "10.5px";
+    tooltipCoords.style.color = "rgba(255,255,255,0.5)";
+    tooltipCoords.style.fontFamily = "ui-monospace, SFMono-Regular, Menlo, monospace";
+    tooltipCoords.style.fontVariantNumeric = "tabular-nums";
     tooltip.appendChild(tooltipCoords);
+
+    // While the tooltip belongs to the selected point it is clickable and clears the selection;
+    // a plain hover tooltip stays inert so it never eats a drag.
+    const setTooltipInteractive = (interactive) => {
+      tooltip.style.pointerEvents = interactive ? "auto" : "none";
+      tooltip.style.cursor = interactive ? "pointer" : "default";
+    };
+    const onTooltipClick = () => callbacksRef.current.onPick?.("");
+    tooltip.addEventListener("click", onTooltipClick);
+
+    const setSelectedTooltipColor = () => {
+      setTooltipInteractive(true);
+    };
 
     // Show the tooltip 10px below-right of (x, y) in container pixels, kept inside the container.
     const placeTooltip = (x, y) => {
+      if (tooltip.style.pointerEvents === "auto") { tooltip.style.display = "none"; return; }
       tooltip.style.display = "block";
       const maxLeft = container.clientWidth - tooltip.offsetWidth - 4;
       const maxTop = container.clientHeight - tooltip.offsetHeight - 4;
@@ -199,6 +242,10 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       if (idx === null) return;
       const label = labels[idx];
       const coord = coordinates[idx];
+      if (label === selectedWordRef.current) {
+        callbacksRef.current.onPick?.(""); // tapping the selected point again clears it
+        return;
+      }
 
       // Show tooltip near the tapped point by projecting to screen
       if (label && coord) {
@@ -209,7 +256,8 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
         const sy = (-projected.y * 0.5 + 0.5) * rect.height;
 
         tooltipName.textContent = label;
-        tooltipCoords.textContent = `(${coord.x.toFixed(3)}, ${coord.y.toFixed(3)}, ${coord.z.toFixed(3)})`;
+        tooltipCoords.textContent = `${coord.x.toFixed(3)}   ${coord.y.toFixed(3)}   ${coord.z.toFixed(3)}`;
+        setSelectedTooltipColor(idx);
         placeTooltip(sx, sy);
 
         // Add or move a persistent search sphere at the tapped point
@@ -234,6 +282,8 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     // Remove the drawn dataset (points + edges) so a reload never stacks scenes.
     function clearDataset() {
       removeClusterEdges();
+      morph = null;
+      explorationLayer.setHidden(false);
       if (points) {
         scene.remove(points);
         const idx = meshes.indexOf(points);
@@ -259,7 +309,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       emitData({ state: "loading" });
           
       try {
-        const fetchUrl = datasetUrl(embeddingModel, wordCount, reductionMethod);
+        const fetchUrl = datasetUrl(embeddingModel, wordCount, methodRef.current);
         let res;
         try {
           res = await fetch(fetchUrl, { signal: abort.signal });
@@ -304,7 +354,9 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
         // Validate everything before touching the scene: a bad file is rejected as a whole.
         const dataset = parseDataset(data, Number(wordCount));
           
+        const previous = loadedDataset && geometry && !reducedMotion.matches ? loadedDataset : null;
         clearDataset();
+        loadedDataset = dataset;
         labels = dataset.words;
         clusters = dataset.clusters;
         edgesData = dataset.edges;
@@ -327,16 +379,27 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
           }
           // Create BufferGeometry for efficient point rendering (positions are already centred)
           geometry = new THREE.BufferGeometry();
-          geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+          geometry.setAttribute("position", new THREE.BufferAttribute(positions.slice(), 3));
+          if (previous) {
+            const oldIndex = new Map(previous.words.map((word, index) => [word, index]));
+            const start = positions.slice();
+            labels.forEach((word, index) => {
+              const old = oldIndex.get(word);
+              if (old !== undefined) start.set(previous.positions.subarray(old * 3, old * 3 + 3), index * 3);
+            });
+            geometry.getAttribute("position").array.set(start);
+            morph = { start, end: positions, startTime: performance.now() };
+            explorationLayer.setHidden(true);
+          }
           geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
           
           // PointsMaterial for efficient point rendering with vertex colors
-          material = new THREE.PointsMaterial({
+          material = addDrift(new THREE.PointsMaterial({
             size: 0.05,
             sizeAttenuation: true,
             depthWrite: false,
             vertexColors: true,
-          });
+          }));
           
       points = new THREE.Points(geometry, material);
       scene.add(points);
@@ -350,6 +413,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
           if (selectedWordRef.current) searchForWord(selectedWordRef.current, false);
           }
 
+        applyExploration();
         emitData({ state: "ready", dataset });
         } catch (error) {
         if (!current()) return;
@@ -365,16 +429,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     // Clusters are now pre-computed and loaded from JSON - no computation needed
 
     // Color palette for clusters (defined outside so it's accessible everywhere)
-    const clusterColors = [
-      new THREE.Color(0xff6b6b), // Red
-      new THREE.Color(0x4ecdc4), // Teal
-      new THREE.Color(0x45b7d1), // Blue
-      new THREE.Color(0xf9ca24), // Yellow
-      new THREE.Color(0x6c5ce7), // Purple
-      new THREE.Color(0xa55eea), // Violet
-      new THREE.Color(0x26de81), // Green
-      new THREE.Color(0xfd79a8), // Pink
-    ];
+    const clusterColors = CLUSTER_COLORS.map((color) => new THREE.Color(color));
 
     // Update colors based on clusters
     function updateClusterColors() {
@@ -395,9 +450,10 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
           color = clusterColors[clusterId % clusterColors.length];
         }
         
-        colorAttr.array[i3] = color.r;
-        colorAttr.array[i3 + 1] = color.g;
-        colorAttr.array[i3 + 2] = color.b;
+        const intensity = explorationLayer.intensity(i);
+        colorAttr.array[i3] = color.r * intensity;
+        colorAttr.array[i3 + 1] = color.g * intensity;
+        colorAttr.array[i3 + 2] = color.b * intensity;
       }
       
       colorAttr.needsUpdate = true;
@@ -412,9 +468,10 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       
       for (let i = 0; i < labels.length; i++) {
         const i3 = i * 3;
-        colorAttr.array[i3] = defaultColor.r;
-        colorAttr.array[i3 + 1] = defaultColor.g;
-        colorAttr.array[i3 + 2] = defaultColor.b;
+        const intensity = explorationLayer.intensity(i);
+        colorAttr.array[i3] = defaultColor.r * intensity;
+        colorAttr.array[i3 + 1] = defaultColor.g * intensity;
+        colorAttr.array[i3 + 2] = defaultColor.b * intensity;
       }
       
       colorAttr.needsUpdate = true;
@@ -468,14 +525,15 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
         edgeGeometry.setAttribute('position', new THREE.Float32BufferAttribute(edgePositions, 3));
         edgeGeometry.setAttribute('color', new THREE.Float32BufferAttribute(edgeColors, 3));
         
-        const edgeMaterial = new THREE.LineBasicMaterial({
+        const edgeMaterial = addDrift(new THREE.LineBasicMaterial({
           vertexColors: true,
           transparent: true,
           opacity: 0.3,
           linewidth: 1
-        });
+        }));
         
         clusterEdges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
+        clusterEdges.visible = !morph;
         scene.add(clusterEdges);
         meshes.push(clusterEdges);
       }
@@ -495,7 +553,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     }
 
     // Search for a word and highlight it. `fly` = animate the camera to it (search), false = highlight only.
-    function searchForWord(word, fly = true) {
+    function searchForWord(word, fly = true, framing = null) {
       if (!word || !labels.length || !geometry) {
         // Clear search
         if (searchedIndex !== null) {
@@ -569,8 +627,9 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
         
         // Update tooltip content
         tooltipName.textContent = label;
+        setSelectedTooltipColor(foundIndex);
         if (pos) {
-          tooltipCoords.textContent = `(${pos.x.toFixed(3)}, ${pos.y.toFixed(3)}, ${pos.z.toFixed(3)})`;
+          tooltipCoords.textContent = `${pos.x.toFixed(3)}   ${pos.y.toFixed(3)}   ${pos.z.toFixed(3)}`;
         } else {
           tooltipCoords.textContent = "";
         }
@@ -589,9 +648,10 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       
       if (!fly) return;
 
-      // Animate camera to word
-      const targetPos = new THREE.Vector3(pos.x, pos.y, pos.z);
-      const distance = 1.5;
+      animateCameraTo(framing?.center ?? new THREE.Vector3(pos.x, pos.y, pos.z), framing?.distance ?? 1.5);
+    }
+
+    function animateCameraTo(targetPos, distance) {
       const direction = new THREE.Vector3()
         .subVectors(camera.position, targetPos)
         .normalize()
@@ -645,6 +705,50 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       animateCamera();
     }
 
+    function applyExploration() {
+      if (!loadedDataset) return;
+      explorationLayer.refresh(loadedDataset, explorationRef.current, selectedWordRef.current);
+      if (useClusterColorsRef.current) updateClusterColors();
+      else resetColors();
+      if (searchedIndex !== null) updatePointColor(searchedIndex, searchColor);
+      if (clusterEdges) clusterEdges.material.opacity = explorationLayer.active() ? 0.045 : 0.3;
+    }
+    canvasFunctionsRef.current.applyExploration = applyExploration;
+    canvasFunctionsRef.current.frameSelection = (word) => {
+      if (!loadedDataset || !renderer) return;
+      const options = explorationRef.current;
+      const network = exploreNetwork(labels, edgesData, word, options.pins, options.focus);
+      if (!network.roots.length) { searchForWord(word, true); return; }
+      const box = new THREE.Box3();
+      for (const index of network.active) box.expandByPoint(new THREE.Vector3().fromArray(loadedDataset.positions, index * 3));
+      const sphere = box.getBoundingSphere(new THREE.Sphere());
+      const halfFov = THREE.MathUtils.degToRad(camera.fov / 2);
+      const distance = Math.max(0.85, sphere.radius / Math.sin(Math.min(halfFov, Math.atan(Math.tan(halfFov) * camera.aspect))) * 1.8);
+      // Leave room below the group for the expanded tray.
+      sphere.center.addScaledVector(new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion), -distance * 0.28);
+      searchForWord(word, true, { center: sphere.center, distance });
+    };
+
+    canvasFunctionsRef.current.frameCluster = (id) => {
+      if (!loadedDataset || !renderer) return;
+      const indices = [];
+      const center = new THREE.Vector3();
+      for (let i = 0; i < clusters.length; i++) {
+        if (clusters[i] !== id) continue;
+        indices.push(i);
+        center.add(new THREE.Vector3().fromArray(loadedDataset.positions, i * 3));
+      }
+      if (!indices.length) return;
+      center.divideScalar(indices.length);
+      const distances = indices.map((i) => center.distanceTo(new THREE.Vector3().fromArray(loadedDataset.positions, i * 3))).sort((a, b) => a - b);
+      const radius = distances[Math.floor((distances.length - 1) * 0.9)];
+      const halfFov = THREE.MathUtils.degToRad(camera.fov / 2);
+      const fitDistance = radius / Math.sin(Math.min(halfFov, Math.atan(Math.tan(halfFov) * camera.aspect))) * 1.4;
+      const currentDistance = camera.position.distanceTo(controls.target);
+      const distance = Math.max(0.85, Math.min(fitDistance, currentDistance * 0.78));
+      animateCameraTo(center, distance);
+    };
+
     // Expose functions to parent component via ref (with current prop values)
     canvasFunctionsRef.current._internalSearchForWord = searchForWord;
     canvasFunctionsRef.current.searchForWord = (word, fly = true) => searchForWord(word, fly);
@@ -655,6 +759,14 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     canvasFunctionsRef.current.removeClusterEdges = removeClusterEdges;
     // Same-dataset retry: reload data into this scene, keeping camera and selection.
     canvasFunctionsRef.current.retry = () => loadEmbeddings();
+    canvasFunctionsRef.current.reload = () => loadEmbeddings();
+    canvasFunctionsRef.current.glideTo = (word) => {
+      const index = labels.indexOf(word);
+      if (index < 0 || !renderer) return;
+      lastInput = performance.now();
+      const { x, y, z } = coordinates[index];
+      animateCameraTo(new THREE.Vector3(x, y, z), Math.min(camera.position.distanceTo(controls.target), 2));
+    };
 
     loadEmbeddings();
       
@@ -683,9 +795,9 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       }
       const clusterId = clusters[index];
       if (clusterId < 0 || !useClusterColorsRef.current) {
-        return defaultColor;
+        return defaultColor.clone().multiplyScalar(explorationLayer.intensity(index));
       }
-      return clusterColors[clusterId % clusterColors.length];
+      return clusterColors[clusterId % clusterColors.length].clone().multiplyScalar(explorationLayer.intensity(index));
     };
 
     // Without a renderer there is nothing to draw or pick; data and text details still load above.
@@ -693,13 +805,39 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       return () => {
         disposed = true;
         loadAbort?.abort();
+        explorationLayer.dispose();
         if (tooltip.parentElement === container) container.removeChild(tooltip);
       };
     }
 
     // --- Animate ---
     const animate = () => {
+      const now = performance.now();
+      const moving = motionRef.current && !reducedMotion.matches;
+      controls.autoRotate = moving && !cameraAnimRaf && !isDragging && now - lastInput > 5000;
+      drift.uTime.value = now / 1000;
+      drift.uDrift.value = moving ? 0.006 : 0;
+      const distance = camera.position.distanceTo(controls.target);
+      scene.fog.near = distance * 0.7;
+      scene.fog.far = distance * 2.6;
+      if (morph && geometry) {
+        const t = Math.min(1, (now - morph.startTime) / 1100);
+        const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        const attr = geometry.getAttribute("position");
+        for (let i = 0; i < attr.array.length; i++) attr.array[i] = morph.start[i] + (morph.end[i] - morph.start[i]) * ease;
+        attr.needsUpdate = true;
+        if (t === 1) {
+          morph = null;
+          geometry.computeBoundingSphere();
+          if (clusterEdges) clusterEdges.visible = true;
+          explorationLayer.setHidden(false);
+        }
+      }
+      explorationLayer.hover(morph ? null : hoveredIndex);
+      if (searchSphere) searchSphere.visible = !morph;
       controls.update();
+      if (material) material.size = 0.05 * Math.min(1, Math.max(0.15, camera.position.distanceTo(controls.target) / 3));
+      explorationLayer.frame(performance.now());
       renderer.render(scene, camera);
       
       // Update tooltip position for searched word if active
@@ -721,8 +859,9 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
               const label = labels[searchedIndex];
               const coord = coordinates[searchedIndex];
               tooltipName.textContent = label;
+              setSelectedTooltipColor(searchedIndex);
               if (coord) {
-                tooltipCoords.textContent = `(${coord.x.toFixed(3)}, ${coord.y.toFixed(3)}, ${coord.z.toFixed(3)})`;
+                tooltipCoords.textContent = `${coord.x.toFixed(3)}   ${coord.y.toFixed(3)}   ${coord.z.toFixed(3)}`;
               }
             }
             placeTooltip(x, y);
@@ -780,16 +919,30 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     renderer.domElement.addEventListener('touchend', onTouchEnd, { passive: true });
 
     // --- Pointer events for hover ---
-    let isDragging = false;
     let downX = 0;
     let downY = 0;
-    const onPointerDown = (event) => { isDragging = true; downX = event.clientX; downY = event.clientY; };
+    const onPointerDown = (event) => { isDragging = true; lastInput = performance.now(); downX = event.clientX; downY = event.clientY; };
+    const onWheel = () => { lastInput = performance.now(); };
+    const onTouchInput = () => { lastInput = performance.now(); };
+    const onDoubleClick = (event) => {
+      const idx = pickAt(event.clientX, event.clientY);
+      if (idx === null) return;
+      callbacksRef.current.onPick?.(labels[idx]);
+      flownWordRef.current = labels[idx];
+      const { x, y, z } = coordinates[idx];
+      lastInput = performance.now();
+      animateCameraTo(new THREE.Vector3(x, y, z), Math.max(0.8, camera.position.distanceTo(controls.target) * 0.6));
+    };
+    renderer.domElement.addEventListener("wheel", onWheel, { passive: true });
+    renderer.domElement.addEventListener("touchstart", onTouchInput, { passive: true });
+    renderer.domElement.addEventListener("dblclick", onDoubleClick);
     const onPointerUp = (event) => {
       isDragging = false;
       // A mouse/pen click without drag reports the word to the page (details only; no camera move).
       if (event.pointerType !== "touch" && Math.hypot(event.clientX - downX, event.clientY - downY) < 4) {
         const idx = pickAt(event.clientX, event.clientY);
-        if (idx !== null) callbacksRef.current.onPick?.(labels[idx]);
+        // clicking the selected point again clears it
+        if (idx !== null) callbacksRef.current.onPick?.(labels[idx] === selectedWordRef.current ? "" : labels[idx]);
       }
     };
     renderer.domElement.addEventListener("pointerdown", onPointerDown);
@@ -800,7 +953,7 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
         tooltip.style.display = "none";
         // Reset previous hover
         if (hoveredIndex !== null && geometry) {
-          updatePointColor(hoveredIndex, defaultColor);
+          updatePointColor(hoveredIndex, getPointColor(hoveredIndex));
           if (highlightSphere) {
             scene.remove(highlightSphere);
             highlightSphere.geometry.dispose();
@@ -934,12 +1087,13 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
           // Update tooltip
           tooltipName.textContent = label;
           if (coord) {
-            tooltipCoords.textContent = `(${coord.x.toFixed(3)}, ${coord.y.toFixed(3)}, ${coord.z.toFixed(3)})`;
+            tooltipCoords.textContent = `${coord.x.toFixed(3)}   ${coord.y.toFixed(3)}   ${coord.z.toFixed(3)}`;
           } else {
             tooltipCoords.textContent = "";
           }
           
           // Tooltip relative to container for consistent positioning
+          setTooltipInteractive(false);
           const tipRect = container.getBoundingClientRect();
           placeTooltip(event.clientX - tipRect.left, event.clientY - tipRect.top);
           container.style.cursor = "pointer";
@@ -1021,6 +1175,8 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       renderer.setAnimationLoop(null);
       renderer.renderLists?.dispose();
 
+      explorationLayer.dispose();
+
       // Dispose controls
       controls.dispose();
 
@@ -1052,9 +1208,13 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       if (geometry) geometry.dispose();
       if (material) material.dispose();
 
+      tooltip.removeEventListener("click", onTooltipClick);
       renderer.domElement.removeEventListener("webglcontextlost", onContextLost);
       renderer.domElement.removeEventListener("webglcontextrestored", onContextRestored);
       renderer.domElement.removeEventListener("pointerdown", onPointerDown);
+      renderer.domElement.removeEventListener("wheel", onWheel);
+      renderer.domElement.removeEventListener("touchstart", onTouchInput);
+      renderer.domElement.removeEventListener("dblclick", onDoubleClick);
       renderer.domElement.removeEventListener("pointerup", onPointerUp);
       renderer.domElement.removeEventListener("pointermove", onPointerMove);
       renderer.domElement.removeEventListener("pointerleave", onPointerLeave);
@@ -1070,7 +1230,14 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
         container.removeChild(tooltip);
       }
     };
-  }, [embeddingModel, wordCount, reductionMethod]); // Re-run when embedding model, word count, or reduction method changes
+  }, [embeddingModel, wordCount]);
+
+  const loadedMethodRef = useRef(reductionMethod);
+  useEffect(() => {
+    if (loadedMethodRef.current === reductionMethod) return;
+    loadedMethodRef.current = reductionMethod;
+    canvasFunctionsRef.current?.reload?.();
+  }, [reductionMethod]);
 
   // Update refs when props change
   useEffect(() => {
@@ -1083,9 +1250,12 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
   // Handle search word changes
   useEffect(() => {
     const searchFn = canvasFunctionsRef.current?.searchForWord;
+    const word = pickedWord || searchWord;
     if (searchFn) {
-      searchFn(pickedWord || searchWord, !pickedWord);
+      searchFn(word, false);
     }
+    if (word && word !== flownWordRef.current) canvasFunctionsRef.current?.glideTo?.(word);
+    flownWordRef.current = word;
   }, [pickedWord, searchWord, useClusterColors]);
 
   // Handle cluster color changes  
@@ -1099,14 +1269,14 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       // Re-apply search if active
       if (pickedWord || searchWord) {
         const searchFn = canvasFunctionsRef.current?.searchForWord;
-        if (searchFn) searchFn(pickedWord || searchWord, !pickedWord);
+        if (searchFn) searchFn(pickedWord || searchWord, false);
       }
     } else if (!useClusterColors && resetFn) {
       resetFn();
       // Re-apply search highlight if active
       if (pickedWord || searchWord) {
         const searchFn = canvasFunctionsRef.current?.searchForWord;
-        if (searchFn) searchFn(pickedWord || searchWord, !pickedWord);
+        if (searchFn) searchFn(pickedWord || searchWord, false);
       }
     }
   }, [useClusterColors, pickedWord, searchWord]);
@@ -1123,6 +1293,10 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       removeFn();
     }
   }, [showClusterEdges]);
+
+  useEffect(() => {
+    canvasFunctionsRef.current?.applyExploration?.();
+  }, [exploration, pickedWord, searchWord, useClusterColors, showClusterEdges]);
 
   return <div ref={containerRef} className="w-full h-full" role="img" aria-label={ariaLabel} />;
 });
