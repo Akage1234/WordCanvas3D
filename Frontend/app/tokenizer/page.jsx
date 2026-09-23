@@ -36,14 +36,24 @@ const LLAMA = "LLaMA (SentencePiece)";
 // Both LLaMA options run the same llama-tokenizer-js 1.2.2 tokenizer (LLaMA 1/2 vocabulary).
 const LLAMA_NOTE = "Both options use the same vocabulary, so their IDs match.";
 const TOKENIZERS = [
-  { label: "GPT-4.1 / 4o / mini (o200k_base)", value: "o200k_base", group: OPENAI },
-  { label: "GPT-4 / 3.5 (cl100k_base)", value: "cl100k_base", group: OPENAI },
-  { label: "GPT-3 (p50k_base)", value: "p50k_base", group: OPENAI },
-  { label: "Instruct (p50k_edit)", value: "p50k_edit", group: OPENAI },
-  { label: "Codex (r50k_base)", value: "r50k_base", group: OPENAI },
-  { label: "GPT-2 (gpt2)", value: "gpt2", group: OPENAI },
-  { label: "LLaMA 2 (llama2)", value: "llama2", group: LLAMA, note: LLAMA_NOTE },
-  { label: "LLaMA (llama)", value: "llama", group: LLAMA, note: LLAMA_NOTE },
+  { label: "GPT-4.1 / 4o / mini (o200k_base)", value: "o200k_base", group: OPENAI, dot: "bg-sky-400" },
+  { label: "GPT-4 / 3.5 (cl100k_base)", value: "cl100k_base", group: OPENAI, dot: "bg-cyan-400" },
+  { label: "GPT-3 (p50k_base)", value: "p50k_base", group: OPENAI, dot: "bg-indigo-400" },
+  { label: "Instruct (p50k_edit)", value: "p50k_edit", group: OPENAI, dot: "bg-violet-400" },
+  { label: "Codex (r50k_base)", value: "r50k_base", group: OPENAI, dot: "bg-fuchsia-400" },
+  { label: "GPT-2 (gpt2)", value: "gpt2", group: OPENAI, dot: "bg-rose-400" },
+  { label: "LLaMA 2 (llama2)", value: "llama2", group: LLAMA, note: LLAMA_NOTE, dot: "bg-amber-400" },
+  { label: "LLaMA (llama)", value: "llama", group: LLAMA, note: LLAMA_NOTE, dot: "bg-orange-400" },
+];
+const PRESETS = [
+  { label: "Short", text: "A quiet idea can travel far." },
+  { label: "World scripts", text: "Hello, world. مرحباً بالعالم. नमस्ते दुनिया। こんにちは世界。" },
+  { label: "Emoji", text: "Build, test, celebrate: 🧩 → 🛠️ → ✅ 🎉" },
+  { label: "Code", text: "const total = items.reduce((sum, item) => sum + item.price, 0);" },
+  {
+    label: "Paragraph",
+    text: "At dusk, the library windows caught the last orange light. Inside, a reader compared two translations, noticing how punctuation, rhythm, and a single borrowed word changed the feeling of the same small scene.",
+  },
 ];
 const labelOf = (value) => TOKENIZERS.find((t) => t.value === value)?.label;
 const OPTS = { allowedSpecial: new Set(["<|endoftext|>"]) };
@@ -173,7 +183,7 @@ export default function TokenizerPage() {
       idEl.id = `tok-i-${activeIndex}`;
       selectedEls.current.push(idEl);
     }
-  }, [activeIndex, result, showWs]);
+  }, [activeIndex, active?.pinned, result, showWs]);
 
   const codePoints = useMemo(() => Array.from(text).length, [text]);
   const byteCount = useMemo(() => utf8.encode(text).length, [text]);
@@ -188,26 +198,23 @@ export default function TokenizerPage() {
     ? "No text"
     : `${result.tokens.length} tokens, ${result.tokenizer}`;
 
-  const isOutOfView = (container, el) => {
-    if (!container || !el) return false;
+  const revealWithin = (container, el) => {
+    if (!container || !el) return;
     const c = container.getBoundingClientRect();
     const r = el.getBoundingClientRect();
     const pad = 4;
-    return r.top < c.top + pad || r.bottom > c.bottom - pad;
+    if (r.top < c.top + pad) container.scrollTop -= c.top + pad - r.top;
+    else if (r.bottom > c.bottom - pad) container.scrollTop += r.bottom - (c.bottom - pad);
   };
 
-  // Scroll the partner (and, for keyboard, the source) element into view if needed.
+  // Scroll only the intended list box. Element.scrollIntoView() can also move the page.
   const reveal = (i, source) => {
     cancelAnimationFrame(hoverRaf.current);
     hoverRaf.current = requestAnimationFrame(() => {
       const t = coloredContainerRef.current?.querySelector(`[data-i="${i}"]`);
       const id = idsContainerRef.current?.querySelector(`[data-i="${i}"]`);
-      if (source !== "tokens" && isOutOfView(coloredContainerRef.current, t)) {
-        t?.scrollIntoView({ block: "center", inline: "nearest", behavior: "auto" });
-      }
-      if (source !== "ids" && isOutOfView(idsContainerRef.current, id)) {
-        id?.scrollIntoView({ block: "center", inline: "nearest", behavior: "auto" });
-      }
+      if (source !== "tokens") revealWithin(coloredContainerRef.current, t);
+      if (source !== "ids") revealWithin(idsContainerRef.current, id);
     });
   };
 
@@ -449,7 +456,7 @@ export default function TokenizerPage() {
 
       <main className="px-4 sm:px-6 md:px-10 lg:px-14 pb-24 md:pb-10">
         <div className="mx-auto w-full max-w-7xl space-y-4 md:space-y-5">
-          {/* Control bar: tokenizer selection, counts, status */}
+          {/* Control bar: tokenizer selection and status */}
           <div className={`${panel} flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between`}>
             <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3 min-w-0">
               <span id="tok-model-label" className="text-sm font-medium text-neutral-200">
@@ -462,7 +469,10 @@ export default function TokenizerPage() {
                     aria-labelledby="tok-model-label tok-model"
                     className="inline-flex min-h-10 w-full sm:w-auto items-center justify-between gap-2 rounded-md border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-left text-sm font-medium hover:bg-neutral-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70 transition-colors"
                   >
-                    <span>{selected?.label}</span>
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${selected?.dot}`} />
+                      <span className="truncate">{selected?.label}</span>
+                    </span>
                     <ChevronDown className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
                   </button>
                 </DropdownMenuTrigger>
@@ -479,9 +489,12 @@ export default function TokenizerPage() {
                           </>
                         )}
                         <DropdownMenuRadioItem value={t.value} className="items-start">
-                          <span className="flex flex-col">
-                            <span>{t.label}</span>
-                            {t.note && <span className="text-xs text-neutral-400">{t.note}</span>}
+                          <span className="flex gap-2">
+                            <span aria-hidden="true" className={`mt-1.5 size-2 shrink-0 rounded-full ${t.dot}`} />
+                            <span className="flex flex-col">
+                              <span>{t.label}</span>
+                              {t.note && <span className="text-xs text-neutral-400">{t.note}</span>}
+                            </span>
                           </span>
                         </DropdownMenuRadioItem>
                       </div>
@@ -490,13 +503,7 @@ export default function TokenizerPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <div id="tok-stats" className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-              <span className="font-semibold text-neutral-100 tabular-nums">
-                {result && !result.error ? tokens.length : "–"} {tokens.length === 1 ? "token" : "tokens"}
-              </span>
-              <span className="text-xs text-neutral-400 tabular-nums">
-                {codePoints} code points · {byteCount} UTF-8 bytes
-              </span>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-2 py-0.5 text-xs text-neutral-300">
                 <span
                   aria-hidden="true"
@@ -521,9 +528,28 @@ export default function TokenizerPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 items-start">
             {/* Left: input */}
             <section className={`${panel} flex flex-col`}>
-              <label htmlFor="tok-input" className="mb-2 text-sm font-medium text-neutral-200">
-                Text
-              </label>
+              <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+                <label htmlFor="tok-input" className="text-sm font-medium text-neutral-200">
+                  Text
+                </label>
+                <fieldset className="flex flex-wrap items-center justify-end gap-1.5">
+                  <legend className="sr-only">Load a text sample</legend>
+                  <span aria-hidden="true" className="mr-0.5 text-[11px] text-neutral-500">Try</span>
+                  {PRESETS.map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => {
+                        setActive(null);
+                        setText(preset.text);
+                      }}
+                      className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-1 text-[11px] leading-none text-neutral-300 transition-colors hover:border-sky-400/40 hover:bg-sky-400/10 hover:text-sky-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/70"
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </fieldset>
+              </div>
               <Textarea
                 id="tok-input"
                 value={text}
@@ -551,6 +577,22 @@ export default function TokenizerPage() {
                     />
                     Show whitespace
                   </label>
+                </div>
+                <div id="tok-stats" className="mb-3 grid grid-cols-3 gap-1.5" aria-label="Text statistics">
+                  <div className="min-w-0 rounded-md border border-sky-400/20 bg-sky-400/[0.07] px-2 py-1.5">
+                    <div className="text-[10px] uppercase tracking-wide text-sky-300/80">Tokens</div>
+                    <div className="truncate text-sm font-semibold tabular-nums text-sky-100">
+                      {result && !result.error ? tokens.length : "–"}
+                    </div>
+                  </div>
+                  <div className="min-w-0 rounded-md border border-violet-400/20 bg-violet-400/[0.07] px-2 py-1.5">
+                    <div className="text-[10px] uppercase tracking-wide text-violet-300/80">Code points</div>
+                    <div className="truncate text-sm font-semibold tabular-nums text-violet-100">{codePoints}</div>
+                  </div>
+                  <div className="min-w-0 rounded-md border border-amber-400/20 bg-amber-400/[0.07] px-2 py-1.5">
+                    <div className="text-[10px] uppercase tracking-wide text-amber-300/80">UTF-8 bytes</div>
+                    <div className="truncate text-sm font-semibold tabular-nums text-amber-100">{byteCount}</div>
+                  </div>
                 </div>
                 {phase === "error" || (busy && result?.error) ? (
                   <div role="alert" className="rounded-md border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-100">
@@ -600,36 +642,35 @@ export default function TokenizerPage() {
                     )}
                   </div>
                 )}
+                {/* Inspector: text form of the active token */}
+                <p id="tok-inspector" className="mt-3 min-h-10 rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-neutral-300">
+                  {activeToken ? (
+                    <>
+                      <span className="font-semibold text-sky-200">
+                        #{activeIndex + 1} of {tokens.length}
+                      </span>
+                      {" · "}
+                      <span className="font-mono text-neutral-100">
+                        {JSON.stringify(tokenLabel(activeToken))}
+                      </span>
+                      {" · ID "}
+                      <span className="font-mono text-violet-200">{activeToken.id}</span>
+                      {activeToken.bytes && (
+                        <>
+                          {` · ${activeToken.bytes.length} ${activeToken.bytes.length === 1 ? "byte" : "bytes"}: `}
+                          <span className="font-mono text-amber-200">{toHex(activeToken.bytes)}</span>
+                        </>
+                      )}
+                      {activeToken.piece !== undefined && ` · vocabulary piece ${JSON.stringify(activeToken.piece)}`}
+                      {activeToken.kind === "special" && " · special token"}
+                      {(activeToken.kind === "fragment" || activeToken.kind === "mixed") &&
+                        " · includes a partial UTF-8 character that combines with neighbouring tokens"}
+                    </>
+                  ) : (
+                    "Hover, tap, or use the arrow keys on a token to inspect it."
+                  )}
+                </p>
               </div>
-
-              {/* Inspector: text form of the active token */}
-              <p id="tok-inspector" className="min-h-10 rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-neutral-300">
-                {activeToken ? (
-                  <>
-                    <span className="font-semibold text-neutral-100">
-                      #{activeIndex + 1} of {tokens.length}
-                    </span>
-                    {" · "}
-                    <span className="font-mono text-neutral-100">
-                      {JSON.stringify(tokenLabel(activeToken))}
-                    </span>
-                    {" · ID "}
-                    <span className="font-mono text-neutral-100">{activeToken.id}</span>
-                    {activeToken.bytes && (
-                      <>
-                        {` · ${activeToken.bytes.length} ${activeToken.bytes.length === 1 ? "byte" : "bytes"}: `}
-                        <span className="font-mono">{toHex(activeToken.bytes)}</span>
-                      </>
-                    )}
-                    {activeToken.piece !== undefined && ` · vocabulary piece ${JSON.stringify(activeToken.piece)}`}
-                    {activeToken.kind === "special" && " · special token"}
-                    {(activeToken.kind === "fragment" || activeToken.kind === "mixed") &&
-                      " · includes a partial UTF-8 character that combines with neighbouring tokens"}
-                  </>
-                ) : (
-                  "Hover, tap, or use the arrow keys on a token to inspect it."
-                )}
-              </p>
 
               {/* Numeric IDs */}
               <div className={panel}>
