@@ -155,7 +155,22 @@ html:has(.jump) { scroll-behavior: smooth; }
 
 .meta .num { font-weight: 600; color: var(--muted); }
 
-.guides { padding: 28px; border-radius: 22px; border: 1px solid var(--line); background: #5ad0f508; }
+.guides {
+  position: relative; isolation: isolate; overflow: hidden; padding: 32px; border-radius: 24px;
+  border: 1px solid #ffffff17;
+  background:
+    radial-gradient(60% 80% at 100% 0%, #1d4ed82e, transparent 60%),
+    radial-gradient(50% 70% at 0% 100%, #72ede514, transparent 60%),
+    linear-gradient(180deg, #0f1420, #0a0d14);
+  box-shadow: inset 0 1px 0 #ffffff12, 0 30px 80px -40px #000;
+}
+/* faint dotted paper texture, fading towards the bottom */
+.guides::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: radial-gradient(#ffffff1c 1px, transparent 1.2px); background-size: 18px 18px;
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent 75%); mask-image: linear-gradient(180deg, #000, transparent 75%);
+}
+.guides .card { background-color: #0c1018e6; }
 .guideGrid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .guideGrid .card { padding: 18px; gap: 10px; }
 .guideGrid .card h2 { font-size: 17px; }

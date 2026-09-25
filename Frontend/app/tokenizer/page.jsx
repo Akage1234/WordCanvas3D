@@ -1,26 +1,12 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { ConceptButton } from "@/components/ConceptSheet";
+import { PageGuide } from "@/components/PageGuide";
 import { Textarea } from "@/components/ui/textarea";
 import { tokenizeText } from "@/lib/tokenizer";
 import { markWhitespace, toHex, tokenColor, tokenLabel, TOKEN_TEXT } from "@/lib/tokenDisplay";
-// import hover card atoms
-import {
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent,
-} from "@/components/ui/hover-card";
-import { HelpCircle, ChevronDown, Copy, RotateCw } from "lucide-react";
-import {
-  Drawer,
-  DrawerTrigger,
-  DrawerContent,
-  DrawerHeader,
-  DrawerFooter,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerClose,
-} from "@/components/ui/drawer";
+import { ChevronDown, Copy, RotateCw } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -319,7 +305,6 @@ export default function TokenizerPage() {
 
   return (
     <>
-      <Drawer>
         <style>{`
           #tok-tokens[data-has-active] .tok-option { background-color: transparent !important; }
           #tok-tokens[data-has-active] .tok-option[data-active] { background-color: var(--token-color) !important; outline: 2px solid #38bdf8; outline-offset: 2px; }
@@ -329,130 +314,14 @@ export default function TokenizerPage() {
           <div className="text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start gap-2">
               <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Tokenizer</h1>
-              <HoverCard>
-                <HoverCardTrigger asChild>
-                  <button
-                    aria-label="About tokenizer"
-                    className="text-blue-400 hover:text-blue-600 transition-colors"
-                    style={{ lineHeight: 0 }}
-                    tabIndex={0}
-                  >
-                    <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
-                </HoverCardTrigger>
-                <HoverCardContent>
-                  <div className="text-sm space-y-3">
-                    <div className="font-semibold text-white">Tokenizer playground</div>
-                    <ul className="list-disc pl-5 space-y-1 text-neutral-300">
-                      <li>Paste or type on the left, then pick an encoding from the menu.</li>
-                      <li>Hover or tap any token or ID to spotlight its partner (auto‑scroll sync). With the keyboard, focus a panel and use the arrow keys.</li>
-                      <li>Try different encodings to see how splits and IDs change.</li>
-                    </ul>
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      <span className="rounded-md border border-neutral-600/70 bg-neutral-900/60 px-2 py-0.5 text-xs text-neutral-200">
-                        Encoding: <span className="font-medium">{tokenizer}</span>
-                      </span>
-                      <span className="rounded-md border border-neutral-600/70 bg-neutral-900/60 px-2 py-0.5 text-xs text-neutral-200">
-                        Tokens: <span className="font-medium">{tokens.length}</span>
-                      </span>
-                    </div>
-                    <div className="text-xs text-neutral-400">Tip: emojis, CJK, and code samples expose differences best.</div>
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
+              <PageGuide page="tokenizer" />
             </div>
             <p className="mt-1 text-sm text-neutral-400">
               See how text splits into tokens and IDs. Runs in your browser; your text isn’t sent anywhere.
             </p>
           </div>
-          <DrawerTrigger asChild>
-            <button className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-neutral-800 bg-neutral-900/60 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800 w-full sm:w-auto">
-              Learn about tokenization
-            </button>
-          </DrawerTrigger>
+          <ConceptButton concept="tokenizer" label="Learn about tokenization" />
         </header>
-
-        <DrawerContent className="flex flex-col max-h-[90vh] custom-scroll">
-          <div className="mx-auto w-full max-w-2xl overflow-y-auto flex-1 px-4 pt-4">
-            <DrawerHeader>
-              <DrawerTitle>What is tokenization?</DrawerTitle>
-              <DrawerDescription>
-                Tokenization is the process of breaking text into smaller units
-                called tokens, which can represent words, subwords, or
-                characters. These tokens are then mapped to numeric IDs that a
-                model can understand. Different models use different
-                tokenization rules, so the same text may be split into tokens in
-                various ways, affecting how it’s processed and interpreted.
-              </DrawerDescription>
-            </DrawerHeader>
-
-            <div className="space-y-3">
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
-                  ASCII words
-                </div>
-                <div className="text-sm text-white mb-1">“Hello world”</div>
-                <div className="flex flex-wrap gap-1">
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    Hello
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    ▁world
-                  </span>
-                </div>
-              </div>
-
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
-                  Emoji + tone
-                </div>
-                <div className="text-sm text-white mb-1">“👋🏽 Friends”</div>
-                <div className="flex flex-wrap gap-1">
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    👋
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    🏽
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    ▁Friends
-                  </span>
-                </div>
-              </div>
-
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
-                  CJK
-                </div>
-                <div className="text-sm text-white mb-1">“こんにちは”</div>
-                <div className="flex flex-wrap gap-1">
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    こん
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    にちは
-                  </span>
-                </div>
-              </div>
-
-              <div className="text-[11px] text-neutral-400">
-                Active encoding:{" "}
-                <span className="font-semibold text-neutral-200">
-                  {tokenizer}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <DrawerFooter className="mx-auto w-full max-w-2xl px-4 pb-4">
-            <DrawerClose asChild>
-              <button className="rounded-md border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800">
-                Close
-              </button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
 
       <main className="px-4 sm:px-6 md:px-10 lg:px-14 pb-24 md:pb-10">
         <div className="mx-auto w-full max-w-7xl space-y-4 md:space-y-5">

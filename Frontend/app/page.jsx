@@ -4,7 +4,7 @@ import { Instrument_Serif } from "next/font/google";
 import Galaxy from "@/components/landing/Galaxy";
 import Headline from "@/components/landing/Headline";
 import { TokenSplit, MiniClusters, VectorMath } from "@/components/landing/LensVisuals";
-import { Reveal, WordSearch } from "@/components/landing/Interactive";
+import { Reveal, ShareBar } from "@/components/landing/Interactive";
 import { ARTICLES as LEARN } from "@/components/learn/registry";
 import s from "@/components/landing/landing.module.css";
 
@@ -160,10 +160,10 @@ export default function Home() {
 
       <section className={s.final}>
         <Reveal className={`${s.wrap} ${s.reveal}`}>
-          <span className={s.kicker}>Your turn</span>
-          <h2 className={s.h2}>Pick a word.<br />See where it lives.</h2>
-          <p className={s.sub}>Jump straight into the embedding space with any word.</p>
-          <WordSearch buttonClass={`${s.cta} ${s.ctaExplore}`} />
+          <span className={`${s.enjoy} ${serif.className}`}>Enjoying it?</span>
+          <h2 className={s.h2}>Share it with someone <em className={`${s.serif} ${serif.className}`}>curious.</em></h2>
+          <p className={s.sub}>Free, no ads, no sign-up. If it helped, pass it on to a friend.</p>
+          <ShareBar buttonClass={`${s.cta} ${s.ctaExplore} ${s.shareBtn}`} />
         </Reveal>
       </section>
 

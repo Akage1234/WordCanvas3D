@@ -11,7 +11,8 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { usePathname } from "next/navigation";
-import { BookOpen, Box, Menu, Sigma, Type, X } from "lucide-react";
+import { BookOpen, Box, Check, Globe, Menu, Sigma, Type, X } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useLayoutMode } from "@/components/LayoutContext";
 
 const NAV_ITEMS = [
@@ -20,6 +21,78 @@ const NAV_ITEMS = [
   { href: "/embedding", label: "Embedding", hint: "Explore words in 3D", Icon: Box },
   { href: "/vector-playground", label: "Vector Playground", hint: "Do math with meaning", Icon: Sigma },
 ];
+
+const REPO_URL = "https://github.com/Akage1234/WordCanvas3D";
+const PROFILE_URL = "https://github.com/Akage1234";
+
+function GithubMark({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
+      <path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z" />
+    </svg>
+  );
+}
+
+// Only English exists today; the others are listed, faded, so the switcher's place is already set.
+const LANGUAGES = [["en", "English", "EN"], ["zh", "中文", "中"], ["ja", "日本語", "日"], ["es", "Español", "ES"]];
+
+function LanguageMenu({ variant = "icon" }) {
+  if (variant === "rows") {
+    return (
+      <div className="flex items-center gap-2 px-3 py-2 text-sm">
+        <Globe className="h-4 w-4 text-neutral-400" />
+        {LANGUAGES.map(([code, name]) => (
+          <span key={code} className={code === "en" ? "rounded-full bg-white/10 px-2.5 py-0.5 text-white" : "px-1 text-neutral-600"} title={code === "en" ? undefined : "Coming soon"}>{name}</span>
+        ))}
+      </div>
+    );
+  }
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button className={`inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`} aria-label="Language: English">
+          <Globe className="h-4 w-4" />EN
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="z-[1000] w-44 rounded-2xl border-white/10 bg-neutral-950/95 p-1.5 backdrop-blur-xl">
+        {LANGUAGES.map(([code, name]) => (
+          <div key={code} aria-disabled={code !== "en"} className={`flex items-center justify-between rounded-xl px-3 py-2 text-sm ${code === "en" ? "bg-white/[0.06] text-white" : "text-neutral-600"}`}>
+            {name}
+            {code === "en" ? <Check className="h-4 w-4 text-cyan-300" /> : <span className="font-mono text-[10px] uppercase tracking-wide">soon</span>}
+          </div>
+        ))}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+// Repo and author links: a small corner cluster on wide screens, rows in the phone menu.
+function SocialLinks({ variant = "icons" }) {
+  if (variant === "rows") {
+    const row = "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-neutral-300 transition-colors hover:bg-white/[0.05] hover:text-white";
+    return (
+      <div className="flex flex-col gap-1">
+        <LanguageMenu variant="rows" />
+        <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className={row}><GithubMark className="h-4 w-4" />Source code on GitHub</a>
+        <a href={PROFILE_URL} target="_blank" rel="noopener noreferrer" className={row}>
+          <img src="https://github.com/Akage1234.png?size=64" alt="" className="h-5 w-5 rounded-full" />Made by @Akage
+        </a>
+      </div>
+    );
+  }
+  const btn = `inline-flex h-10 w-10 items-center justify-center rounded-full text-neutral-300 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`;
+  return (
+    <div className="flex items-center gap-1">
+      <LanguageMenu />
+      <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className={btn} aria-label="WordCanvas3D on GitHub" title="Source code on GitHub">
+        <GithubMark className="h-[18px] w-[18px]" />
+      </a>
+      <a href={PROFILE_URL} target="_blank" rel="noopener noreferrer" className={btn} aria-label="About the author, @Akage" title="Made by @Akage">
+        <img src="https://github.com/Akage1234.png?size=64" alt="" className="h-7 w-7 rounded-full ring-1 ring-white/20" />
+      </a>
+    </div>
+  );
+}
 
 const glass = "bg-black/40 supports-[backdrop-filter]:bg-black/30 backdrop-blur-xl backdrop-saturate-150 border border-white/10 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.06)]";
 const focusRing = "outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
@@ -117,7 +190,9 @@ function MobileMenu({ isActive, triggerClassName }) {
               );
             })}
           </nav>
-          <p className="mt-6 border-t border-white/10 pt-4 text-xs text-neutral-500">Free &amp; open source · no sign-up</p>
+          <div className="mt-6 border-t border-white/10 pt-3">
+            <SocialLinks variant="rows" />
+          </div>
         </div>
       </DrawerContent>
     </Drawer>
@@ -147,8 +222,10 @@ export function Navbar() {
         <div className={`fixed top-3 left-3 z-50 rounded-full px-3.5 py-2 ${glass}`}>
           <Logo size="sm" />
         </div>
-        <nav className={`fixed top-3 right-3 z-50 hidden md:block rounded-full p-1 ${glass}`} aria-label="Main">
+        <nav className={`fixed top-3 right-3 z-50 hidden md:flex items-center gap-1 rounded-full p-1 ${glass}`} aria-label="Main">
           <DesktopLinks isActive={isActive} compact />
+          <span className="mx-1 h-5 w-px bg-white/10" aria-hidden="true" />
+          <SocialLinks />
         </nav>
         <div className={`fixed top-3 right-3 z-50 md:hidden rounded-full ${glass}`}>
           <MobileMenu isActive={isActive} />
@@ -159,6 +236,7 @@ export function Navbar() {
 
   // Standard layout (sidebar pages)
   return (
+    <>
     <nav
       aria-label="Main"
       className={`flex sticky top-2 mx-auto max-w-3xl z-50 items-center justify-between rounded-full pl-4 pr-2 md:pl-6 md:pr-3 py-1.5 md:py-2.5 mb-4 md:mb-8 transition-[background-color,box-shadow] duration-300 ${glass} ${scrolled ? "bg-black/60 supports-[backdrop-filter]:bg-black/55" : ""}`}
@@ -169,5 +247,10 @@ export function Navbar() {
       </div>
       <MobileMenu isActive={isActive} />
     </nav>
+    {/* Outside the bar: its backdrop-filter would make it the containing block for this fixed cluster */}
+    <div className={`fixed top-3 right-4 z-50 hidden min-[1120px]:block rounded-full p-1 ${glass}`}>
+      <SocialLinks />
+    </div>
+    </>
   );
 }

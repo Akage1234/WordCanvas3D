@@ -4,22 +4,8 @@ import VisualizerLayout from "@/components/VisualizerLayout";
 import { useLayoutMode } from "@/components/LayoutContext";
 import VectorPlaygroundCanvas from "@/components/VectorPlaygroundCanvas";
 import { lookup, analogy, nearest, pca3, loadModel } from "@/components/vectorPlayground/vectorMath.mjs";
-import {
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent,
-} from "@/components/ui/hover-card";
-import {
-  Drawer,
-  DrawerTrigger,
-  DrawerContent,
-  DrawerHeader,
-  DrawerFooter,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerClose,
-} from "@/components/ui/drawer";
-import { HelpCircle, Info, Database, Grid, FileText, Calculator, X, Eye, Radar } from "lucide-react";
+import { PageGuide } from "@/components/PageGuide";
+import { HelpCircle, Database, Grid, FileText, Calculator, X, Eye, Radar } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import {
   Select,
@@ -211,28 +197,7 @@ function VectorPlaygroundControls({
     <div className="w-full min-w-0 overflow-hidden">
       <h2 className="text-lg md:text-xl font-semibold mb-2 flex items-center gap-2">
         Vector Playground{" "}
-        <HoverCard>
-          <HoverCardTrigger asChild>
-            <button
-              aria-label="About Vector Playground"
-              className="text-blue-400 hover:text-blue-600 transition-colors"
-              style={{ lineHeight: 0 }}
-              tabIndex={0}
-            >
-              <HelpCircle className="w-4 h-4 md:w-5 md:h-5" />
-            </button>
-          </HoverCardTrigger>
-          <HoverCardContent>
-            <div className="text-sm space-y-3">
-              <div className="font-semibold text-white">Vector Playground</div>
-              <ul className="list-disc pl-5 space-y-1 text-neutral-300">
-                <li>Plot words as arrows. Their 300 numbers are projected to 3D with PCA fitted on just the words you plot.</li>
-                <li>Try analogies like <code className="text-red-400">king - man + woman = ?</code></li>
-                <li>The math always uses all 300 dimensions; only the picture is flattened.</li>
-              </ul>
-            </div>
-          </HoverCardContent>
-        </HoverCard>
+        <PageGuide page="vectors" />
       </h2>
       <p className="text-xs text-muted-foreground mb-3 md:mb-4">
         Perform vector math and analogy experiments here.
@@ -429,67 +394,6 @@ export default function PlaygroundPage() {
 
   return (
     <>
-      <Drawer>
-        <div className="fixed top-20 landscape:top-16 right-4 landscape:right-2 z-50">
-          <DrawerTrigger asChild>
-            <button className="flex items-center justify-center rounded-full p-2 landscape:p-1.5 bg-white/50 dark:bg-black/40 backdrop-blur-lg supports-[backdrop-filter]:bg-white/40 dark:supports-[backdrop-filter]:bg-black/30 border-b border-white/20 dark:border-white/10 shadow-xl outline outline-white/20 dark:outline-white/10 text-neutral-200 hover:bg-neutral-800/50 transition-colors">
-              <Info className="h-4 w-4 landscape:h-3.5 landscape:w-3.5" />
-            </button>
-          </DrawerTrigger>
-        </div>
-
-        <DrawerContent className="flex flex-col max-h-[90vh] landscape:max-h-[80vh] custom-scroll">
-          <div className="mx-auto w-full max-w-2xl overflow-y-auto flex-1 px-4 pt-4">
-            <DrawerHeader>
-              <DrawerTitle>Geometric Meaning of Embedding Vectors</DrawerTitle>
-              <DrawerDescription>
-                Vector math reveals semantic patterns. Word analogies work because geometric relationships encode meaning.
-              </DrawerDescription>
-            </DrawerHeader>
-
-            <div className="space-y-3 pb-4">
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">Classic analogy</div>
-                <div className="text-sm text-white mb-1">&quot;king - man + woman&quot;</div>
-                <div className="flex flex-wrap gap-1">
-                  {["king", "−", "man", "+", "woman"].map((t, i) => (
-                    <span key={i} className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">{t}</span>
-                  ))}
-                  <span className="px-2 py-0.5 text-xs rounded bg-green-900/60 text-green-100">≈ queen</span>
-                </div>
-              </div>
-
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">Yellow arrows</div>
-                <div className="text-sm text-white mb-1">The same relationship, twice</div>
-                <p className="text-xs text-neutral-300 mb-2">
-                  One arrow goes from b to a (man → king). The other starts at c and applies that same step (woman → a − b + c).
-                  If the analogy holds, the two arrows look parallel, and the green dashed line to the answer is short.
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  <span className="px-2 py-0.5 text-xs rounded bg-yellow-900/60 text-yellow-100">b → a</span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-yellow-900/60 text-yellow-100">c → a − b + c</span>
-                </div>
-              </div>
-
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">Try these</div>
-                <DrawerClose asChild>
-                  <div><PresetChips onPick={handlePreset} /></div>
-                </DrawerClose>
-              </div>
-            </div>
-          </div>
-
-          <DrawerFooter className="mx-auto w-full max-w-2xl px-4 pb-4">
-            <DrawerClose asChild>
-              <button className="rounded-md border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800">
-                Close
-              </button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
 
       <VisualizerLayout
         leftPanel={

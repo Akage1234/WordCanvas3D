@@ -2,22 +2,8 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import VisualizerLayout from "@/components/VisualizerLayout";
 import EmbeddingCanvas from "@/components/EmbeddingCanvas";
-import {
-  HoverCard,
-  HoverCardTrigger,
-  HoverCardContent,
-} from "@/components/ui/hover-card";
-import {
-  Drawer,
-  DrawerTrigger,
-  DrawerContent,
-  DrawerHeader,
-  DrawerFooter,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerClose,
-} from "@/components/ui/drawer";
-import { HelpCircle, Check, ChevronsUpDown, Database, Search, Palette, Info, AlertTriangle, X } from "lucide-react";
+import { PageGuide } from "@/components/PageGuide";
+import { Check, ChevronsUpDown, Database, Search, Palette, AlertTriangle, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -276,39 +262,7 @@ function EmbeddingControls({
       <header>
         <h2 className="text-lg font-semibold flex items-center gap-2">
           Embedding Space
-        <HoverCard>
-          <HoverCardTrigger asChild>
-            <button
-              aria-label="About Embedding Visualizer"
-              className="text-blue-400 hover:text-blue-600 transition-colors"
-              style={{ lineHeight: 0 }}
-              tabIndex={0}
-            >
-                <HelpCircle size={18} />
-            </button>
-          </HoverCardTrigger>
-          <HoverCardContent>
-            <div className="text-sm space-y-3">
-              <div className="font-semibold text-white">
-                Embedding Visualizer
-              </div>
-              <ul className="list-disc pl-5 space-y-1 text-neutral-300">
-                <li>
-                    Pick a pretrained model and view a 3D projection (PCA or
-                    UMAP) of its 300-dimensional word vectors.
-                </li>
-                <li>
-                  Hover or search words to highlight their position in the
-                    projection.
-                </li>
-                <li>
-                    Projecting to 3D can distort relationships: distance in
-                    this view is not the original embedding similarity score.
-                </li>
-              </ul>
-            </div>
-          </HoverCardContent>
-        </HoverCard>
+        <PageGuide page="embedding" />
       </h2>
         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
           300-D word vectors projected to 3D. Distances here can distort relationships.
@@ -603,107 +557,6 @@ export default function EmbeddingPage() {
 
   return (
     <div className={explorationStyles.page}>
-      {/* Info Icon - Top Right */}
-      <Drawer>
-        <div className="fixed top-20 landscape:top-16 right-4 landscape:right-2 z-50">
-          <DrawerTrigger asChild>
-            <button aria-label="About embedding space" className="flex items-center justify-center rounded-full p-2 landscape:p-1.5 bg-white/50 dark:bg-black/40 backdrop-blur-lg supports-[backdrop-filter]:bg-white/40 dark:supports-[backdrop-filter]:bg-black/30 border-b border-white/20 dark:border-white/10 shadow-xl outline outline-white/20 dark:outline-white/10 text-neutral-200 hover:bg-neutral-800/50 transition-colors">
-              <Info className="h-4 w-4 landscape:h-3.5 landscape:w-3.5" aria-hidden="true" />
-            </button>
-          </DrawerTrigger>
-        </div>
-
-        <DrawerContent className="flex flex-col max-h-[90vh] landscape:max-h-[80vh] custom-scroll">
-          <div className="mx-auto w-full max-w-2xl overflow-y-auto flex-1 px-4 pt-4">
-            <DrawerHeader>
-              <DrawerTitle>What is Embedding Space?</DrawerTitle>
-              <DrawerDescription>
-                Each word is a 300-dimensional vector. This view projects those vectors into 3D, which keeps some structure and distorts the rest.
-              </DrawerDescription>
-            </DrawerHeader>
-
-            <div className="space-y-3 pb-4">
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
-                  Royalty cluster
-                </div>
-                <div className="text-sm text-white mb-1">Close in meaning</div>
-                <div className="flex flex-wrap gap-1">
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    king
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    queen
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    prince
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    royal
-                  </span>
-                </div>
-              </div>
-
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
-                  Emotions cluster
-                </div>
-                <div className="text-sm text-white mb-1">Sentiment groups</div>
-                <div className="flex flex-wrap gap-1">
-                  <span className="px-2 py-0.5 text-xs rounded bg-green-900/60 text-green-100">
-                    happy
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-green-900/60 text-green-100">
-                    joyful
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-red-900/60 text-red-100">
-                    sad
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-red-900/60 text-red-100">
-                    miserable
-                  </span>
-                </div>
-              </div>
-
-              <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
-                  High dimensions → 3D view
-                </div>
-                <div className="text-sm text-white mb-1">Projected from {MODEL_LABELS[embeddingModel]}</div>
-                <div className="flex flex-wrap gap-1">
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    300 dims
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    ↓ {METHOD_LABELS[reductionMethod]}
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-purple-900/60 text-purple-100">
-                    3D view
-                  </span>
-                </div>
-                <p className="mt-2 text-xs text-neutral-400">
-                  Distance in the 3D view is not the original embedding similarity score.
-                </p>
-              </div>
-
-              <div className="text-[11px] text-neutral-400">
-                Active model:{" "}
-                <span className="font-semibold text-neutral-200">
-                  {embeddingModel}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <DrawerFooter className="mx-auto w-full max-w-2xl px-4 pb-4">
-            <DrawerClose asChild>
-              <button className="rounded-md border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800">
-                Close
-              </button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
 
       <VisualizerLayout
         leftPanel={

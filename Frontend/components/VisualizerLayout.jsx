@@ -11,6 +11,10 @@ import {
 } from "@/components/ui/drawer";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { useLayoutMode } from "@/components/LayoutContext";
+import { ConceptButton } from "@/components/ConceptSheet";
+
+const CONCEPT_BY_PATH = { "/embedding": "embedding", "/vector-playground": "vectors" };
+const roundGlass = "bg-black/40 supports-[backdrop-filter]:bg-black/30 backdrop-blur-lg border border-white/10 shadow-xl";
 
 export default function VisualizerLayout({ 
   leftPanel, 
@@ -24,6 +28,7 @@ export default function VisualizerLayout({
   // Get current pathname to check if we're on a visualizer page
   const pathname = usePathname();
   const isVisualizerPage = pathname === '/embedding' || pathname === '/vector-playground';
+  const concept = CONCEPT_BY_PATH[pathname];
   
   // Only allow minimalist mode on visualizer pages
   const effectiveMinimalistMode = isVisualizerPage && isMinimalistMode;
@@ -145,17 +150,6 @@ export default function VisualizerLayout({
       {/* Desktop Layout - Side-by-side */}
       {!effectiveMinimalistMode && (
       <div className="hidden md:flex gap-4 p-4 h-screen overflow-hidden relative">
-        {/* Layout Toggle Button - Only show on visualizer pages */}
-        {isVisualizerPage && (
-        <button
-          onClick={() => setIsMinimalistMode(true)}
-          className="absolute top-4 right-4 z-50 flex items-center justify-center rounded-full p-2.5 bg-white/50 dark:bg-black/40 backdrop-blur-lg supports-[backdrop-filter]:bg-white/40 dark:supports-[backdrop-filter]:bg-black/30 border border-white/20 dark:border-white/10 shadow-xl outline outline-white/20 dark:outline-white/10 text-neutral-200 hover:bg-neutral-800/50 transition-colors"
-          aria-label="Switch to minimalist layout"
-        >
-          <Maximize2 className="h-4 w-4" />
-        </button>
-        )}
-
         {/* Left Panel */}
         <aside className="w-64 bg-white/5 rounded-xl p-4 border border-white/10 backdrop-blur overflow-hidden min-w-0 flex flex-col">
           <div className="w-full min-w-0 overflow-y-auto hide-scrollbar flex-1">
@@ -166,6 +160,19 @@ export default function VisualizerLayout({
         {/* Right Canvas Area */}
         <main className="flex-1 rounded-xl border border-white/10 relative overflow-hidden min-h-0">
           {rightCanvas}
+          {isVisualizerPage && (
+            <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
+              {concept && <ConceptButton concept={concept} className={`h-[38px] w-[38px] ${roundGlass}`} />}
+              <button
+                onClick={() => setIsMinimalistMode(true)}
+                className={`flex h-[38px] w-[38px] items-center justify-center rounded-full text-neutral-200 transition-colors hover:bg-white/10 hover:text-white ${roundGlass}`}
+                aria-label="Switch to full-screen layout"
+                title="Full screen"
+              >
+                <Maximize2 className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </main>
       </div>
       )}
@@ -181,6 +188,7 @@ export default function VisualizerLayout({
         >
           <Minimize2 className="h-4 w-4" />
         </button>
+        {concept && <ConceptButton concept={concept} className={`fixed top-4 left-1/2 ml-7 z-50 h-[38px] w-[38px] ${roundGlass}`} />}
 
         {/* Full Screen Canvas */}
         <main className="absolute inset-0 w-full h-full">
@@ -196,6 +204,7 @@ export default function VisualizerLayout({
       {isVisualizerPage ? (
         // Full screen canvas for visualizer pages (embedding, vector-playground)
         <div className="md:hidden fixed inset-0 w-screen h-screen overflow-hidden">
+          {concept && <ConceptButton concept={concept} className={`fixed top-20 landscape:top-16 right-4 landscape:right-2 z-50 h-9 w-9 ${roundGlass}`} />}
           {/* Full Screen Canvas */}
           <main className="absolute inset-0 w-full h-full">
             {rightCanvas}
