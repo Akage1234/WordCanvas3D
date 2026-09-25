@@ -72,7 +72,7 @@ export async function tokenizeText(text, encodingName = 'cl100k_base', opts = {}
   }
   const { enc, specials } = await getEncoder(ENCODING_META[encodingName] ?? ENCODING_META.cl100k_base)
   // encode(text, allowed_special = 'none', disallowed_special = 'all')
-  let allowed_special = 'none'
+  let allowed_special = []
   if (opts.allowedSpecial instanceof Set && opts.allowedSpecial.size > 0) {
     allowed_special = Array.from(opts.allowedSpecial)
   } else if (opts.allowedSpecial === 'all') {

@@ -1,0 +1,80 @@
+/* Controls */
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.btn {
+  padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: #ffffff08;
+  font: 500 13px var(--mono); color: #cfd8e6; cursor: pointer;
+}
+.btn:hover:not(:disabled) { border-color: #fd79a866; }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn[aria-pressed="true"], .primary { color: #fff; background: #fd79a826; border-color: #fd79a8; }
+.btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.status { font: 400 12px var(--mono); color: var(--muted); }
+.cap { display: block; margin-bottom: 8px; font: 400 11px var(--mono); color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
+
+/* Patch → sequence */
+.stage { margin-top: 16px; display: grid; grid-template-columns: minmax(150px, 220px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; aspect-ratio: 1; }
+.cell { position: relative; border-radius: 3px; overflow: hidden; transition: opacity .3s, outline-color .3s; outline: 2px solid transparent; outline-offset: -2px; }
+.cell.taken { opacity: .35; }
+.cell.current { opacity: 1; outline-color: #fd79a8; }
+.cell small, .slot small {
+  position: absolute; left: 3px; top: 1px; font: 600 10px var(--mono); color: #fff;
+  text-shadow: 0 0 3px #000, 0 0 3px #000;
+}
+.patchImg { display: block; width: 100%; height: 100%; background-size: 400% 400%; }
+
+.seq { list-style: none !important; margin: 0 !important; padding: 0 !important; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.seq li { margin: 0 !important; }
+.textTok {
+  font: 500 14px var(--mono); color: #fff; white-space: pre; padding: 6px 7px; border-radius: 6px;
+  background: color-mix(in srgb, var(--tc) 28%, transparent); box-shadow: inset 0 -2px 0 var(--tc);
+}
+.marker { font: 500 11px var(--mono); color: var(--muted); padding: 6px 4px; border: 1px dashed #ffffff30; border-radius: 6px; }
+.slot { position: relative; width: 34px; height: 34px; border-radius: 5px; border: 1px dashed #ffffff26; overflow: hidden; }
+.slot small { opacity: .5; }
+.slot.filled { border: 0; box-shadow: inset 0 -2px 0 #fd79a8; }
+.slot.filled small { opacity: 1; }
+.slot.filled .patchImg { animation: fly .45s cubic-bezier(.2, .8, .2, 1); }
+@keyframes fly { from { transform: translate(-40px, -30px) scale(1.6); opacity: 0; } }
+
+/* Calculator */
+.pickers { display: flex; flex-wrap: wrap; gap: 16px 28px; }
+.calcBody { margin-top: 18px; display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 20px; align-items: center; }
+.miniGrid {
+  aspect-ratio: 1; border-radius: 6px; background-color: #1d3b6e;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Ccircle cx='7' cy='3' r='1.3' fill='%23f9ca24'/%3E%3Cpath d='M0 7 L3 4.5 L5 6.5 L7 5 L10 7.5 V10 H0Z' fill='%234b3f72'/%3E%3C/svg%3E");
+  background-size: cover; position: relative; overflow: hidden;
+}
+.miniGrid::after {
+  content: ""; position: absolute; inset: 0;
+  background-image: linear-gradient(#0e1015 1px, transparent 1px), linear-gradient(90deg, #0e1015 1px, transparent 1px);
+  background-size: calc(100% / var(--n)) calc(100% / var(--n));
+}
+.readout { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 14px; font: 400 13px var(--mono); }
+.readout dt { color: var(--dim); }
+.readout dd { margin: 0; color: #cfd8e6; }
+.readout b { color: #fff; font-size: 15px; }
+
+/* Audio pipeline */
+.audio { min-width: 560px; }
+.audio text { font-size: 11px !important; }
+
+/* Comparison table */
+.tableWrap { overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; font: 400 12.5px var(--mono); line-height: 1.5; }
+.tbl th, .tbl td { padding: 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.tbl thead th { color: var(--dim); font-weight: 500; font-size: 12px; }
+.tbl tbody th { color: #fff; font-weight: 600; }
+
+@media (max-width: 720px) {
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  .imageWrap { max-width: 220px; }
+  .calcBody { grid-template-columns: 120px minmax(0, 1fr); gap: 14px; }
+  .readout { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .readout dd { margin-bottom: 6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slot.filled .patchImg { animation: none; }
+  .cell { transition: none; }
+}

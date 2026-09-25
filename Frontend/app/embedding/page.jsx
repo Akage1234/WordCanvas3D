@@ -541,6 +541,15 @@ export default function EmbeddingPage() {
     setPicked(word);
     setSearchWord(word);
   }, []);
+  // A link like /embedding?word=paris selects that word once the first dataset is ready.
+  const linkedWordRef = useRef(false);
+  const handleDataStatus = useCallback((status) => {
+    setData(status);
+    if (status.state !== "ready" || linkedWordRef.current) return;
+    linkedWordRef.current = true;
+    const word = new URLSearchParams(window.location.search).get("word")?.trim();
+    if (word) selectSearchWord(word);
+  }, [selectSearchWord]);
   const clearSelection = useCallback(() => {
     setPicked(null);
     setSearchWord("");
@@ -931,7 +940,7 @@ export default function EmbeddingPage() {
               pickedWord={picked ?? ""}
               useClusterColors={useClusterColors}
               showClusterEdges={showClusterEdges}
-                onDataStatus={setData}
+                onDataStatus={handleDataStatus}
                 onGraphicsStatus={setGraphics}
                 onPick={(word) => (word ? selectSearchWord(word) : clearSelection())}
                 exploration={{ focus, pins: validPins, spotlight, showLabels }}

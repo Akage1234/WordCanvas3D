@@ -1,0 +1,62 @@
+/* ---------- One-hot vs dense ---------- */
+.vecRows { display: grid; gap: 10px; }
+.vecRow { display: grid; grid-template-columns: 5.5em minmax(0, 1fr); gap: 10px; align-items: center; font: 400 12px var(--mono); color: #cfd8e6; }
+.slots { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 2px; }
+.slots i { height: 18px; border-radius: 3px; background: #ffffff0a; }
+.slots i[data-on] { background: var(--tc); }
+.dense i { background: color-mix(in srgb, var(--tc) calc(var(--a) * 100%), #1a1d24); }
+.vecNote { font: 400 12px var(--mono); color: var(--dim); margin: 4px 0 12px; }
+
+/* ---------- Word map ---------- */
+.map { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.map svg { background: #0e1015; border: 1px solid #ffffff14; border-radius: 12px; }
+.pt { cursor: pointer; }
+.pt circle { fill: var(--tc); stroke: #0e1015; stroke-width: 1.5; transition: opacity .25s; }
+.pt text { fill: #fff !important; paint-order: stroke; stroke: #0e1015; stroke-width: 3px; transition: opacity .25s; }
+.pt[data-state="rest"] { opacity: .7; }
+.pt[data-state="sel"] circle { stroke: #fff; stroke-width: 2; }
+.pt[data-state="sel"] text { font-weight: 700; }
+.link { stroke: #ffffff66; stroke-width: 1.2; stroke-dasharray: 3 3; }
+
+.side { min-width: 0; }
+.sideHead { margin: 0 0 8px !important; font: 400 13px var(--mono); color: var(--muted); }
+.sideHead b { color: #fff; box-shadow: inset 0 -2px 0 var(--tc); }
+.nn { list-style: none !important; margin: 0 !important; padding: 0 !important; display: grid; gap: 4px; }
+.nn li { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) 2.6em; gap: 8px; align-items: center; margin: 0 !important; font: 400 13px var(--mono); color: var(--muted); }
+.nn li[data-on] span { color: #fff; font-weight: 600; }
+.nn span { overflow: hidden; text-overflow: ellipsis; }
+.nn i { height: 7px; border-radius: 4px; background: var(--cyan); width: calc(var(--w) * 100%); }
+.nn small { text-align: right; font-size: 12px; }
+.hint { margin: 8px 0 0 !important; font: 400 12px var(--mono); color: var(--dim); }
+
+.picker { display: grid; gap: 6px; grid-column: 1 / -1; }
+.pickRow { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.pickRow span { width: 5.5em; font: 400 11px var(--mono); color: var(--dim); }
+.pickRow button {
+  padding: 3px 8px; border-radius: 6px; border: 1px solid transparent; cursor: pointer;
+  font: 500 12px var(--mono); color: #e7edf6; background: color-mix(in srgb, var(--tc) 16%, transparent);
+}
+.pickRow button:hover { background: color-mix(in srgb, var(--tc) 30%, transparent); }
+.pickRow button[aria-pressed="true"] { background: color-mix(in srgb, var(--tc) 45%, transparent); border-color: var(--tc); color: #fff; }
+.pickRow button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+@media (min-width: 720px) {
+  .nn { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+}
+
+/* ---------- Static SVG diagrams ---------- */
+.label { fill: #fff !important; paint-order: stroke; stroke: #0e1015; stroke-width: 3px; }
+.dimText { fill: #8b95a7 !important; }
+
+/* ---------- Context (bank) ---------- */
+.ctx { display: grid; gap: 12px; }
+.sentence { font: 400 14px var(--mono); color: #cfd8e6; margin: 0 !important; }
+.sentence b { color: #fff; padding: 1px 5px; border-radius: 5px; background: color-mix(in srgb, var(--tc) 30%, transparent); box-shadow: inset 0 -2px 0 var(--tc); }
+
+@media (max-width: 600px) {
+  .map .pt text { font-size: 17px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt circle, .pt text { transition: none; }
+}

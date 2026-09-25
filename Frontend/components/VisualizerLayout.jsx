@@ -158,7 +158,7 @@ export default function VisualizerLayout({
 
         {/* Left Panel */}
         <aside className="w-64 bg-white/5 rounded-xl p-4 border border-white/10 backdrop-blur overflow-hidden min-w-0 flex flex-col">
-          <div className="w-full min-w-0 overflow-y-auto custom-scroll flex-1">
+          <div className="w-full min-w-0 overflow-y-auto hide-scrollbar flex-1">
             {leftPanel}
           </div>
         </aside>

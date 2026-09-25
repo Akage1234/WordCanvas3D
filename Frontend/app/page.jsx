@@ -1,318 +1,178 @@
-'use client';
+import Link from "next/link";
+import Image from "next/image";
+import { Instrument_Serif } from "next/font/google";
+import Galaxy from "@/components/landing/Galaxy";
+import Headline from "@/components/landing/Headline";
+import { TokenSplit, MiniClusters, VectorMath } from "@/components/landing/LensVisuals";
+import { Reveal, WordSearch } from "@/components/landing/Interactive";
+import { ARTICLES as LEARN } from "@/components/learn/registry";
+import s from "@/components/landing/landing.module.css";
 
-import { useEffect, useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
-import { Button } from '@/components/ui/button'
-import * as THREE from 'three'
-import { Html } from '@react-three/drei'
+const serif = Instrument_Serif({ weight: "400", style: "italic", subsets: ["latin"] });
 
-// Tiny typewriter for rotating taglines
-function useTypewriter(lines, speed = 40, hold = 1400) {
-  const [index, setIndex] = useState(0);
-  const [text, setText] = useState('');
-  useEffect(() => {
-    let i = 0;
-    let mounted = true;
-    const type = () => {
-      if (!mounted) return;
-      if (i <= lines[index].length) {
-        setText(lines[index].slice(0, i));
-        i++;
-        setTimeout(type, speed);
-      } else {
-        setTimeout(() => {
-          setIndex((prev) => (prev + 1) % lines.length);
-          setText('');
-        }, hold);
-      }
-    };
-    type();
-    return () => { mounted = false; };
-  }, [index, lines, speed, hold]);
-  return text;
-}
+const REPO = "https://github.com/Akage1234/WordCanvas3D";
+const AUTHOR = "https://www.linkedin.com/in/ajay-kumar-0a024521a";
 
-// 3D: simple interactive floating points cloud
-function FloatingPoints({ count = 800, color = '#60a5fa', labeledCount = 24, neighbors = 3 }) {
-    const groupRef = useRef();
-    const geomRef = useRef();
-  
-    const wordBank = useMemo(
-      () => [
-        'token', 'vector', 'embedding', 'cosine', 'norm', 'latent', 'space', 'similarity',
-        'cluster', 'feature', 'dimension', 'context', 'attention', 'matrix', 'basis',
-        'graph', 'manifold', 'loss', 'gradient', 'epoch', 'layer', 'neuron', 'encode',
-        'decode', 'project', 'orthogonal', 'semantic', 'syntax', 'scale', 'shift',
-        'projection', 'alignment', 'distance', 'angle', 'rank', 'kernel', 'entropy',
-      ],
-      []
-    );
-  
-    const positions = useMemo(() => {
-      const pos = new Float32Array(count * 3);
-      for (let i = 0; i < count; i++) {
-        const r = 0.9 + Math.random() * 0.6;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(2 * Math.random() - 1);
-        const x = r * Math.sin(phi) * Math.cos(theta);
-        const y = r * Math.sin(phi) * Math.sin(theta);
-        const z = r * Math.cos(phi);
-        pos[i * 3 + 0] = x;
-        pos[i * 3 + 1] = y;
-        pos[i * 3 + 2] = z;
-      }
-      return pos;
-    }, [count]);
-  
-    const labelIndices = useMemo(() => {
-      const n = Math.min(labeledCount, count);
-      const indices = new Set();
-      while (indices.size < n) indices.add(Math.floor(Math.random() * count));
-      return Array.from(indices);
-    }, [count, labeledCount]);
-  
-    const uniqueLabels = useMemo(() => {
-      const n = labelIndices.length;
-      const pool = [...wordBank];
-      for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-      }
-      const base = pool.slice(0, Math.min(n, pool.length));
-      while (base.length < n) base.push(`${pool[base.length % pool.length]}-${base.length}`);
-      return base;
-    }, [labelIndices.length, wordBank]);
-  
-    const colors = useMemo(() => {
-      const base = new THREE.Color(color);
-      const highlight = new THREE.Color('#facc15');
-      const arr = new Float32Array(count * 3);
-      for (let i = 0; i < count; i++) {
-        const j = i * 3;
-        arr[j + 0] = base.r;
-        arr[j + 1] = base.g;
-        arr[j + 2] = base.b;
-      }
-      for (let k = 0; k < labelIndices.length; k++) {
-        const idx = labelIndices[k];
-        const j = idx * 3;
-        arr[j + 0] = highlight.r;
-        arr[j + 1] = highlight.g;
-        arr[j + 2] = highlight.b;
-      }
-      return arr;
-    }, [count, color, labelIndices]);
-  
-    useFrame((state) => {
-      const t = state.clock.getElapsedTime();
-      if (groupRef.current) {
-        groupRef.current.rotation.y = t * 0.12;
-        groupRef.current.rotation.x = Math.sin(t * 0.3) * 0.08;
-      }
-    });
-  
-    const getLabelPosition = (i) => {
-      const j = i * 3;
-      const x = positions[j + 0];
-      const y = positions[j + 1];
-      const z = positions[j + 2];
-      const v = new THREE.Vector3(x, y, z).normalize().multiplyScalar(0.06);
-      return [x + v.x, y + v.y, z + v.z];
-    };
-  
-    // Build lightweight graph between labeled points (k-NN)
-    const linePositions = useMemo(() => {
-      const idxs = labelIndices;
-      if (idxs.length === 0) return new Float32Array(0);
-      const pts = idxs.map((idx) => {
-        const j = idx * 3;
-        return new THREE.Vector3(positions[j], positions[j + 1], positions[j + 2]);
-      });
-  
-      const edges = [];
-      const seen = new Set();
-      for (let i = 0; i < pts.length; i++) {
-        // compute distances to others
-        const dists = [];
-        for (let j = 0; j < pts.length; j++) {
-          if (i === j) continue;
-          dists.push({ j, d: pts[i].distanceTo(pts[j]) });
-        }
-        dists.sort((a, b) => a.d - b.d);
-        const k = Math.min(neighbors, dists.length);
-        for (let n = 0; n < k; n++) {
-          const a = Math.min(i, dists[n].j);
-          const b = Math.max(i, dists[n].j);
-          const key = `${a}-${b}`;
-          if (!seen.has(key)) {
-            seen.add(key);
-            edges.push([a, b]);
-          }
-        }
-      }
-  
-      const arr = new Float32Array(edges.length * 2 * 3);
-      let p = 0;
-      for (const [a, b] of edges) {
-        arr[p++] = pts[a].x; arr[p++] = pts[a].y; arr[p++] = pts[a].z;
-        arr[p++] = pts[b].x; arr[p++] = pts[b].y; arr[p++] = pts[b].z;
-      }
-      return arr;
-    }, [labelIndices, positions, neighbors]);
-  
-    return (
-      <group ref={groupRef}>
-        <points>
-          <bufferGeometry ref={geomRef}>
-            <bufferAttribute
-              attach="attributes-position"
-              count={positions.length / 3}
-              array={positions}
-              itemSize={3}
-            />
-            <bufferAttribute
-              attach="attributes-color"
-              count={colors.length / 3}
-              array={colors}
-              itemSize={3}
-            />
-          </bufferGeometry>
-          <pointsMaterial
-            vertexColors
-            size={0.024}
-            sizeAttenuation
-            depthWrite={false}
-            transparent
-            opacity={0.9}
-            blending={THREE.NormalBlending}
-          />
-        </points>
-  
-        {/* White lines connecting labeled points */}
-        {linePositions.length > 0 && (
-          <lineSegments>
-            <bufferGeometry>
-              <bufferAttribute
-                attach="attributes-position"
-                count={linePositions.length / 3}
-                array={linePositions}
-                itemSize={3}
-              />
-            </bufferGeometry>
-            <lineBasicMaterial color="#ffffff" transparent opacity={0.25} />
-          </lineSegments>
-        )}
-  
-        {labelIndices.map((idx, i) => (
-          <Html key={idx} position={getLabelPosition(idx)} zIndexRange={[0, 1000]}>
-            <div
-              style={{
-                pointerEvents: 'none',
-                background: 'rgba(17, 24, 39, 0.92)',
-                color: '#fef3c7',
-                border: '1px solid rgba(120, 113, 108, 0.5)',
-                padding: '2px 6px',
-                borderRadius: 6,
-                fontSize: 11,
-                fontWeight: 600,
-                whiteSpace: 'nowrap',
-                boxShadow: '0 6px 16px rgba(0,0,0,0.45)',
-              }}
-            >
-              {uniqueLabels[i]}
-            </div>
-          </Html>
-        ))}
-      </group>
-    );
-  }
+const Arrow = ({ size }) => (
+  <svg viewBox="0 0 24 24" width={size} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </svg>
+);
 
+const GitHubMark = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 .5a11.5 11.5 0 0 0-3.64 22.4c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z" />
+  </svg>
+);
 
-const Home = () => {
-  const lines = useMemo(
-    () => [
-      'Visualize tokenization in real-time.',
-      'Explore embeddings in 3D space.',
-      'Play with vectors, gain intuition.',
-    ],
-    []
-  );
-  const typed = useTypewriter(lines);
+const LENSES = [
+  { href: "/tokenizer", accent: "#f9ca24", step: "01 · Tokenizer", title: "Text into pieces", text: "Compare how GPT and other tokenizers cut the same sentence, and why emoji and rare words cost more.", cta: "Open Tokenizer", visual: <TokenSplit /> },
+  { href: "/embedding", accent: "#4ecdc4", step: "02 · Embedding", title: "Words as a map", text: "Fly through up to 10,000 GloVe words. Clusters form on their own: numbers, places, feelings, verbs.", cta: "Open Embedding", visual: <MiniClusters /> },
+  { href: "/vector-playground", accent: "#a55eea", step: "03 · Vector Playground", title: "Math with meaning", text: "Plot your own words as arrows and try the famous analogy: king − man + woman lands near queen.", cta: "Open Playground", visual: <VectorMath /> },
+];
 
+// A short reading path for the landing page; titles and reading times come from the Learn registry.
+const FEATURED = ["how-llms-work", "why-tokens", "what-are-embeddings", "attention-and-transformers", "king-man-woman"];
+const ARTICLES = FEATURED.map((slug) => LEARN.find((a) => a.slug === slug));
+
+export default function Home() {
   return (
-    <>
-     <main className="px-4 sm:px-6 md:px-10 lg:px-14 overflow-x-hidden min-h-[calc(100dvh-96px)] flex items-center justify-center py-6 md:py-0 pb-8 md:pb-0">
-     <div className="mx-auto flex flex-col md:flex-row w-full max-w-7xl items-center justify-center gap-6 md:gap-6 lg:gap-10">
-          {/* Left: headline + brief explanation + actions */}
-          <section className="relative flex-1 flex flex-col justify-center order-2 md:order-1 w-full md:w-auto min-w-0">
-            <div className="pointer-events-none absolute -inset-10 opacity-40 blur-3xl"
-                 aria-hidden
-                 style={{
-                   background:
-                     'radial-gradient(1200px 500px at 0% 0%, rgba(59,130,246,0.20), rgba(0,0,0,0))'
-                 }}
-            />
-            <div className="relative w-full">
-              <div className="inline-flex items-center gap-2 rounded-full border border-neutral-800/60 px-2 md:px-3 py-1 text-[10px] md:text-xs text-neutral-400 mb-3 md:mb-4">
-                <span className="h-1.5 w-1.5 md:h-2 md:w-2 rounded-full bg-blue-500 animate-pulse" />
-                Live playground
-              </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight break-words">
-                Understand text through
-                {' '}
-                <span className="bg-gradient-to-r from-blue-400 via-sky-300 to-cyan-300 bg-clip-text text-transparent">
-                  tokens and vectors
-                </span>
-              </h1>
-              <p className="mt-3 md:mt-4 text-sm sm:text-base max-w-xl text-neutral-400 leading-relaxed break-words">
-                WordCanvas helps you see how text becomes numbers, and how those numbers
-                arrange in space. Tokenize inputs, explore embeddings, and build intuition—
-                all in your browser.
-              </p>
-
-              <div className="mt-4 md:mt-6 h-6 md:h-7 text-sky-300/90">
-                <span className="font-mono text-sm md:text-base lg:text-lg">{typed}</span>
-                <span className="ml-1 inline-block h-4 md:h-5 w-[2px] align-middle bg-sky-300 animate-pulse" />
-              </div>
-
-              <div className="mt-6 md:mt-8 mb-4 md:mb-0 flex flex-wrap gap-2 md:gap-3">
-                <Link href="/tokenizer" className="w-full sm:w-auto">
-                  <Button className="bg-blue-600 hover:bg-blue-500 text-white w-full sm:w-auto">
-                    Try Tokenizer
-                  </Button>
-                </Link>
-                <Link href="/embedding" className="w-full sm:w-auto">
-                  <Button variant="outline" className="border-neutral-700 hover:bg-neutral-900 w-full sm:w-auto">
-                    View Embeddings
-                  </Button>
-                </Link>
-                <Link href="/vector-playground" className="w-full sm:w-auto">
-                  <Button variant="outline" className="border-neutral-700 hover:bg-neutral-900 w-full sm:w-auto">
-                    Vector Playground
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </section>
-
-          {/* Right: interactive 3D */}
-          <section className="relative flex-1 max-w-[860px] w-full order-1 md:order-2">
-            <div className="absolute inset-0 rounded-lg md:rounded-xl bg-gradient-to-br from-neutral-900 to-neutral-950" />
-            <div className="relative w-full h-[50vh] min-h-[280px] max-h-[90vh] landscape:h-[60vh] sm:h-[55vh] md:h-[62dvh] md:min-h-[400px] lg:h-[68dvh] rounded-lg md:rounded-xl overflow-hidden border border-neutral-800">
-                <Canvas className="h-full w-full" camera={{ position: [1.8, 1.4, 1.8], fov: 55 }}>
-                <ambientLight intensity={0.6} />
-                <pointLight position={[4, 4, 4]} intensity={1.2} />
-                <FloatingPoints />
-                <OrbitControls enableZoom={false} minPolarAngle={0.9} maxPolarAngle={2.2} />
-                </Canvas>
-            </div>
-        </section>
+    <main className={s.page}>
+      <div className={`${s.wrap} ${s.hero}`}>
+        <div>
+          <span className={s.eyebrow}><i /> Free &amp; open source · no sign-up</span>
+          <Headline serifClass={serif.className} />
+          <p className={s.pitch}>
+            <strong>WordCanvas3D</strong> is a free playground for how AI understands text. Tokenize it, map it in 3D, and do math with meaning, right in your browser.
+          </p>
+          <div className={s.ctas}>
+            <Link className={`${s.cta} ${s.ctaExplore}`} href="/embedding">
+              <span className={s.orbit} aria-hidden="true"><i /><i /><i /></span>
+              Explore embeddings
+              <Arrow />
+            </Link>
+            <Link className={`${s.cta} ${s.ctaTokens}`} href="/tokenizer" aria-label="Tokenize text">
+              <span className={s.t} style={{ "--tc": "#f9ca24" }}>Token</span>
+              <span className={s.t} style={{ "--tc": "#fd79a8" }}>ize</span>
+              <span className={s.t} style={{ "--tc": "#4ecdc4" }}>&nbsp;text</span>
+            </Link>
+          </div>
         </div>
-      </main>
-    </>
-  )
-}
+        <Galaxy />
+      </div>
 
-export default Home
+      <section className={s.section}>
+        <div className={s.wrap}>
+          <Reveal className={s.reveal}>
+            <span className={s.kicker}>Three tools, one idea</span>
+            <h2 className={s.h2}>How a model sees language.</h2>
+            <p className={s.sub}>Each tool shows one step of the journey. Start anywhere; they link into each other.</p>
+          </Reveal>
+          <div className={s.lenses}>
+            {LENSES.map((lens) => (
+              <Reveal as="link" key={lens.href} href={lens.href} className={`${s.lens} ${s.reveal}`} style={{ "--accent": lens.accent }}>
+                <div className={s.lensViz}>{lens.visual}</div>
+                <div className={s.lensBody}>
+                  <span className={s.lensStep}>{lens.step}</span>
+                  <h3 className={s.lensTitle}>{lens.title}</h3>
+                  <p className={s.lensText}>{lens.text}</p>
+                  <span className={s.go}>{lens.cta} <Arrow /></span>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className={s.section}>
+        <div className={`${s.wrap} ${s.learn}`}>
+          <Reveal className={`${s.learnIntro} ${s.reveal}`}>
+            <span className={s.kicker}>Learn</span>
+            <h2 className={s.h2}>Understand what<br />you’re looking at.</h2>
+            <p className={s.sub}>Beginner-friendly articles on how language models read text, from your first word to the next one they write.</p>
+            <Link className={`${s.cta} ${s.ctaQuiet}`} href="/learn">Read the guides <Arrow /></Link>
+          </Reveal>
+          <Reveal as="ol" className={`${s.articles} ${s.reveal}`}>
+            {ARTICLES.map((a) => (
+              <li key={a.slug}>
+                <Link href={`/learn/${a.slug}`}>
+                  <span className={s.tag} style={{ "--tc": a.color }}>{a.tag}</span>
+                  <strong>{a.title}</strong>
+                  <small>{a.minutes} min</small>
+                  <Arrow />
+                </Link>
+              </li>
+            ))}
+          </Reveal>
+        </div>
+      </section>
+
+      <section className={s.section}>
+        <div className={s.wrap}>
+          <Reveal className={`${s.center} ${s.reveal}`}>
+            <span className={s.kicker}>Works on any device</span>
+            <h2 className={s.h2}>Your desk, your couch, your commute.</h2>
+            <p className={s.sub}>Every tool is built for touch as well as mouse. Rotate, pinch and tap your way through language.</p>
+          </Reveal>
+          <Reveal className={s.devices} inClass={s.devicesIn}>
+            <figure className={`${s.device} ${s.desktop}`}>
+              <div className={s.screen}><Image src="/landing/desktop-embedding.webp" alt="The Embedding page on a desktop screen" width={1440} height={900} sizes="(max-width: 960px) 82vw, 820px" /></div>
+              <div className={s.stand} />
+            </figure>
+            <figure className={`${s.device} ${s.tablet}`}>
+              <div className={s.screen}><Image src="/landing/tablet-tokenizer.webp" alt="The Tokenizer page on a tablet" width={1180} height={820} sizes="(max-width: 960px) 36vw, 360px" /></div>
+              <figcaption>Tokenizer</figcaption>
+            </figure>
+            <figure className={`${s.device} ${s.phone}`}>
+              <div className={s.screen}><Image src="/landing/phone-vector.webp" alt="The Vector Playground on a phone" width={390} height={844} sizes="(max-width: 960px) 15vw, 150px" /></div>
+              <figcaption>Vector Playground</figcaption>
+            </figure>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className={s.section}>
+        <div className={s.wrap}>
+          <Reveal className={`${s.oss} ${s.reveal}`}>
+            <div>
+              <span className={s.kicker}>Open source</span>
+              <h2 className={s.h2}>Built in the open.</h2>
+              <p className={s.sub}>Every line of WordCanvas3D is on GitHub. Read how it works, run it locally, open an issue, or send a pull request.</p>
+              <div className={s.ossActions}>
+                <a className={`${s.cta} ${s.ctaGh}`} href={REPO} target="_blank" rel="noopener noreferrer"><GitHubMark /> View on GitHub</a>
+                <a className={`${s.cta} ${s.ctaQuiet}`} href={`${REPO}/stargazers`} target="_blank" rel="noopener noreferrer"><span className={s.star}>★</span> Star the repo</a>
+              </div>
+            </div>
+            <div className={s.terminal} aria-label="Commands to run WordCanvas3D locally">
+              <div className={s.termBar}><i /><i /><i /><span>Akage1234/WordCanvas3D</span></div>
+              <pre>
+                <span className={s.cmt}># run it on your machine</span>{"\n"}
+                <span className={s.prompt}>$</span> git clone {REPO}{"\n"}
+                <span className={s.prompt}>$</span> cd WordCanvas3D/Frontend{"\n"}
+                <span className={s.prompt}>$</span> npm install{"\n"}
+                <span className={s.prompt}>$</span> npm run dev{"\n"}
+                <span className={s.ok}>✓ Ready on http://localhost:3000</span><span className={s.caret} />
+              </pre>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className={s.final}>
+        <Reveal className={`${s.wrap} ${s.reveal}`}>
+          <span className={s.kicker}>Your turn</span>
+          <h2 className={s.h2}>Pick a word.<br />See where it lives.</h2>
+          <p className={s.sub}>Jump straight into the embedding space with any word.</p>
+          <WordSearch buttonClass={`${s.cta} ${s.ctaExplore}`} />
+        </Reveal>
+      </section>
+
+      <footer className={s.footer}>
+        <div className={s.wrap}>
+          <span>© 2026 WordCanvas3D</span>
+          <span>Made with <span className={s.heart} role="img" aria-label="love">❤️</span> by <a className={s.author} href={AUTHOR} target="_blank" rel="noopener noreferrer">@Akage</a></span>
+        </div>
+      </footer>
+    </main>
+  );
+}

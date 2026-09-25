@@ -1,7 +1,9 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import VisualizerLayout from "@/components/VisualizerLayout";
+import { useLayoutMode } from "@/components/LayoutContext";
 import VectorPlaygroundCanvas from "@/components/VectorPlaygroundCanvas";
+import { lookup, analogy, nearest, pca3, loadModel } from "@/components/vectorPlayground/vectorMath.mjs";
 import {
   HoverCard,
   HoverCardTrigger,
@@ -17,7 +19,7 @@ import {
   DrawerDescription,
   DrawerClose,
 } from "@/components/ui/drawer";
-import { HelpCircle, Info, Database, Grid, FileText, Calculator } from "lucide-react";
+import { HelpCircle, Info, Database, Grid, FileText, Calculator, X, Eye, Radar } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import {
   Select,
@@ -31,30 +33,179 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
+const MODELS = {
+  glove_300D: { label: "GloVe", url: "/glove_300d/glove_300D_full.json.gz" },
+  fasttext_300D: { label: "FastText", url: "/FastText_300D/FastText_300D_full.json.gz" },
+  word2vec_300D: { label: "Word2Vec", url: "/Word2Vec_300D/Word2Vec_300D_full.json.gz" },
+};
+
+const PRESETS = [
+  ["king", "man", "woman"],
+  ["paris", "france", "italy"],
+  ["bigger", "big", "small"],
+  ["brother", "man", "woman"],
+  ["tokyo", "japan", "germany"],
+  ["walking", "walk", "swim"],
+];
+
+const WORD_COLORS = ["#45b7d1", "#ff6b6b", "#4ecdc4", "#a55eea", "#fd79a8", "#6c5ce7", "#fa8231", "#00aaff"];
+const ANSWER_COLOR = "#26de81";
+const HELPER_COLOR = "#f9ca24";
+const FIELDS = ["a", "b", "c"];
+
+const VIEWS = {
+  centred: { label: "Group centre", origin: "centre = average of these words", hint: "Arrows start from the average of the plotted words. Good for seeing how the words spread out." },
+  zero: { label: "From zero", origin: "real zero", hint: "Arrows start from the model's real zero, where directions decide the nearest word. Arrows bunch up because most words point a similar way." },
+};
+
+function PresetChips({ onPick }) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {PRESETS.map((p) => (
+        <button
+          key={p.join()}
+          type="button"
+          onClick={() => onPick(p)}
+          className="rounded-md border border-neutral-800 bg-neutral-900/60 px-2 py-1 font-mono text-[11px] text-neutral-300 hover:border-neutral-600 hover:text-white transition-colors"
+        >
+          {p[0]} − {p[1]} + {p[2]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function WordChips({ words, colors, modelLabel, dimmed }) {
+  if (!words.length) return null;
+  const missing = words.filter((w) => !colors[w]);
+  return (
+    <div className={cn("space-y-1.5", dimmed && "opacity-50")}>
+      <div className="flex flex-wrap gap-1 font-mono text-xs">
+        {words.map((w) => colors[w] ? (
+          <span key={w} className="rounded px-1.5 py-0.5 text-white" style={{ background: `color-mix(in srgb, ${colors[w]} 30%, transparent)`, boxShadow: `inset 0 -2px 0 ${colors[w]}` }}>{w}</span>
+        ) : (
+          <span key={w} className="rounded bg-red-500/10 px-1.5 py-0.5 text-red-300 line-through decoration-red-400/70">{w}</span>
+        ))}
+      </div>
+      <p className="text-[11px] leading-snug text-muted-foreground">
+        Whole words, looked up directly in {modelLabel} (no tokenizer).{missing.length > 0 && ` Struck-out words aren't in its 10,000-word vocabulary.`}
+        {dimmed && " Hidden while an analogy is shown."}
+      </p>
+    </div>
+  );
+}
+
+function ResultCard({ result, onClose, top: topClass, open, onToggle }) {
+  if (!result) return null;
+  const [top, ...rest] = result.neighbors;
+  const [a, b, c] = result.keys;
+  return (
+    <div className={`absolute right-3 bottom-28 md:bottom-auto ${topClass} z-40 w-[min(240px,calc(100%-24px))] rounded-xl border border-white/10 bg-neutral-950/85 p-2 md:p-3 shadow-2xl backdrop-blur-md space-y-1.5 md:space-y-2 animate-in fade-in slide-in-from-top-2 duration-500`}>
+      <div className="hidden md:flex items-start justify-between gap-2">
+        <p className="font-mono text-xs text-neutral-400">{a} − {b} + {c} ≈</p>
+        <button type="button" onClick={onClose} aria-label="Clear analogy" className="-m-1 rounded p-1 text-neutral-400 hover:bg-white/10 hover:text-white">
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="flex items-center justify-between gap-2">
+        <span className="rounded-md px-2 py-0.5 text-base md:text-lg font-bold text-white" style={{ background: `color-mix(in srgb, ${ANSWER_COLOR} 55%, #0b0e14)` }}>{top.word}</span>
+        <span className="font-mono text-xs text-emerald-300">cos {top.similarity.toFixed(2)}</span>
+        <button type="button" onClick={onClose} aria-label="Clear analogy" className="md:hidden rounded p-1 text-neutral-400 hover:bg-white/10 hover:text-white">
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+      <button type="button" onClick={onToggle} aria-pressed={open} className={cn("flex w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-[11px] transition-colors", open ? "bg-sky-500/15 text-sky-200" : "text-neutral-400 hover:bg-white/5 hover:text-white")}>
+        <Radar className="h-3.5 w-3.5" />
+        <span>{open ? "Hide" : "Show"} the next {rest.length} closest words</span>
+      </button>
+      {open && <ul className="space-y-0.5">
+        {rest.map((n) => (
+          <li key={n.word} className="flex items-center justify-between px-1 text-sm text-neutral-300">
+            <span>{n.word}</span>
+            <span className="font-mono text-xs text-neutral-500">{n.similarity.toFixed(2)}</span>
+          </li>
+        ))}
+      </ul>}
+    </div>
+  );
+}
+
+function PlotLegend({ result, view }) {
+  const [open, setOpen] = useState(false);
+  if (!result) return null;
+  const [a, b, c] = result.keys;
+  const answer = result.neighbors[0].word;
+  const row = (mark, text) => (
+    <li className="flex items-start gap-2">
+      <svg width="26" height="12" viewBox="0 0 26 12" className="mt-0.5 shrink-0" aria-hidden="true">{mark}</svg>
+      <span>{text}</span>
+    </li>
+  );
+  if (!open) return (
+    <button type="button" onClick={() => setOpen(true)} className="absolute bottom-3 left-3 z-40 hidden md:flex items-center gap-1.5 rounded-full border border-white/15 bg-neutral-950/80 px-3 py-1.5 text-xs text-neutral-200 backdrop-blur-md hover:bg-neutral-800">
+      <HelpCircle className="h-3.5 w-3.5 text-sky-300" /> How to read this
+    </button>
+  );
+  return (
+    <div className="absolute bottom-3 left-3 z-40 hidden md:block max-w-[300px] rounded-xl border border-white/10 bg-neutral-950/80 p-3 text-[11px] leading-snug text-neutral-300 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="font-semibold text-white text-xs">How to read this</p>
+        <button type="button" onClick={() => setOpen(false)} aria-label="Close legend" className="-m-1 rounded p-1 text-neutral-400 hover:bg-white/10 hover:text-white"><X className="h-3.5 w-3.5" /></button>
+      </div>
+      <ul className="space-y-1.5">
+        {view === "zero"
+          ? row(<circle cx="6" cy="6" r="3.5" fill="#fff" />, <>The white dot is the model&apos;s <b className="text-white">real zero</b>. The nearest word is the one whose arrow points most nearly the same way as the green dot&apos;s.</>)
+          : row(<circle cx="6" cy="6" r="3.5" fill="#fff" />, <>The white dot is the <b className="text-white">average</b> of these words, not zero. Where things sit around it is not meaningful on its own.</>)}
+        {row(<path d="M2 6h20m-5-4 5 4-5 4" stroke={HELPER_COLOR} strokeWidth="2" fill="none" />, <>Yellow: the step from <b className="text-white">{b}</b> to <b className="text-white">{a}</b>, then the same step taken from <b className="text-white">{c}</b>.</>)}
+        {row(<circle cx="6" cy="6" r="4" fill={ANSWER_COLOR} />, <>Green dot: where that step lands. Usually empty space, not a word.</>)}
+        {row(<path d="M2 6h22" stroke={ANSWER_COLOR} strokeWidth="2" strokeDasharray="3 3" />, <>Dashed: the gap to <b className="text-white">{answer}</b>, the closest real word out of 10,000.</>)}
+      </ul>
+    </div>
+  );
+}
+
+const OPERATIONS = [
+  { caption: "start with" },
+  { sign: "−", caption: "take away" },
+  { sign: "+", caption: "add" },
+];
+const OPERATION_STYLES = ["bg-sky-500/15 text-sky-300", "bg-red-500/15 text-red-300", "bg-emerald-500/15 text-emerald-300"];
+
+function EquationInputs({ inputs, onInputChange, onCalculate, errorField }) {
+  return (
+    <div>
+      {FIELDS.map((field, i) => (
+        <div key={field}>
+          {OPERATIONS[i].sign && (
+            <div className="flex h-5 items-center pl-9 text-sm font-semibold text-neutral-400" aria-hidden="true">
+              <span className="flex-1 text-center">{OPERATIONS[i].sign}</span>
+            </div>
+          )}
+          <label className="flex items-center gap-2">
+            <span className={cn("grid h-7 w-7 shrink-0 place-items-center rounded-md font-mono text-sm font-semibold", OPERATION_STYLES[i])}>
+              {field}
+            </span>
+            <Input
+              aria-label={`${field}: ${OPERATIONS[i].caption}`}
+              value={inputs[field]}
+              onChange={(e) => onInputChange(field, e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") onCalculate(); }}
+              placeholder={`${OPERATIONS[i].caption}: ${["king", "man", "woman"][i]}`}
+              className={cn("h-9 min-w-0 flex-1", errorField === field && "border-destructive focus-visible:ring-destructive")}
+            />
+          </label>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function VectorPlaygroundControls({
-  embeddingModel,
-  onEmbeddingModelChange,
-  showGridlines,
-  onShowGridlinesChange,
-  wordsText,
-  onWordsTextChange,
-  vectorA,
-  onVectorAChange,
-  vectorB,
-  onVectorBChange,
-  vectorC,
-  onVectorCChange,
-  onCalculate,
-  calculationResult,
-  errorMessage,
-  errorField,
+  embeddingModel, onEmbeddingModelChange, showGridlines, onShowGridlinesChange,
+  wordsText, onWordsTextChange, manualWords, wordColors, inputs, onInputChange, onPreset,
+  onCalculate, calcDisabled, calcLabel, result, errorMessage, errorField,
 }) {
   return (
     <div className="w-full min-w-0 overflow-hidden">
@@ -75,23 +226,9 @@ function VectorPlaygroundControls({
             <div className="text-sm space-y-3">
               <div className="font-semibold text-white">Vector Playground</div>
               <ul className="list-disc pl-5 space-y-1 text-neutral-300">
-                <li>
-                  Experiment with vector arithmetic (addition, subtraction,
-                  scaling).
-                </li>
-                <li>
-                  Visualize the results of analogy operations like:
-                  <span className="font-mono">
-                    {" "}
-                    <code className="text-red-400">king - man + woman = ?</code>
-                  </span>
-                </li>
-                <li>
-                  Analyze distances and directions between selected points.
-                </li>
-                <li>
-                  Get intuition for how vector math underpins word analogies.
-                </li>
+                <li>Plot words as arrows. Their 300 numbers are projected to 3D with PCA fitted on just the words you plot.</li>
+                <li>Try analogies like <code className="text-red-400">king - man + woman = ?</code></li>
+                <li>The math always uses all 300 dimensions; only the picture is flattened.</li>
               </ul>
             </div>
           </HoverCardContent>
@@ -102,7 +239,6 @@ function VectorPlaygroundControls({
       </p>
       <Separator className="my-3 md:my-4" />
 
-      {/* Embedding Selector */}
       <div className="space-y-2">
         <label htmlFor="embedding-select" className="text-sm font-medium">
           Embedding Model
@@ -121,24 +257,15 @@ function VectorPlaygroundControls({
 
       <Separator className="my-3 md:my-4" />
 
-      {/* Gridlines Toggle */}
       <div className="flex items-center space-x-2">
-        <Checkbox
-          id="gridlines"
-          checked={showGridlines}
-          onCheckedChange={onShowGridlinesChange}
-        />
-        <label
-          htmlFor="gridlines"
-          className="text-sm font-medium cursor-pointer"
-        >
+        <Checkbox id="gridlines" checked={showGridlines} onCheckedChange={onShowGridlinesChange} />
+        <label htmlFor="gridlines" className="text-sm font-medium cursor-pointer">
           Show Gridlines
         </label>
       </div>
 
       <Separator className="my-3 md:my-4" />
 
-      {/* Words Input */}
       <div className="space-y-2">
         <Label htmlFor="words-input" className="text-sm font-medium">
           Words to Plot (up to 50)
@@ -152,159 +279,25 @@ function VectorPlaygroundControls({
           maxLength={1000}
         />
         <p className="text-xs text-muted-foreground">
-          {Math.min(
-            wordsText.split(/\s+/).filter((w) => w.trim().length > 0).length,
-            50
-          )}{" "}
-          / 50 words
+          {Math.min(wordsText.split(/\s+/).filter((w) => w.trim().length > 0).length, 50)} / 50 words
         </p>
+        <WordChips words={manualWords} colors={wordColors} modelLabel={MODELS[embeddingModel].label} dimmed={!!result} />
       </div>
 
       <Separator className="my-3 md:my-4" />
 
-      {/* Vector Calculation */}
       <div className="space-y-2 max-w-full overflow-hidden">
-        <Label className="text-sm font-medium">Vector Calculation
-        <HoverCard>
-          <HoverCardTrigger asChild>
-            <HelpCircle className="inline-block ml-1 h-3 w-3 text-muted-foreground cursor-help" />
-          </HoverCardTrigger>
-          <HoverCardContent>
-            <div className="text-sm space-y-3">
-              <div>
-                <p className="font-semibold mb-2">
-                  Vector Calculation: a - b + c
-                </p>
-                <p className="text-xs text-muted-foreground mb-2">
-                  This performs word analogy calculations using vector
-                  arithmetic. The result finds the word that has the same
-                  relationship to 'c' as 'a' has to 'b'.
-                </p>
-              </div>
-              <div>
-                <p className="font-medium mb-1">Example:</p>
-                <div className="font-mono text-xs space-y-1">
-                  <p>
-                    • <strong>a:</strong> king (starting word)
-                  </p>
-                  <p>
-                    • <strong>b:</strong> man (reference word)
-                  </p>
-                  <p>
-                    • <strong>c:</strong> woman (target word)
-                  </p>
-                  <p>
-                    • <strong>Result:</strong> queen
-                  </p>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2 italic">
-                  "What is to woman as king is to man?" → queen
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">
-                  <strong>How it works:</strong> The calculation (a - b + c)
-                  finds the direction from b to a, then applies that same
-                  direction starting from c. All input words and the result are
-                  automatically plotted on the canvas.
-                </p>
-              </div>
-            </div>
-          </HoverCardContent>
-        </HoverCard>
-        </Label>
-        {/* Mobile: Stack vertically for better UX. Desktop: Horizontal layout */}
-        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-2">
-          <Tooltip open={errorField === "a" && errorMessage ? true : false}>
-            <TooltipTrigger asChild>
-              <div className="flex items-center gap-2 md:flex-1">
-                <Input
-                  id="vector-a"
-                  value={vectorA}
-                  onChange={(e) => onVectorAChange(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      onCalculate();
-                    }
-                  }}
-                  placeholder="king"
-                  className={cn(
-                    "flex-1",
-                    errorField === "a" &&
-                      "border-destructive focus-visible:ring-destructive"
-                  )}
-                />
-                <span className="text-sm font-semibold md:hidden">a</span>
-              </div>
-            </TooltipTrigger>
-            {errorField === "a" && errorMessage && (
-              <TooltipContent className="bg-destructive text-destructive-foreground border-destructive">
-                <p className="max-w-xs">{errorMessage}</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-          <span className="text-sm font-semibold self-center md:self-auto">-</span>
-          <Tooltip open={errorField === "b" && errorMessage ? true : false}>
-            <TooltipTrigger asChild>
-              <div className="flex items-center gap-2 md:flex-1">
-                <Input
-                  id="vector-b"
-                  value={vectorB}
-                  onChange={(e) => onVectorBChange(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      onCalculate();
-                    }
-                  }}
-                  placeholder="man"
-                  className={cn(
-                    "flex-1",
-                    errorField === "b" &&
-                      "border-destructive focus-visible:ring-destructive"
-                  )}
-                />
-                <span className="text-sm font-semibold md:hidden">b</span>
-              </div>
-            </TooltipTrigger>
-            {errorField === "b" && errorMessage && (
-              <TooltipContent className="bg-destructive text-destructive-foreground border-destructive">
-                <p className="max-w-xs">{errorMessage}</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-          <span className="text-sm font-semibold self-center md:self-auto">+</span>
-          <Tooltip open={errorField === "c" && errorMessage ? true : false}>
-            <TooltipTrigger asChild>
-              <div className="flex items-center gap-2 md:flex-1">
-                <Input
-                  id="vector-c"
-                  value={vectorC}
-                  onChange={(e) => onVectorCChange(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      onCalculate();
-                    }
-                  }}
-                  placeholder="woman"
-                  className={cn(
-                    "flex-1",
-                    errorField === "c" &&
-                      "border-destructive focus-visible:ring-destructive"
-                  )}
-                />
-                <span className="text-sm font-semibold md:hidden">c</span>
-              </div>
-            </TooltipTrigger>
-            {errorField === "c" && errorMessage && (
-              <TooltipContent className="bg-destructive text-destructive-foreground border-destructive">
-                <p className="max-w-xs">{errorMessage}</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </div>
-        <Button onClick={onCalculate} variant="default" className="w-full">
-          Calculate
+        <Label className="text-sm font-medium">Word analogy</Label>
+        <p className="text-xs leading-snug text-muted-foreground">
+          Start with a word, take one idea away, add another, and see which real word it lands on.
+        </p>
+        <EquationInputs inputs={inputs} onInputChange={onInputChange} onCalculate={onCalculate} errorField={errorField} />
+        {errorMessage && <p className="text-xs text-destructive">{errorMessage}</p>}
+        <Button onClick={onCalculate} variant="default" className="w-full" disabled={calcDisabled}>
+          {calcLabel}
         </Button>
+        <p className="pt-1 text-[11px] uppercase tracking-wide text-neutral-500">Or try an example</p>
+        <PresetChips onPick={onPreset} />
       </div>
 
       <Separator className="my-3 md:my-4" />
@@ -312,376 +305,130 @@ function VectorPlaygroundControls({
   );
 }
 
-// Vector equation parser for format: a - b + c
-// IMPORTANT: Perform arithmetic on FULL vectors, not just first 3 dimensions
-function parseVectorEquation(a, b, c, embeddings) {
-  if (!embeddings)
-    return { result: null, missingWords: [], inputWords: [], errorField: null };
-
-  const missingWords = [];
-  const inputWords = [a, b, c]
-    .filter((w) => w && w.trim().length > 0)
-    .map((w) => w.trim().toLowerCase());
-  let errorField = null;
-
-  // Check if all words exist
-  const aWord = a?.trim().toLowerCase();
-  const bWord = b?.trim().toLowerCase();
-  const cWord = c?.trim().toLowerCase();
-
-  if (!aWord) {
-    return {
-      result: null,
-      missingWords: ["First word (a) is required"],
-      inputWords,
-      errorField: "a",
-    };
-  }
-  if (!bWord) {
-    return {
-      result: null,
-      missingWords: ["Second word (b) is required"],
-      inputWords,
-      errorField: "b",
-    };
-  }
-  if (!cWord) {
-    return {
-      result: null,
-      missingWords: ["Third word (c) is required"],
-      inputWords,
-      errorField: "c",
-    };
-  }
-
-  // Check each word exists in embeddings
-  if (!embeddings[aWord]) {
-    missingWords.push(`"${aWord}"`);
-    if (!errorField) errorField = "a";
-  }
-  if (!embeddings[bWord]) {
-    missingWords.push(`"${bWord}"`);
-    if (!errorField) errorField = "b";
-  }
-  if (!embeddings[cWord]) {
-    missingWords.push(`"${cWord}"`);
-    if (!errorField) errorField = "c";
-  }
-
-  if (missingWords.length > 0) {
-    return { result: null, missingWords, inputWords, errorField };
-  }
-
-  // Get vectors
-  const vectorA = embeddings[aWord];
-  const vectorB = embeddings[bWord];
-  const vectorC = embeddings[cWord];
-
-  if (
-    !Array.isArray(vectorA) ||
-    !Array.isArray(vectorB) ||
-    !Array.isArray(vectorC)
-  ) {
-    return {
-      result: null,
-      missingWords: ["Invalid vector format"],
-      inputWords,
-      errorField: null,
-    };
-  }
-
-  // Calculate: a - b + c
-  // Ensure same dimensionality
-  const dims = Math.max(vectorA.length, vectorB.length, vectorC.length);
-
-  const resultVector = new Array(dims).fill(0);
-
-  // Add a
-  for (let i = 0; i < Math.min(vectorA.length, dims); i++) {
-    resultVector[i] += vectorA[i] || 0;
-  }
-
-  // Subtract b
-  for (let i = 0; i < Math.min(vectorB.length, dims); i++) {
-    resultVector[i] -= vectorB[i] || 0;
-  }
-
-  // Add c
-  for (let i = 0; i < Math.min(vectorC.length, dims); i++) {
-    resultVector[i] += vectorC[i] || 0;
-  }
-
-  return {
-    result: resultVector,
-    missingWords: [],
-    inputWords,
-    errorField: null,
-  };
-}
-
-// Find closest word to a vector using cosine similarity (better for word embeddings)
-function findClosestWord(resultVectorFull, embeddings, excludeWords = []) {
-  if (!resultVectorFull || !embeddings || !Array.isArray(resultVectorFull))
-    return null;
-
-  let maxSimilarity = -Infinity;
-  let closestWord = null;
-  let closestDistance = Infinity;
-
-  // Calculate magnitude of result vector for cosine similarity
-  const resultMagnitude = Math.sqrt(
-    resultVectorFull.reduce((sum, val) => sum + val * val, 0)
-  );
-
-  if (resultMagnitude === 0) return null;
-
-  // Create a set of words to exclude (case-insensitive)
-  const excludeSet = new Set(excludeWords.map((w) => w.toLowerCase()));
-
-  for (const [word, embedding] of Object.entries(embeddings)) {
-    // Skip excluded words (input words)
-    if (excludeSet.has(word.toLowerCase())) continue;
-
-    if (!Array.isArray(embedding) || embedding.length === 0) continue;
-
-    // Ensure same dimensionality
-    const dims = Math.min(resultVectorFull.length, embedding.length);
-
-    // Calculate dot product for cosine similarity
-    let dotProduct = 0;
-    let embeddingMagnitude = 0;
-
-    for (let i = 0; i < dims; i++) {
-      const rVal = resultVectorFull[i] || 0;
-      const eVal = embedding[i] || 0;
-      dotProduct += rVal * eVal;
-      embeddingMagnitude += eVal * eVal;
-    }
-
-    embeddingMagnitude = Math.sqrt(embeddingMagnitude);
-
-    if (embeddingMagnitude === 0) continue;
-
-    // Cosine similarity (range: -1 to 1)
-    const cosineSimilarity =
-      dotProduct / (resultMagnitude * embeddingMagnitude);
-
-    // Also calculate Euclidean distance for reference
-    let euclideanDistance = 0;
-    for (let i = 0; i < dims; i++) {
-      const diff = (resultVectorFull[i] || 0) - (embedding[i] || 0);
-      euclideanDistance += diff * diff;
-    }
-    euclideanDistance = Math.sqrt(euclideanDistance);
-
-    // Use cosine similarity to find closest (higher is better)
-    if (cosineSimilarity > maxSimilarity) {
-      maxSimilarity = cosineSimilarity;
-      closestWord = word;
-      closestDistance = euclideanDistance;
-    }
-  }
-
-  return {
-    word: closestWord,
-    distance: closestDistance,
-    similarity: maxSimilarity,
-  };
-}
-
 export default function PlaygroundPage() {
   const [embeddingModel, setEmbeddingModel] = useState("glove_300D");
   const [showGridlines, setShowGridlines] = useState(true);
-  const [wordsText, setWordsText] = useState(
-    "If the path be beautiful , let us not ask where it leads"
-  );
-  const [vectorA, setVectorA] = useState("");
-  const [vectorB, setVectorB] = useState("");
-  const [vectorC, setVectorC] = useState("");
-  const [calculationResult, setCalculationResult] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [errorField, setErrorField] = useState(null); // 'a', 'b', 'c', or null
-  const [embeddingsData, setEmbeddingsData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); // Canvas loading state
-  const shouldAutoRecalculateRef = useRef(false); // Track if we should auto-recalculate when embeddings load
+  const [wordsText, setWordsText] = useState("If the path be beautiful , let us not ask where it leads");
+  const [inputs, setInputs] = useState({ a: "", b: "", c: "" });
+  const [equation, setEquation] = useState(null);
+  const [models, setModels] = useState({});
+  const [progress, setProgress] = useState(0);
+  const [view, setView] = useState("zero");
+  const [showNearby, setShowNearby] = useState(false);
+  const { isMinimalistMode } = useLayoutMode();
 
-  // Auto-dismiss error messages after 5 seconds
+  const embeddings = models[embeddingModel] ?? null;
+  const modelLabel = MODELS[embeddingModel].label;
+
   useEffect(() => {
-    if (errorMessage) {
-      const timer = setTimeout(() => {
-        setErrorMessage(null);
-        setErrorField(null);
-      }, 5000); // 5 seconds
+    if (models[embeddingModel]) return;
+    let alive = true;
+    setProgress(0);
+    loadModel(MODELS[embeddingModel].url, (p) => { if (alive) setProgress(p); })
+      .then((data) => { if (alive) setModels((m) => ({ ...m, [embeddingModel]: data })); })
+      .catch((error) => console.error("Error loading embeddings:", error));
+    return () => { alive = false; };
+  }, [embeddingModel, models]);
 
-      return () => clearTimeout(timer);
-    }
-  }, [errorMessage]);
-
-  // Clear calculation result when embedding model changes, but mark for auto-recalculate if we had a result
+  // Replot once typing pauses briefly, not on every keystroke.
+  const [plotText, setPlotText] = useState(wordsText);
   useEffect(() => {
-    if (calculationResult && vectorA && vectorB && vectorC) {
-      // Had a calculation - mark to auto-recalculate when new embeddings load
-      shouldAutoRecalculateRef.current = true;
-    }
-    setCalculationResult(null);
-    setErrorMessage(null);
-    setErrorField(null);
-    setEmbeddingsData(null); // Clear old embeddings to ensure we wait for new ones
-  }, [embeddingModel]);
-
-  // Auto-recalculate when embeddings finish loading (if we had a previous calculation)
-  useEffect(() => {
-    if (
-      shouldAutoRecalculateRef.current &&
-      embeddingsData &&
-      vectorA &&
-      vectorB &&
-      vectorC
-    ) {
-      shouldAutoRecalculateRef.current = false;
-      // Use handleCalculate logic inline to avoid circular dependency
-      const {
-        result: resultVectorFull,
-        missingWords,
-        inputWords,
-        errorField: field,
-      } = parseVectorEquation(vectorA, vectorB, vectorC, embeddingsData);
-
-      if (
-        missingWords.length === 0 &&
-        resultVectorFull &&
-        Array.isArray(resultVectorFull)
-      ) {
-        const vector3D = [
-          resultVectorFull[0] || 0,
-          resultVectorFull[1] || 0,
-          resultVectorFull[2] || 0,
-        ];
-        const closest = findClosestWord(
-          resultVectorFull,
-          embeddingsData,
-          inputWords
-        );
-
-        setCalculationResult({
-          vector3D: vector3D,
-          vectorFull: resultVectorFull,
-          closestWord: closest?.word,
-          closestDistance: closest?.distance,
-          similarity: closest?.similarity,
-        });
-        setErrorMessage(null);
-        setErrorField(null);
-      }
-    }
-  }, [embeddingsData, vectorA, vectorB, vectorC]);
-
-  // Mutual exclusivity: If user types in words textbox, clear vector inputs and calculation
-  useEffect(() => {
-    if (wordsText.trim().length > 0) {
-      if (vectorA || vectorB || vectorC || calculationResult) {
-        setVectorA("");
-        setVectorB("");
-        setVectorC("");
-        setCalculationResult(null);
-        setErrorMessage(null);
-        setErrorField(null);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const id = setTimeout(() => setPlotText(wordsText), 150);
+    return () => clearTimeout(id);
   }, [wordsText]);
+  const manualWords = useMemo(
+    () => [...new Set(plotText.split(/\s+/).map((w) => w.trim()).filter(Boolean))].slice(0, 50),
+    [plotText]
+  );
 
-  // Mutual exclusivity: If user types in vector inputs, clear words textbox
-  useEffect(() => {
-    if (
-      (vectorA.trim().length > 0 ||
-        vectorB.trim().length > 0 ||
-        vectorC.trim().length > 0) &&
-      wordsText.trim().length > 0
-    ) {
-      setWordsText("");
+  // Equation state: which fields are missing in the current model, and the result if all three resolve.
+  const calc = useMemo(() => {
+    if (!equation || !embeddings) return null;
+    const keys = FIELDS.map((f) => lookup(embeddings, equation[f]));
+    const missing = FIELDS.find((f, i) => !keys[i]);
+    if (missing) return { errorField: missing, error: `"${equation[missing]}" is not in ${modelLabel}.` };
+    const vector = analogy(...keys.map((k) => embeddings[k]));
+    return { keys, vector, neighbors: nearest(vector, embeddings, keys, 5) };
+  }, [equation, embeddings, modelLabel]);
+  const result = calc?.neighbors ? calc : null;
+
+
+  const scene = useMemo(() => {
+    if (!embeddings) return { items: [], links: [] };
+    const plotted = [];
+    const add = (key, kind) => { if (key && !plotted.some((p) => p.key === key)) plotted.push({ key, kind }); };
+    if (result) result.keys.forEach((k) => add(k, "word"));
+    else manualWords.forEach((w) => add(lookup(embeddings, w), "word"));
+    const answer = result?.neighbors[0].word;
+    if (answer) {
+      const existing = plotted.find((p) => p.key === answer);
+      if (existing) existing.kind = "answer";
+      else add(answer, "answer");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vectorA, vectorB, vectorC]);
-
-  // Parse words from text, limit to 50
-  const manualWords = wordsText
-    .split(/\s+/)
-    .map((w) => w.trim().toLowerCase())
-    .filter((w) => w.length > 0)
-    .slice(0, 50);
-
-  // Combine manual words with vector calculation words (a, b, c)
-  // NOTE: Don't include result word here - it's plotted separately as resultVector
-  const vectorWords = [];
-  if (vectorA.trim()) vectorWords.push(vectorA.trim().toLowerCase());
-  if (vectorB.trim()) vectorWords.push(vectorB.trim().toLowerCase());
-  if (vectorC.trim()) vectorWords.push(vectorC.trim().toLowerCase());
-
-  // Combine all words, removing duplicates
-  const allWords = [...new Set([...manualWords, ...vectorWords])].slice(0, 50);
-  const words = allWords;
-
-  // Handle vector calculation
-  const handleCalculate = () => {
-    setErrorMessage(null);
-    setErrorField(null);
-    setCalculationResult(null);
-
-    if (!embeddingsData) {
-      setErrorMessage("Embeddings not loaded yet. Please wait...");
-      setErrorField(null);
-      return;
+    // Always fit the layout with the runner-ups so toggling them never moves the other arrows.
+    if (result) result.neighbors.slice(1).forEach((n) => add(n.word, "nearby"));
+    const vectors = plotted.map((p) => embeddings[p.key]);
+    if (result) vectors.push(result.vector);
+    if (!vectors.length) return { items: [], links: [] };
+    const coords = pca3(vectors, view === "centred");
+    const radius = Math.max(...coords.map((c) => Math.hypot(...c)), 1e-9);
+    const pos = coords.map((c) => c.map((x) => (x / radius) * 2.4));
+    let colorIndex = 0;
+    const items = plotted.map((p, i) => ({
+      id: p.key, label: p.key, pos: pos[i],
+      color: p.kind === "answer" ? ANSWER_COLOR : WORD_COLORS[colorIndex++ % WORD_COLORS.length],
+      kind: p.kind === "word" && result && showNearby ? "faded" : p.kind === "nearby" ? "word" : p.kind,
+      delay: result ? (p.kind === "answer" ? 2.3 : p.kind === "nearby" ? 0.1 + (i % 4) * 0.12 : i * 0.25) : i * 0.04,
+      hidden: p.kind === "nearby" && !showNearby,
+    })).filter((item) => !item.hidden);
+    const links = [];
+    if (result) {
+      const at = (key) => pos[plotted.findIndex((p) => p.key === key)];
+      const point = pos[pos.length - 1];
+      const [a, b, c] = result.keys;
+      items.push({ id: "__result", label: "a − b + c", pos: point, kind: "point", color: ANSWER_COLOR, delay: 1.6 });
+      links.push({ from: at(b), to: at(a), color: HELPER_COLOR, delay: 0.9, faded: showNearby });
+      links.push({ from: at(c), to: point, color: HELPER_COLOR, delay: 1.3, faded: showNearby });
+      links.push({ from: point, to: at(answer), color: ANSWER_COLOR, dashed: true, delay: 1.9 });
+      if (view === "zero") links.push({ from: [0, 0, 0], to: point, color: ANSWER_COLOR, delay: 1.6 });
     }
+    return { items, links };
+  }, [embeddings, manualWords, result, view, showNearby]);
 
-    // Parse equation to get full-dimensional result vector
-    const {
-      result: resultVectorFull,
-      missingWords,
-      inputWords,
-      errorField: field,
-    } = parseVectorEquation(vectorA, vectorB, vectorC, embeddingsData);
-
-    if (missingWords.length > 0) {
-      setErrorMessage(
-        `Words not found in embeddings: ${missingWords.join(", ")}`
-      );
-      setErrorField(field);
-      return;
+  const wordColors = useMemo(() => {
+    const colors = {};
+    if (!embeddings) return colors;
+    let i = 0;
+    for (const w of manualWords) {
+      const key = lookup(embeddings, w);
+      if (key) colors[w] = WORD_COLORS[i++ % WORD_COLORS.length];
     }
+    return colors;
+  }, [embeddings, manualWords]);
 
-    if (!resultVectorFull || !Array.isArray(resultVectorFull)) {
-      setErrorMessage("Invalid calculation. Please check your inputs.");
-      setErrorField(null);
-      return;
-    }
-
-    // Extract first 3 dimensions for visualization (the canvas only shows 3D)
-    const vector3D = [
-      resultVectorFull[0] || 0,
-      resultVectorFull[1] || 0,
-      resultVectorFull[2] || 0,
-    ];
-
-    // Find closest word using FULL vectors (important for accuracy)
-    const closest = findClosestWord(
-      resultVectorFull,
-      embeddingsData,
-      inputWords
-    );
-
-    setCalculationResult({
-      vector3D: vector3D, // 3D for visualization
-      vectorFull: resultVectorFull, // Full vector for accurate calculations
-      closestWord: closest?.word,
-      closestDistance: closest?.distance,
-      similarity: closest?.similarity,
-    });
+  const onInputChange = (field, value) => {
+    setInputs((cur) => ({ ...cur, [field]: value }));
+    if (calc?.errorField) setEquation(null);
   };
+  const handleCalculate = () => {
+    if (FIELDS.some((f) => !inputs[f].trim())) return;
+    setEquation({ ...inputs });
+    setShowNearby(false);
+  };
+  const handlePreset = ([a, b, c]) => {
+    setInputs({ a, b, c });
+    setEquation({ a, b, c });
+    setShowNearby(false);
+  };
+
+  const incomplete = FIELDS.some((f) => !inputs[f].trim());
+  const calcDisabled = !embeddings || incomplete;
+  const calcLabel = embeddings ? "Calculate" : `Loading ${modelLabel}… ${Math.round(progress * 100)}%`;
+  const errorMessage = calc?.error ?? null;
+  const errorField = calc?.errorField ?? null;
 
   return (
     <>
-      {/* Info Icon - Top Right */}
       <Drawer>
         <div className="fixed top-20 landscape:top-16 right-4 landscape:right-2 z-50">
           <DrawerTrigger asChild>
@@ -702,63 +449,34 @@ export default function PlaygroundPage() {
 
             <div className="space-y-3 pb-4">
               <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
-                  Classic analogy
-                </div>
-                <div className="text-sm text-white mb-1">"king - man + woman"</div>
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">Classic analogy</div>
+                <div className="text-sm text-white mb-1">&quot;king - man + woman&quot;</div>
                 <div className="flex flex-wrap gap-1">
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    king
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    -
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    man
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    +
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    woman
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-green-900/60 text-green-100">
-                    ≈ queen
-                  </span>
+                  {["king", "−", "man", "+", "woman"].map((t, i) => (
+                    <span key={i} className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">{t}</span>
+                  ))}
+                  <span className="px-2 py-0.5 text-xs rounded bg-green-900/60 text-green-100">≈ queen</span>
                 </div>
               </div>
 
               <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
-                  Yellow arrows
-                </div>
-                <div className="text-sm text-white mb-1">Distance vectors show relationships</div>
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">Yellow arrows</div>
+                <div className="text-sm text-white mb-1">The same relationship, twice</div>
+                <p className="text-xs text-neutral-300 mb-2">
+                  One arrow goes from b to a (man → king). The other starts at c and applies that same step (woman → a − b + c).
+                  If the analogy holds, the two arrows look parallel, and the green dashed line to the answer is short.
+                </p>
                 <div className="flex flex-wrap gap-1">
-                  <span className="px-2 py-0.5 text-xs rounded bg-yellow-900/60 text-yellow-100">
-                    a → b
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-yellow-900/60 text-yellow-100">
-                    b → c
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-yellow-900/60 text-yellow-100">
-                    c → result
-                  </span>
+                  <span className="px-2 py-0.5 text-xs rounded bg-yellow-900/60 text-yellow-100">b → a</span>
+                  <span className="px-2 py-0.5 text-xs rounded bg-yellow-900/60 text-yellow-100">c → a − b + c</span>
                 </div>
               </div>
 
               <div className="rounded-md bg-neutral-800/40 border border-neutral-700/50 p-3">
-                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">
-                  Try these
-                </div>
-                <div className="text-sm text-white mb-1">More examples</div>
-                <div className="flex flex-wrap gap-1">
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    paris - france + italy
-                  </span>
-                  <span className="px-2 py-0.5 text-xs rounded bg-neutral-700/60 text-neutral-100">
-                    happy - sad + joy
-                  </span>
-                </div>
+                <div className="text-[11px] uppercase tracking-wide text-neutral-400 mb-1">Try these</div>
+                <DrawerClose asChild>
+                  <div><PresetChips onPick={handlePreset} /></div>
+                </DrawerClose>
               </div>
             </div>
           </div>
@@ -782,14 +500,15 @@ export default function PlaygroundPage() {
             onShowGridlinesChange={setShowGridlines}
             wordsText={wordsText}
             onWordsTextChange={setWordsText}
-            vectorA={vectorA}
-            onVectorAChange={setVectorA}
-            vectorB={vectorB}
-            onVectorBChange={setVectorB}
-            vectorC={vectorC}
-            onVectorCChange={setVectorC}
+            manualWords={manualWords}
+            wordColors={wordColors}
+            inputs={inputs}
+            onInputChange={onInputChange}
+            onPreset={handlePreset}
             onCalculate={handleCalculate}
-            calculationResult={calculationResult}
+            calcDisabled={calcDisabled}
+            calcLabel={calcLabel}
+            result={result}
             errorMessage={errorMessage}
             errorField={errorField}
           />
@@ -831,15 +550,8 @@ export default function PlaygroundPage() {
                 <div>
                   <h3 className="text-lg font-semibold mb-3">Display Options</h3>
                   <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="mobile-gridlines"
-                      checked={showGridlines}
-                      onCheckedChange={setShowGridlines}
-                    />
-                    <label
-                      htmlFor="mobile-gridlines"
-                      className="text-sm font-medium cursor-pointer"
-                    >
+                    <Checkbox id="mobile-gridlines" checked={showGridlines} onCheckedChange={setShowGridlines} />
+                    <label htmlFor="mobile-gridlines" className="text-sm font-medium cursor-pointer">
                       Show Gridlines
                     </label>
                   </div>
@@ -868,12 +580,9 @@ export default function PlaygroundPage() {
                       maxLength={1000}
                     />
                     <p className="text-xs text-muted-foreground">
-                      {Math.min(
-                        wordsText.split(/\s+/).filter((w) => w.trim().length > 0).length,
-                        50
-                      )}{" "}
-                      / 50 words
+                      {Math.min(wordsText.split(/\s+/).filter((w) => w.trim().length > 0).length, 50)} / 50 words
                     </p>
+                    <WordChips words={manualWords} colors={wordColors} modelLabel={modelLabel} dimmed={!!result} />
                   </div>
                 </div>
               </div>
@@ -888,100 +597,13 @@ export default function PlaygroundPage() {
                 <div>
                   <h3 className="text-lg font-semibold mb-3">Vector Calculation</h3>
                   <div className="space-y-4">
-                    {/* Formula Display */}
-                    <div className="p-4 rounded-lg bg-neutral-800/40 border border-neutral-700/50">
-                      <div className="flex items-center justify-center gap-2 flex-wrap text-lg font-mono">
-                        <Input
-                          id="mobile-vector-a"
-                          value={vectorA}
-                          onChange={(e) => setVectorA(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              handleCalculate();
-                            }
-                          }}
-                          placeholder="king"
-                          className={cn(
-                            "w-20 text-center text-base font-semibold",
-                            errorField === "a" &&
-                              "border-destructive focus-visible:ring-destructive"
-                          )}
-                        />
-                        <span className="text-neutral-400">-</span>
-                        <Input
-                          id="mobile-vector-b"
-                          value={vectorB}
-                          onChange={(e) => setVectorB(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              handleCalculate();
-                            }
-                          }}
-                          placeholder="man"
-                          className={cn(
-                            "w-20 text-center text-base font-semibold",
-                            errorField === "b" &&
-                              "border-destructive focus-visible:ring-destructive"
-                          )}
-                        />
-                        <span className="text-neutral-400">+</span>
-                        <Input
-                          id="mobile-vector-c"
-                          value={vectorC}
-                          onChange={(e) => setVectorC(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              handleCalculate();
-                            }
-                          }}
-                          placeholder="woman"
-                          className={cn(
-                            "w-20 text-center text-base font-semibold",
-                            errorField === "c" &&
-                              "border-destructive focus-visible:ring-destructive"
-                          )}
-                        />
-                        <span className="text-neutral-400">=</span>
-                        {calculationResult ? (
-                          <div className="px-3 py-1.5 rounded bg-blue-500/20 text-blue-400 font-semibold min-w-[80px] text-center">
-                            {calculationResult.closestWord}
-                          </div>
-                        ) : (
-                          <div className="px-3 py-1.5 rounded bg-neutral-700/40 text-neutral-500 font-semibold min-w-[80px] text-center">
-                            ?
-                          </div>
-                        )}
-                      </div>
-                      {(errorField && errorMessage) && (
-                        <p className="text-xs text-destructive mt-2 text-center">
-                          {errorMessage}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Calculate Button */}
-                    <Button 
-                      onClick={handleCalculate} 
-                      variant="default" 
-                      className="w-full"
-                      disabled={!vectorA || !vectorB || !vectorC}
-                    >
-                      Calculate
+                    <EquationInputs inputs={inputs} onInputChange={onInputChange} onCalculate={handleCalculate} errorField={errorField} />
+                    {errorMessage && <p className="text-xs text-destructive">{errorMessage}</p>}
+                    <Button onClick={handleCalculate} variant="default" className="w-full" disabled={calcDisabled}>
+                      {calcLabel}
                     </Button>
-
-                    {/* Result Details */}
-                    {calculationResult && (
-                      <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                        <p className="text-sm font-medium text-blue-400 mb-1">Result:</p>
-                        <p className="text-lg font-semibold text-white mb-2">
-                          {calculationResult.closestWord}
-                        </p>
-                        <div className="text-xs text-muted-foreground space-y-1">
-                          <p>Similarity: {(calculationResult.similarity * 100).toFixed(1)}%</p>
-                          <p>Distance: {calculationResult.closestDistance.toFixed(3)}</p>
-                        </div>
-                      </div>
-                    )}
+                    <p className="text-[11px] uppercase tracking-wide text-neutral-500">Or try an example</p>
+                    <PresetChips onPick={handlePreset} />
                   </div>
                 </div>
               </div>
@@ -990,36 +612,30 @@ export default function PlaygroundPage() {
         ]}
         rightCanvas={
           <div className="relative w-full h-full">
-            {isLoading && (
+            {!embeddings && (
               <div className="absolute inset-0 z-50 flex items-center justify-center bg-neutral-950/80 backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-8 h-8 border-4 border-neutral-700 border-t-blue-500 rounded-full animate-spin" />
-                  <p className="text-sm text-neutral-300">Loading embeddings...</p>
+                <div className="flex w-56 flex-col items-center gap-3">
+                  <p className="text-sm text-neutral-300">Loading {modelLabel} embeddings…</p>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-800" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
+                    <div className="h-full rounded-full bg-blue-500 transition-[width]" style={{ width: `${Math.round(progress * 100)}%` }} />
+                  </div>
+                  <p className="font-mono text-xs text-neutral-500">{Math.round(progress * 100)}%</p>
                 </div>
               </div>
             )}
-            <VectorPlaygroundCanvas
-              embeddingModel={embeddingModel}
-              showGridlines={showGridlines}
-              words={words}
-              resultVector={calculationResult ? calculationResult.vector3D : null}
-              resultLabel={calculationResult?.closestWord || "Result"}
-              resultInfo={
-                calculationResult
-                  ? {
-                      closestWord: calculationResult.closestWord,
-                      vector3D: calculationResult.vector3D,
-                      similarity: calculationResult.similarity,
-                      distance: calculationResult.closestDistance,
-                    }
-                  : null
-              }
-              onEmbeddingsLoaded={setEmbeddingsData}
-              onLoadingChange={setIsLoading}
-              vectorA={vectorA.trim().toLowerCase() || null}
-              vectorB={vectorB.trim().toLowerCase() || null}
-              vectorC={vectorC.trim().toLowerCase() || null}
-            />
+            <ResultCard result={result} onClose={() => { setEquation(null); setShowNearby(false); }} open={showNearby} onToggle={() => setShowNearby(!showNearby)} top={isMinimalistMode ? "md:top-32" : "md:top-16"} />
+            <PlotLegend result={result} view={view} />
+            <button
+              type="button"
+              onClick={() => setView((v) => (v === "centred" ? "zero" : "centred"))}
+              title={VIEWS[view].hint}
+              aria-label={`Change view. Current view: ${VIEWS[view].label}`}
+              className={`absolute left-3 top-20 ${isMinimalistMode ? "md:top-20" : "md:top-3"} z-40 flex items-center gap-2 rounded-full border border-white/15 bg-neutral-950/80 py-1.5 pl-2.5 pr-3.5 text-xs font-medium text-neutral-200 backdrop-blur-md transition-colors hover:bg-neutral-800`}
+            >
+              <Eye className="h-4 w-4 text-sky-300" />
+              <span className="text-neutral-400">View:</span> {VIEWS[view].label}
+            </button>
+            <VectorPlaygroundCanvas showGridlines={showGridlines} items={scene.items} links={scene.links} originLabel={VIEWS[view].origin} />
           </div>
         }
       />

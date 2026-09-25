@@ -1,0 +1,76 @@
+/* Shared controls */
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 16px; }
+.btn {
+  padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: #ffffff08;
+  font: 500 13px var(--mono); color: #cfd8e6; cursor: pointer;
+}
+.btn:hover:not(:disabled) { border-color: #f9ca2466; }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn[aria-pressed="true"], .primary { color: #fff; background: #f9ca2426; border-color: #f9ca24; }
+.btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.stepNo { font: 400 12px var(--mono); color: var(--muted); }
+
+/* BPE trainer */
+.trainer { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.trainer section { padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: #0e1015; min-width: 0; }
+.trainer h3 { margin: 0 0 10px; font: 500 11px var(--mono); color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
+.trainer h3 + * + h3 { margin-top: 14px; }
+.vocabBox { grid-column: 1 / -1; }
+
+.words, .pairs, .mergeList, .trace { list-style: none !important; margin: 0 !important; padding: 0 !important; }
+.words li { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 8px !important; }
+.words small { font: 400 12px var(--mono); color: var(--muted); }
+.syms { display: inline-flex; flex-wrap: wrap; gap: 3px; }
+.syms b {
+  font: 500 15px var(--mono); color: #fff; padding: 2px 6px; border-radius: 5px;
+  background: #ffffff10; box-shadow: inset 0 -2px 0 #ffffff30; transition: background .3s, box-shadow .3s;
+}
+.syms b.hit { background: #f9ca2433; box-shadow: inset 0 -2px 0 #f9ca24; }
+
+.pairs li { display: grid; grid-template-columns: 5.5em minmax(0, 1fr) 2em; align-items: center; gap: 8px; margin: 0 0 6px !important; font: 400 13px var(--mono); color: #cfd8e6; }
+.pairs code { background: none !important; padding: 0 !important; }
+.pairs i { display: block; height: 8px; border-radius: 4px; background: #ffffff30; width: var(--w); transition: width .4s; }
+.pairs span { text-align: right; }
+.pairs li.best { color: #fff; }
+.pairs li.best i { background: #f9ca24; }
+.next { margin: 12px 0 0 !important; font-size: 15px; line-height: 1.6; }
+.next code + code { margin-left: 4px; }
+
+.mergeList { display: flex; flex-wrap: wrap; gap: 6px; counter-reset: m; }
+.mergeList li { margin: 0 !important; font-size: 13px; counter-increment: m; }
+.mergeList li::before { content: counter(m) "."; margin-right: 4px; font: 400 11px var(--mono); color: var(--dim); }
+.mergeList .empty { color: var(--dim); font: 400 13px var(--mono); }
+.mergeList .empty::before { content: none; }
+.vocab { display: flex; flex-wrap: wrap; gap: 4px; }
+.vocab span { font: 500 14px var(--mono); padding: 2px 7px; border-radius: 5px; color: #fff; }
+.base { background: #ffffff10; }
+.learned { background: color-mix(in srgb, var(--tc) 28%, transparent); box-shadow: inset 0 -2px 0 var(--tc); animation: pop .35s ease-out; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } }
+
+/* Applying merges */
+.trace li { display: grid; grid-template-columns: 8.5em minmax(0, 1fr); align-items: center; gap: 10px; margin: 0 0 8px !important; animation: rise .35s ease-out both; animation-delay: var(--d); }
+.traceLabel { font: 400 12px var(--mono); color: var(--muted); }
+.traceLabel code { font-size: 12px !important; }
+.trace li:last-child .syms b { background: #f9ca2433; box-shadow: inset 0 -2px 0 #f9ca24; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+
+/* Static tables */
+.tableWrap { overflow-x: auto; }
+.tbl { width: 100%; min-width: 440px; border-collapse: collapse; font: 400 13px var(--mono); }
+.tbl th, .tbl td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl thead th { color: var(--dim); font-weight: 500; font-size: 12px; }
+.tbl .win { color: #f9ca24; font-weight: 600; }
+.compare td, .compare th { text-align: left !important; white-space: normal; vertical-align: top; }
+.compare { min-width: 560px; font-size: 12.5px; line-height: 1.5; }
+.compare tbody th { color: #fff; font-weight: 600; }
+
+@media (max-width: 720px) {
+  .trainer { grid-template-columns: minmax(0, 1fr); }
+  .trace li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .learned, .trace li { animation: none; }
+  .syms b, .pairs i { transition: none; }
+}

@@ -1,0 +1,37 @@
+.label { fill: #fff !important; paint-order: stroke; stroke: #0e1015; stroke-width: 3px; }
+.dimText { fill: #8b95a7 !important; }
+
+/* ---------- Swiss roll ---------- */
+.roll { display: grid; gap: 12px; }
+.panels { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.panels svg { background: #0e1015; border: 1px solid #ffffff14; border-radius: 12px; aspect-ratio: 1; }
+.panels circle { cursor: pointer; }
+.sel { stroke: #fff; stroke-width: .02; }
+.near { stroke: #fff; stroke-width: .013; }
+.panelHead { margin: 0 0 6px !important; font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+.range { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center; margin-top: 10px; font: 400 12px var(--mono); color: var(--muted); }
+.range input { width: 100%; accent-color: var(--cyan); }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.tabs button {
+  padding: 5px 10px; border-radius: 8px; border: 1px solid var(--line-2); background: #ffffff08;
+  font: 500 12px var(--mono); color: #e7edf6; cursor: pointer;
+}
+.tabs button:hover { background: #ffffff14; }
+.tabs button[aria-pressed="true"] { background: #5ad0f522; border-color: #5ad0f566; color: #fff; }
+.tabs button:focus-visible, .range input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.note { margin: 0 !important; min-height: 5.2em; font-size: 15px; line-height: 1.55; color: #cfd8e6; }
+.note strong { color: var(--cyan); }
+.hint { margin: 0 !important; font: 400 12px var(--mono); color: var(--dim); }
+
+@media (min-width: 640px) {
+  .panels { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ---------- Perplexity small multiples ---------- */
+.multi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.multi > div { min-width: 0; }
+.multi svg { background: #0e1015; border: 1px solid #ffffff14; border-radius: 10px; aspect-ratio: 1; }
+.multi p { margin: 6px 0 0 !important; font: 400 12px var(--mono); color: var(--muted); text-align: center; }
+@media (min-width: 640px) {
+  .multi { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}

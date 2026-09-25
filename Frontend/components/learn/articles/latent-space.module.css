@@ -1,0 +1,48 @@
+.label { fill: #fff !important; paint-order: stroke; stroke: #0e1015; stroke-width: 3px; }
+.dimText { fill: #8b95a7 !important; }
+.axis { stroke: #ffffff26; }
+
+/* ---------- Walk between two words ---------- */
+.walk { display: grid; gap: 12px; }
+.pairs { display: flex; flex-wrap: wrap; gap: 6px; }
+.pairs button {
+  padding: 5px 10px; border-radius: 8px; border: 1px solid var(--line-2); background: #ffffff08;
+  font: 500 12px var(--mono); color: #e7edf6; cursor: pointer;
+}
+.pairs button:hover { background: #ffffff14; }
+.pairs button[aria-pressed="true"] { background: #5ad0f522; border-color: #5ad0f566; color: #fff; }
+.pairs button:focus-visible, .slider input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.track line { stroke: #ffffff33; stroke-width: 2; }
+.cursor { fill: #fff; stroke: #0e1015; stroke-width: 2; transition: cx .25s; }
+.slider { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; font: 600 13px var(--mono); }
+.slider input { width: 100%; accent-color: var(--cyan); }
+.mix { margin: 0 !important; text-align: center; font: 400 13px var(--mono); color: var(--muted); }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.cols h3 { margin: 0 0 6px; font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+.bars { list-style: none !important; margin: 0 !important; padding: 0 !important; display: grid; gap: 4px; }
+.bars li { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) 2.8em; gap: 8px; align-items: center; margin: 0 !important; font: 400 13px var(--mono); color: #cfd8e6; }
+.bars li span { overflow: hidden; text-overflow: ellipsis; }
+.bars i { height: 8px; border-radius: 4px; background: var(--tc); width: calc((var(--w) - .3) / .7 * 100%); min-width: 3px; transition: width .25s; }
+.bars small { text-align: right; color: var(--muted); font-size: 12px; }
+.strong span { color: #fff; font-weight: 700; }
+
+@media (min-width: 640px) {
+  .cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ---------- Occupation bias bars ---------- */
+.occ { display: grid; gap: 3px; font: 400 13px var(--mono); }
+.occRow { display: grid; grid-template-columns: 6.5em minmax(0, 1fr) minmax(0, 1fr) 3.4em; align-items: center; gap: 0; color: #cfd8e6; }
+.occRow small { text-align: right; color: var(--muted); font-size: 12px; }
+.occRow i { height: 10px; }
+.neg { margin-left: auto; border-radius: 4px 0 0 4px; background: var(--tc); width: calc(var(--w) * 100%); }
+.pos { border-radius: 0 4px 4px 0; background: var(--tc); width: calc(var(--w) * 100%); }
+.occMid { border-left: 1px solid #ffffff40; }
+.occHead { display: grid; grid-template-columns: 6.5em minmax(0, 1fr) minmax(0, 1fr) 3.4em; font: 400 11px var(--mono); color: var(--dim); margin-bottom: 6px; }
+.occHead span:nth-child(2) { text-align: right; padding-right: 8px; }
+.occHead span:nth-child(3) { padding-left: 8px; }
+.ref { color: var(--muted) !important; font-style: italic; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor, .bars i { transition: none; }
+}
