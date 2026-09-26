@@ -1,0 +1,453 @@
+{
+  "Og": {
+    "footer": "免费 · 无广告 · 在浏览器中运行",
+    "home": { "title": "看看 AI", "serif": "如何读懂文字。", "sub": "把文字切成词元，在 3D 中查看词语，用含义做数学。" },
+    "tokenizer": { "kicker": "分词器", "title": "看文字如何", "serif": "变成词元。" },
+    "embedding": { "kicker": "词嵌入", "title": "在 3D 中", "serif": "穿梭词海。", "sub": "GloVe、Word2Vec 和 FastText：相近的词会自然聚在一起。" },
+    "vectors": { "kicker": "向量实验场", "title": "用含义", "serif": "做数学。" },
+    "learn": { "kicker": "学习", "title": "语言模型", "serif": "如何读懂文字。", "sub": "面向初学者的文章：词元、嵌入、注意力与 Transformer。" },
+    "article": { "kicker": "{minutes} 分钟阅读", "learn": "学习" }
+  },
+  "Metadata": {
+    "title": "WordCanvas3D · 看看 AI 如何读懂文字",
+    "description": "一个免费的交互式实验场，带你了解 AI 如何读懂文字：把文字切分成词元（token），在 3D 中探索词嵌入，用含义做向量运算，并学习语言模型的工作原理。",
+    "keywords": ["分词器", "词元计数", "词嵌入", "词嵌入可视化", "向量运算", "king - man + woman", "PCA", "UMAP", "GloVe", "Word2Vec", "FastText", "大语言模型原理", "Transformer", "注意力机制", "学习 AI"],
+    "ogLocale": "zh_CN"
+  },
+  "Nav": {
+    "learn": { "label": "学习", "hint": "文章与指南" },
+    "tokenizer": { "label": "分词器", "hint": "看文字如何被切分" },
+    "embedding": { "label": "词嵌入", "hint": "在 3D 中探索词语" },
+    "vectors": { "label": "向量实验场", "hint": "用含义做数学" },
+    "main": "主导航",
+    "openMenu": "打开菜单",
+    "closeMenu": "关闭菜单",
+    "drawerTitle": "导航",
+    "drawerDescription": "WordCanvas3D 的页面",
+    "sourceCode": "GitHub 上的源代码",
+    "madeBy": "作者 @Akage",
+    "repoLabel": "GitHub 上的 WordCanvas3D",
+    "authorLabel": "关于作者 @Akage",
+    "languageLabel": "语言：中文"
+  },
+  "Home": {
+    "eyebrow": "免费开源 · 无需注册",
+    "headlines": [
+      ["让语言", "看得见。"],
+      ["看看 AI", "如何读懂文字。"],
+      ["把文字切成", "词元。"],
+      ["在 3D 中", "穿梭词海。"],
+      ["用含义", "做数学。"],
+      ["每个词都有", "自己的位置。"]
+    ],
+    "pitch": "<strong>WordCanvas3D</strong> 是一个免费的实验场，带你了解 AI 如何理解文字。把文字切分成词元（token），在 3D 中查看它们，用含义做数学，一切都在浏览器中完成。",
+    "exploreCta": "探索词嵌入",
+    "tokenizeCta": "切分文字",
+    "tokenizeChips": ["Token", "ize", " text"],
+    "galaxyLabel": "一个缓慢旋转的词语星系，按簇着色",
+    "tools": {
+      "kicker": "三个工具，一个理念",
+      "title": "模型眼中的语言。",
+      "sub": "每个工具展示旅程中的一步。从哪里开始都可以，它们彼此相连。"
+    },
+    "lenses": {
+      "tokenizer": { "step": "01 · 分词器", "title": "把文字切成小块", "text": "比较 GPT 和其他分词器如何切分同一句话，看看为什么表情符号和生僻词更费词元。", "cta": "打开分词器" },
+      "embedding": { "step": "02 · 词嵌入", "title": "词语的地图", "text": "在多达 10,000 个 GloVe 词语中穿梭。簇会自然形成：数字、地点、情感、动词。", "cta": "打开词嵌入" },
+      "vectors": { "step": "03 · 向量实验场", "title": "用含义做数学", "text": "把你自己的词画成箭头，试试著名的类比：king − man + woman 会落在 queen 附近。", "cta": "打开实验场" }
+    },
+    "learn": {
+      "kicker": "学习",
+      "title": "看懂<br></br>你看到的一切。",
+      "sub": "面向初学者的文章，讲解语言模型如何读懂文字：从你输入的第一个词，到它写出的下一个词。",
+      "cta": "阅读指南",
+      "minutes": "{count} 分钟"
+    },
+    "devices": {
+      "kicker": "适用于任何设备",
+      "title": "书桌前、沙发上、通勤路上。",
+      "sub": "每个工具都同时支持触摸和鼠标。旋转、双指缩放、轻点，畅游语言世界。",
+      "desktopAlt": "桌面屏幕上的词嵌入页面",
+      "tabletAlt": "平板上的分词器页面",
+      "phoneAlt": "手机上的向量实验场",
+      "tabletCaption": "分词器",
+      "phoneCaption": "向量实验场"
+    },
+    "oss": {
+      "kicker": "开源",
+      "title": "公开构建。",
+      "sub": "WordCanvas3D 的每一行代码都在 GitHub 上。看看它如何运作、在本地运行、提交 issue，或发送 pull request。",
+      "github": "在 GitHub 上查看",
+      "star": "给仓库点星",
+      "terminalLabel": "在本地运行 WordCanvas3D 的命令",
+      "terminalComment": "# 在你的电脑上运行",
+      "ready": "✓ 已就绪：http://localhost:3000"
+    },
+    "final": {
+      "enjoy": "喜欢吗？",
+      "title": "分享给<em>好奇</em>的朋友。",
+      "sub": "免费、无广告、无需注册。如果对你有帮助，就转给朋友吧。"
+    },
+    "footer": {
+      "copyright": "© 2026 WordCanvas3D",
+      "madeWith": "由 <author>@Akage</author> 用 <heart></heart> 制作",
+      "love": "爱"
+    }
+  },
+  "Share": {
+    "text": "WordCanvas3D：看看 AI 如何读懂文字。切分词元、在 3D 中查看词语、用含义做数学，在浏览器中免费使用。",
+    "button": "分享 WordCanvas3D",
+    "copied": "链接已复制",
+    "shareOn": "或分享到"
+  },
+  "Learn": {
+    "title": "学习",
+    "metaTitle": "学习：语言模型如何读懂文字",
+    "description": "面向初学者的文章，讲解语言模型如何读懂文字：词元（token）、嵌入、注意力和 Transformer，还有每个 WordCanvas3D 工具的快速指南。",
+    "heading": "看懂你看到的一切。",
+    "sub": "语言模型如何读懂文字：从最初的一步，到它写出的下一个词。",
+    "sectionsLabel": "本页章节",
+    "quickStart": "快速入门",
+    "startPrompt": "不知道从哪里开始？<em>从这里开始</em>",
+    "minRead": "{count} 分钟阅读",
+    "pairsWith": "配套工具：<b>{tool}</b>",
+    "chapter": "第 {number} 章 · {topic}",
+    "backToTop": "返回顶部",
+    "englishOnly": "本文暂时只有英文版，网站的其他部分已翻译。",
+    "tools": {
+      "tokenizer": "分词器",
+      "embedding": "词嵌入浏览器",
+      "vectors": "向量实验场"
+    },
+    "tags": {
+      "Quick Start": "快速入门",
+      "Tokens": "词元",
+      "Embeddings": "嵌入",
+      "Transformers": "Transformer",
+      "Vectors": "向量"
+    },
+    "tracks": {
+      "start": { "title": "从这里开始", "blurb": "无需任何基础。用一张图看懂从你的文字到模型回答的完整过程。" },
+      "foundations": { "title": "基础知识", "blurb": "通用学习资料。每篇文章把一个概念讲透，就像一本好教材的一章。" },
+      "guides": { "title": "站点指南", "blurb": "快速了解每个 WordCanvas3D 工具展示了什么，并链接回基础知识。" }
+    },
+    "back": "← 学习 · {track}",
+    "tryIt": "亲自试试",
+    "pagerLabel": "更多指南",
+    "previous": "← 上一篇",
+    "next": "下一篇 →"
+  },
+  "Concepts": {
+    "readMore": "在“学习”中了解更多",
+    "minRead": "{count} 分钟阅读",
+    "close": "关闭",
+    "tokenizer": {
+      "kicker": "分词器",
+      "title": "什么是分词？",
+      "lede": "语言模型无法直接读字母。在它看到你的文字之前，分词器会把文字切成叫作词元（token）的小块，再把每一块换成一个数字。",
+      "points": [
+        "一个词元通常是一个常见的完整单词，有时是单词的一部分、一个空格或一个标点符号。",
+        "每个模型都有一份固定的词元列表，也就是词表，每个词元都有一个编号（ID）。",
+        "生僻词、其他语言和表情符号会占用更多词元，因此处理成本更高。"
+      ]
+    },
+    "embedding": {
+      "kicker": "词嵌入",
+      "title": "什么是嵌入？",
+      "lede": "嵌入把一个词变成一长串数字（这里是 300 个），让用法相似的词得到相似的数字。",
+      "points": [
+        "把每串数字想象成一个有 300 个方向的空间中的点。点越近，词越相关。",
+        "没有人手写这些数字。它们是通过阅读海量文本学出来的。",
+        "我们看不到 300 个维度，所以本页用 PCA 或 UMAP 把它们压缩到 3D。有些距离会因此失真。"
+      ]
+    },
+    "vectors": {
+      "kicker": "向量实验场",
+      "title": "什么是词向量？",
+      "lede": "每个词的嵌入都是一个向量：一支从原点指向某个点的箭头。既然是箭头，就可以相加和相减，而结果往往仍然有意义。",
+      "points": [
+        "king − man + woman 会落在 queen 附近：“王室”这一步在两边大致是同一支箭头。",
+        "相似度是用夹角（余弦）衡量的，而不是屏幕上的距离。",
+        "这里的箭头是 300 个维度压平后的视图；计算用到了全部维度。"
+      ]
+    }
+  },
+  "PageGuide": {
+    "buttonTitle": "如何使用本页",
+    "kicker": "使用方法",
+    "tokenizer": {
+      "title": "使用分词器",
+      "steps": [
+        "在左侧输入或粘贴文字，或选择一个预设：简短、多种文字、表情符号、代码或段落。",
+        "从顶部菜单选择一个分词器，看看不同模型如何切分同一段文字。",
+        "悬停或轻点任意词元即可高亮它的 ID，反过来也一样。方向键同样可用。",
+        "打开“显示空白字符”，即可看到词元中的空格和换行。"
+      ],
+      "tip": "表情符号和非英文文字最能体现不同分词器之间的差异。"
+    },
+    "embedding": {
+      "title": "使用词嵌入浏览器",
+      "steps": [
+        "在侧边栏选择模型、要加载的词数，以及 PCA 或 UMAP。",
+        "拖动可旋转点云，滚动或双指捏合可缩放。",
+        "点击一个点，或使用“词语搜索”，选中一个词并查看它的最近邻。",
+        "使用画布上的“显示标签”“动态”和“簇”来改变显示内容。"
+      ],
+      "tip": "3D 视图中的距离只是近似值，因为 300 个维度被压缩成了 3 个。"
+    },
+    "vectors": {
+      "title": "使用向量实验场",
+      "steps": [
+        "在“词语”框中输入单词，每个词都会画成一支箭头。",
+        "填写 a、b 和 c 来计算 a − b + c，或选择一个预设，然后点击“计算”。",
+        "结果卡片会显示最接近的词。展开“显示接下来 4 个最接近的词”可以看到其他候选。",
+        "用眼睛按钮在“从零点”和“组中心”视图之间切换。拖动可旋转。"
+      ],
+      "tip": "试试 paris − france + italy，或 walking − walk + swim。"
+    }
+  },
+  "Visualizer": {
+    "controls": "控制",
+    "controlsTitle": "可视化控制",
+    "close": "关闭",
+    "fullScreen": "全屏",
+    "toFullScreen": "切换到全屏布局",
+    "toSidebar": "切换到侧边栏布局"
+  },
+  "Tokenizer": {
+    "metaTitle": "分词器：看文字如何变成词元",
+    "description": "粘贴任意文字，看看 GPT、LLaMA 等分词器如何把它切分成词元（token）和 ID。统计词元数量、比较模型，了解为什么表情符号和其他语言更费词元。",
+    "title": "分词器",
+    "intro": "看看文字如何被切分成词元（token）和 ID。在浏览器中运行，你的文字不会被发送到任何地方。",
+    "learnButton": "了解分词",
+    "modelLabel": "分词器",
+    "llamaNote": "两个选项使用相同的词表，所以 ID 一致。",
+    "defaultText": "敏捷的棕色狐狸跳过了那只懒狗。",
+    "presets": [
+      { "label": "简短", "text": "一个安静的想法也能走得很远。" },
+      { "label": "多种文字", "text": "Hello, world. مرحباً بالعالم. नमस्ते दुनिया। こんにちは世界。" },
+      { "label": "表情符号", "text": "构建、测试、庆祝：🧩 → 🛠️ → ✅ 🎉" },
+      { "label": "代码", "text": "const total = items.reduce((sum, item) => sum + item.price, 0);" },
+      { "label": "段落", "text": "黄昏时分，图书馆的窗户映着最后一抹橙色的光。屋里，一位读者正在比较两个译本，留意到标点、节奏和一个外来词如何改变了同一个小场景的感觉。" }
+    ],
+    "status": {
+      "loading": "正在加载分词器…",
+      "error": "出错",
+      "ready": "就绪",
+      "tokenizing": "· 正在分词…"
+    },
+    "sr": {
+      "loading": "正在加载分词器",
+      "inputError": "这个编码器无法对这段文字分词",
+      "loadError": "分词器加载失败，请重试。",
+      "noText": "没有文字",
+      "result": "{count} 个词元，{tokenizer}"
+    },
+    "text": "文字",
+    "sampleLegend": "加载示例文字",
+    "try": "试试",
+    "placeholder": "输入或粘贴文字…",
+    "tokens": "词元",
+    "showWhitespace": "显示空白字符",
+    "statsLabel": "文字统计",
+    "codePoints": "码位",
+    "utf8Bytes": "UTF-8 字节",
+    "inputError": "{tokenizer} 无法对这段文字分词。",
+    "loadError": "无法加载 {tokenizer} 分词器。",
+    "inputErrorDetail": "{message}。这里只接受 {special} 作为特殊词元。",
+    "retrying": "正在重试…",
+    "retry": "重试",
+    "empty": "输入或粘贴文字即可查看它的词元。",
+    "inspector": {
+      "position": "第 {index} 个，共 {total} 个",
+      "id": " · ID ",
+      "bytes": " · {count, plural, other {# 字节}}：",
+      "piece": " · 词表片段 {piece}",
+      "special": " · 特殊词元",
+      "partial": " · 包含不完整的 UTF-8 字符，会与相邻词元组合",
+      "hint": "悬停、轻点或在词元上使用方向键即可查看详情。"
+    },
+    "spoken": {
+      "special": "特殊词元 {name}",
+      "space": "空格",
+      "newline": "换行",
+      "tab": "制表符",
+      "bytes": "字节 {hex}"
+    },
+    "tokenOption": "第 {index} 个词元，共 {total} 个：{spoken}，ID {id}",
+    "tokenTitle": "id：{id}",
+    "idOption": "ID {id}，第 {index} 个词元，共 {total} 个",
+    "idTitle": "词元序号：{index}",
+    "partialTitle": "不完整的 UTF-8 字符：这些字节会与相邻词元组合",
+    "tokenIds": "词元 ID",
+    "copyIds": "复制 ID",
+    "copied": "已将 ID 复制到剪贴板。",
+    "copyFailed": "复制失败。请选中上面的 ID 手动复制。"
+  },
+  "Embedding": {
+    "metaTitle": "词嵌入浏览器：3D 中的词嵌入",
+    "description": "在交互式 3D 地图中探索来自 GloVe、Word2Vec 和 FastText 的数千个词。搜索词语，查看它的最近邻，并比较 PCA 和 UMAP 投影。",
+    "words": "{count, number} 个词",
+    "colorHint": "随数据集存储的簇 ID。",
+    "edgeHint": "绘制已存储的近邻连线。并非所有连线都会画出，所以这些线不是完整的近邻列表。",
+    "errors": {
+      "network": "无法连接到数据集。请检查网络后重试。",
+      "http": "这个数据集暂时不可用，请重试。",
+      "decode": "数据集下载不完整，请重试。",
+      "invalid": "无法读取这个数据集，请重试。"
+    },
+    "loadFailed": "无法加载 {dataset}",
+    "retry": "重试",
+    "unavailableTitle": "此浏览器无法使用 3D 视图",
+    "stalledTitle": "3D 视图尚未恢复",
+    "unavailableText": "WebGL 无法启动。你仍然可以在面板中搜索词语并查看详情。",
+    "stalledText": "浏览器暂停了图形渲染，尚未恢复。它可能会自行恢复。",
+    "unavailableHint": "重试以启动 3D 视图。",
+    "stalledHint": "重新加载 3D 视图以恢复图形。重新加载会重置视角。",
+    "tryAgain": "重试",
+    "reloadView": "重新加载 3D 视图",
+    "graphicsLost": "图形已被浏览器暂停，正在恢复…",
+    "loadingDataset": "正在加载 {dataset}…",
+    "noSelection": "搜索或点击一个点即可查看详情。",
+    "selected": "已选中",
+    "clearSelection": "取消选中 {word}",
+    "clear": "清除",
+    "controlsLabel": "词嵌入控制",
+    "heading": "嵌入空间",
+    "intro": "300 维词向量投影到 3D。这里的距离可能会扭曲词之间的关系。",
+    "dataset": "数据集",
+    "model": "嵌入模型",
+    "modelPlaceholder": "选择嵌入模型",
+    "wordCount": "词数",
+    "wordCountPlaceholder": "选择词数",
+    "reduction": "降维",
+    "explore": "探索",
+    "wordSearch": "词语搜索",
+    "wordSearchSelected": "词语搜索，已选中 {word}",
+    "searchPlaceholder": "搜索一个词...",
+    "searchWords": "搜索词语...",
+    "noWordFound": "未找到该词。",
+    "typeToSearch": "输入以搜索 {count} 个词...",
+    "loadingWords": "正在加载词语...",
+    "first300": "仅显示前 300 条结果。请细化搜索以查看更多。",
+    "display": "显示",
+    "colorByCluster": "按相似簇着色",
+    "connectClusters": "用连线连接簇",
+    "status": {
+      "loading": "正在加载 {dataset}…",
+      "error": "无法加载 {dataset}。",
+      "unavailable": "已加载 {count} 个词。3D 视图不可用，搜索仍然可用。",
+      "lost": "图形已暂停，正在恢复…",
+      "stalled": "3D 视图尚未恢复。",
+      "ready": "就绪 · {count} 个词"
+    },
+    "canvasLabel": "来自 {model} 的 {count}个词的 3D 散点图，{method} 投影。使用词语搜索以文字形式浏览这些词。",
+    "tabs": {
+      "model": "模型",
+      "search": "搜索",
+      "display": "显示"
+    },
+    "modelConfig": "模型与配置",
+    "typeToSearchLabel": "输入以搜索词语",
+    "typeToSearchPlaceholder": "输入以搜索词语...",
+    "noWordsFound": "未找到词语。试试其他搜索词。",
+    "first50": "仅显示前 50 条结果。继续输入以细化搜索...",
+    "searchThrough": "在 {count} 个词中搜索。选择一个词即可在画布上高亮它。",
+    "loadingWordList": "正在加载词表...",
+    "displayOptions": "显示选项",
+    "loadingModel": "正在加载 {model}"
+  },
+  "Exploration": {
+    "unassigned": "未分组",
+    "cluster": "簇 {id}",
+    "toolsLabel": "画布探索",
+    "showLabelsTitle": "为可见的词显示清晰的标签",
+    "showLabels": "显示标签",
+    "motionTitle": "自动旋转和漂移",
+    "motion": "动态",
+    "clusters": "簇",
+    "clearSpotlight": "取消簇聚焦",
+    "clearCluster": "清除 {label}",
+    "spotlightLabel": "簇聚焦",
+    "searchCluster": "搜索 {label} · {count}",
+    "findInCluster": "在 {label} 中查找词语",
+    "zoomToCluster": "缩放到簇",
+    "wordsIn": "{label} 中的词",
+    "noMatches": "没有匹配项",
+    "hint": "选择一个词来探索它的关联",
+    "trayLabel": "词语探索",
+    "unpin": "取消固定",
+    "pinToCompare": "固定以比较",
+    "unpinWord": "取消固定词语",
+    "pinWord": "固定词语以比较",
+    "locate": "定位词语",
+    "exitFocus": "退出聚焦",
+    "focus": "聚焦关联",
+    "collapse": "收起词语详情",
+    "expand": "展开词语详情",
+    "clearSelection": "取消选中",
+    "clear": "清除",
+    "comparison": "比较",
+    "shared": "{count} 个共同近邻",
+    "directlyLinked": "直接相连",
+    "selectToCompare": "选择一个词进行比较",
+    "notIn": "不在 {dataset} 中",
+    "storedLinks": "{word} 的已存储连线"
+  },
+  "Vectors": {
+    "metaTitle": "向量实验场：词向量运算",
+    "description": "用词义做数学：试试 king − man + woman 等类比，并在 3D 中把词向量看作箭头，计算使用全部 300 个维度。",
+    "views": {
+      "centred": { "label": "组中心", "origin": "中心 = 这些词的平均点", "hint": "箭头从所画词语的平均点出发，便于观察这些词如何分布。" },
+      "zero": { "label": "从零点", "origin": "真正的零点", "hint": "箭头从模型真正的零点出发，由方向决定最近的词。由于大多数词的指向相近，箭头会挤在一起。" }
+    },
+    "wholeWords": "完整单词，直接在 {model} 中查找（不经过分词器）。",
+    "struckOut": " 带删除线的词不在它 10,000 词的词表中。",
+    "hiddenWhileAnalogy": " 显示类比时隐藏。",
+    "clearAnalogy": "清除类比",
+    "showNext": "显示接下来 {count} 个最接近的词",
+    "hideNext": "隐藏接下来 {count} 个最接近的词",
+    "howToRead": "如何解读",
+    "closeLegend": "关闭图例",
+    "legendZero": "白点是模型<b>真正的零点</b>。最近的词，是箭头方向与绿点方向最接近的那个词。",
+    "legendCentred": "白点是这些词的<b>平均点</b>，不是零点。各点在它周围的位置本身没有意义。",
+    "legendStep": "黄色：从 <b>{from}</b> 到 <b>{to}</b> 的一步，再从 <b>{start}</b> 出发走同样的一步。",
+    "legendPoint": "绿点：这一步落到的位置。通常是空白处，而不是一个词。",
+    "legendGap": "虚线：到 <b>{answer}</b> 的距离，它是 10,000 个词中最接近的真实词。",
+    "operations": ["从这个词开始", "减去", "加上"],
+    "heading": "向量实验场",
+    "intro": "在这里进行向量运算和类比实验。",
+    "model": "嵌入模型",
+    "modelPlaceholder": "选择嵌入模型",
+    "gridlines": "显示网格线",
+    "wordsToPlot": "要绘制的词",
+    "wordsToPlotLimit": "要绘制的词（最多 50 个）",
+    "wordsPlaceholder": "输入英文单词，用空格分隔（例如 man woman king queen）",
+    "wordCount": "{count} / 50 个词",
+    "analogy": "词语类比",
+    "analogyIntro": "从一个词开始，减去一个概念，再加上另一个，看看会落在哪个真实的词上。",
+    "orTryExample": "或者试试一个例子",
+    "defaultWords": "If the path be beautiful , let us not ask where it leads",
+    "notInModel": "“{word}”不在 {model} 中。",
+    "calculate": "计算",
+    "loadingProgress": "正在加载 {model}… {percent}%",
+    "tabs": {
+      "model": "模型",
+      "display": "显示",
+      "words": "词语",
+      "calc": "计算"
+    },
+    "displayOptions": "显示选项",
+    "calculation": "向量计算",
+    "loadingEmbeddings": "正在加载 {model} 嵌入…",
+    "changeView": "切换视图。当前视图：{view}",
+    "view": "视图："
+  },
+  "NotFound": {
+    "title": "页面未找到",
+    "kicker": "错误 404",
+    "heading": "这个页面不在我们的词表里。",
+    "sub": "链接可能已失效，或者页面已被移动。返回首页，或者开始了解模型如何读懂文字。",
+    "home": "返回首页",
+    "learn": "浏览学习内容"
+  }
+}
