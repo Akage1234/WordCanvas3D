@@ -7,6 +7,18 @@ import { TokenSplit, MiniClusters, VectorMath } from "@/components/landing/LensV
 import { Reveal, ShareBar } from "@/components/landing/Interactive";
 import { ARTICLES as LEARN } from "@/components/learn/registry";
 import s from "@/components/landing/landing.module.css";
+import { AUTHOR as SITE_AUTHOR, REPO_URL, SITE_DESCRIPTION, SITE_NAME, SITE_URL, jsonLd } from "@/lib/site";
+
+export const metadata = { alternates: { canonical: "/" } };
+
+const SCHEMA = [
+  { "@context": "https://schema.org", "@type": "WebSite", name: SITE_NAME, url: SITE_URL, description: SITE_DESCRIPTION, inLanguage: "en" },
+  {
+    "@context": "https://schema.org", "@type": "WebApplication", name: SITE_NAME, url: SITE_URL, description: SITE_DESCRIPTION,
+    applicationCategory: "EducationalApplication", operatingSystem: "Any (runs in the browser)", isAccessibleForFree: true,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, author: { "@type": "Person", ...SITE_AUTHOR }, codeRepository: REPO_URL,
+  },
+];
 
 const serif = Instrument_Serif({ weight: "400", style: "italic", subsets: ["latin"] });
 
@@ -38,6 +50,7 @@ const ARTICLES = FEATURED.map((slug) => LEARN.find((a) => a.slug === slug));
 export default function Home() {
   return (
     <main className={s.page}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(SCHEMA)} />
       <div className={`${s.wrap} ${s.hero}`}>
         <div>
           <span className={s.eyebrow}><i /> Free &amp; open source · no sign-up</span>

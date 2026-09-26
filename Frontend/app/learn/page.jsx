@@ -5,12 +5,27 @@ import s from "@/components/landing/landing.module.css";
 import l from "@/components/learn/learn.module.css";
 import PipelineAnim from "@/components/learn/PipelineAnim";
 import LearnArt from "@/components/learn/LearnArt";
+import { SITE_URL, jsonLd } from "@/lib/site";
 
 const serif = Instrument_Serif({ weight: "400", style: "italic", subsets: ["latin"] });
 
+const DESCRIPTION = "Beginner-friendly articles on how language models read text: tokens, embeddings, attention and transformers, plus quick guides to each WordCanvas3D tool.";
+
 export const metadata = {
-  title: "Learn · WordCanvas3D",
-  description: "Beginner-friendly articles on how language models read text: tokens, embeddings, attention and transformers, plus quick guides to each WordCanvas3D tool.",
+  title: "Learn: how language models read text",
+  description: DESCRIPTION,
+  alternates: { canonical: "/learn" },
+  openGraph: { title: "Learn: how language models read text", description: DESCRIPTION, url: "/learn" },
+  twitter: { title: "Learn: how language models read text", description: DESCRIPTION },
+};
+
+const SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Learn",
+  url: `${SITE_URL}/learn`,
+  description: DESCRIPTION,
+  hasPart: ARTICLES.map((a) => ({ "@type": "Article", headline: a.title, url: `${SITE_URL}/learn/${a.slug}` })),
 };
 
 const TOOL_NAMES = { "/tokenizer": "Tokenizer", "/embedding": "Embedding explorer", "/vector-playground": "Vector Playground" };
@@ -71,6 +86,7 @@ export default function LearnIndex() {
 
   return (
     <main className={`${s.page} ${l.main}`}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(SCHEMA)} />
       <div className={`${s.wrap} ${l.indexWrap}`}>
         <LearnArt className={l.headArt} />
         <header id="top" className={l.head}>
