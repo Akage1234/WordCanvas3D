@@ -1,13 +1,9 @@
-import '../../styles/globals.css';
 import { notFound } from 'next/navigation';
-import { hasLocale, NextIntlClientProvider } from 'next-intl';
+import { hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
-import { LayoutProvider } from '@/components/LayoutProvider';
-import { Navbar } from '@/components/Navbar';
-import DotCanvas from '@/components/DotCanvas';
+import SiteShell from '@/components/SiteShell';
 import { AUTHOR, INDEXABLE, SITE_NAME, SITE_URL } from '@/lib/site';
-import { Analytics } from "@vercel/analytics/react";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -51,18 +47,5 @@ export default async function RootLayout({ children, params }) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-  return (
-    <html lang={locale} className="dark">
-      <body className="dark:bg-black dark:text-neutral-100 dark:text-white bg-white text-black">
-        <NextIntlClientProvider>
-          <LayoutProvider>
-            <DotCanvas opacity={0.09} dotColor="#ffffff" />
-            <Navbar />
-            {children}
-          </LayoutProvider>
-        </NextIntlClientProvider>
-        <Analytics />
-      </body>
-    </html>
-  );
+  return <SiteShell locale={locale}>{children}</SiteShell>;
 }

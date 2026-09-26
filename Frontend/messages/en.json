@@ -433,5 +433,13 @@
     "loadingEmbeddings": "Loading {model} embeddings…",
     "changeView": "Change view. Current view: {view}",
     "view": "View:"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "kicker": "Error 404",
+    "heading": "This page isn’t in our vocabulary.",
+    "sub": "The link may be broken, or the page may have moved. Head back home, or start learning how models read text.",
+    "home": "Back to home",
+    "learn": "Browse Learn"
   }
 }
