@@ -39,10 +39,10 @@ const LANGUAGES = [["en", "English", "EN"], ["zh", "中文", "中"], ["ja", "日
 function LanguageMenu({ variant = "icon" }) {
   if (variant === "rows") {
     return (
-      <div className="flex items-center gap-2 px-3 py-2 text-sm">
-        <Globe className="h-4 w-4 text-neutral-400" />
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 px-3 py-2 text-sm">
+        <Globe className="h-4 w-4 flex-none text-neutral-400" />
         {LANGUAGES.map(([code, name]) => (
-          <span key={code} className={code === "en" ? "rounded-full bg-white/10 px-2.5 py-0.5 text-white" : "px-1 text-neutral-600"} title={code === "en" ? undefined : "Coming soon"}>{name}</span>
+          <span key={code} className={`whitespace-nowrap ${code === "en" ? "rounded-full bg-white/10 px-2.5 py-0.5 text-white" : "px-1 text-neutral-600"}`} title={code === "en" ? undefined : "Coming soon"}>{name}</span>
         ))}
       </div>
     );
@@ -153,7 +153,7 @@ function MobileMenu({ isActive, triggerClassName }) {
           <DrawerTitle>Navigation</DrawerTitle>
           <DrawerDescription>Pages on WordCanvas3D</DrawerDescription>
         </DrawerHeader>
-        <div className="flex h-full flex-col p-5">
+        <div className="flex h-full min-h-0 flex-col overflow-y-auto overscroll-contain p-5 custom-scroll">
           <div className="mb-8 flex items-center justify-between">
             <Logo size="lg" onClick={close} />
             <DrawerClose asChild>
@@ -162,7 +162,7 @@ function MobileMenu({ isActive, triggerClassName }) {
               </button>
             </DrawerClose>
           </div>
-          <nav className="flex flex-1 flex-col gap-1.5" aria-label="Main">
+          <nav className="flex flex-1 flex-col gap-1.5 pb-2" aria-label="Main">
             {NAV_ITEMS.map(({ href, label, hint, Icon }, i) => {
               const active = isActive(href);
               return (
