@@ -1,3 +1,4 @@
+import { Link } from "@/i18n/navigation";
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
 import { ArticleLink, Callout, Fig, FurtherReading } from "../kit";
 import { WalkBetween } from "./latent-space.figures";
@@ -224,7 +225,7 @@ export default function LatentSpace() {
       <p>
         One more limit is on our side. We can only look at these spaces through flat pictures, and squashing 300 dimensions into two always distorts something.
         <ArticleLink slug="dimensionality-reduction"> Seeing high dimensions</ArticleLink> explains how those pictures are made and how to read them without being fooled.
-        To explore GloVe yourself, try the <a href="/embedding">Embedding explorer</a> or do word arithmetic in the <a href="/vector-playground">Vector Playground</a>.
+        To explore GloVe yourself, try the <Link href="/embedding">Embedding explorer</Link> or do word arithmetic in the <Link href="/vector-playground">Vector Playground</Link>.
       </p>
 
       <FurtherReading links={[

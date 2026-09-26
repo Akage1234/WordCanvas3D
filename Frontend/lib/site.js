@@ -1,8 +1,6 @@
 // One place for the public URL and the copy search engines and link previews see.
 export const SITE_URL = "https://wordcanvas3d.vercel.app";
 export const SITE_NAME = "WordCanvas3D";
-export const SITE_DESCRIPTION =
-  "A free, interactive playground for how AI reads text: split text into tokens, explore word embeddings in 3D, do vector math with meaning, and learn how language models work.";
 export const AUTHOR = { name: "Akage", url: "https://github.com/Akage1234" };
 export const REPO_URL = "https://github.com/Akage1234/WordCanvas3D";
 

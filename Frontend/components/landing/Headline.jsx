@@ -1,17 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
 import { hash } from "./random";
 import styles from "./landing.module.css";
-
-const PHRASES = [
-  ["Language, made", "visible."],
-  ["See how AI", "reads text."],
-  ["Split text into", "tokens."],
-  ["Fly through", "words in 3D."],
-  ["Do math with", "meaning."],
-  ["Every word has", "a place."],
-];
 
 // Decorative split that looks tokenizer-like; the Tokenizer page uses real tokenizers.
 function pieces(text) {
@@ -29,6 +21,7 @@ function pieces(text) {
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 export default function Headline({ serifClass }) {
+  const PHRASES = useTranslations("Home").raw("headlines");
   const [phrase, setPhrase] = useState(0);
   const [shown, setShown] = useState(Infinity);
   const [chips, setChips] = useState(false);
@@ -59,7 +52,7 @@ export default function Headline({ serifClass }) {
     };
     run();
     return () => { alive = false; };
-  }, []);
+  }, [PHRASES]);
 
   const [plain, accent] = PHRASES[phrase];
   const plainPieces = pieces(plain);

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
 import { Fig, ArticleLink, Callout, FurtherReading } from "@/components/learn/kit";
 import l from "@/components/learn/learn.module.css";

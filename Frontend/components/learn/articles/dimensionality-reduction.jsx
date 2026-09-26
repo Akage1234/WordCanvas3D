@@ -1,3 +1,4 @@
+import { Link } from "@/i18n/navigation";
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
 import { ArticleLink, Callout, Fig, FurtherReading } from "../kit";
 import { SwissRoll } from "./dimensionality-reduction.figures";
@@ -171,7 +172,7 @@ export default function DimensionalityReduction() {
       </Callout>
       <p>
         For why the structure is there in the first place, see <ArticleLink slug="latent-space">Latent space</ArticleLink> and <ArticleLink slug="what-are-embeddings">What are embeddings?</ArticleLink>.
-        The site guide <ArticleLink slug="pca-vs-umap">PCA vs UMAP</ArticleLink> shows how these two methods are used in the <a href="/embedding">Embedding explorer</a>, where you can switch between them on 10,000 real words.
+        The site guide <ArticleLink slug="pca-vs-umap">PCA vs UMAP</ArticleLink> shows how these two methods are used in the <Link href="/embedding">Embedding explorer</Link>, where you can switch between them on 10,000 real words.
       </p>
 
       <FurtherReading links={[

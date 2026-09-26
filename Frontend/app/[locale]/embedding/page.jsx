@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import VisualizerLayout from "@/components/VisualizerLayout";
 import EmbeddingCanvas from "@/components/EmbeddingCanvas";
 import { PageGuide } from "@/components/PageGuide";
@@ -36,12 +37,9 @@ import explorationStyles from "@/components/embedding/exploration.module.css";
 import { useLayoutMode } from "@/components/LayoutContext";
 
 const MODEL_LABELS = { glove_300D: "GloVe 300D", fasttext_300D: "FastText 300D", word2vec_300D: "Word2Vec 300D" };
-const COUNT_LABELS = { "1000": "1,000 words", "5000": "5,000 words", "10000": "10,000 words" };
 const METHOD_LABELS = { pca: "PCA", umap: "UMAP" };
 const NO_WORDS = [];
 
-const COLOR_HINT = "Cluster IDs stored with the dataset.";
-const EDGE_HINT = "Draws stored neighbour links. Not every stored link is drawn, so lines are not a complete neighbour list.";
 
 function SectionLabel({ id, children }) {
   return (
@@ -53,6 +51,7 @@ function SectionLabel({ id, children }) {
 
 // Loading / error / graphics notices. `compact` is the in-drawer variant (drawers are modal on mobile).
 function StatusNotice({ status, onRetry, onReloadScene, compact = false }) {
+  const t = useTranslations("Embedding");
   const { data, graphics, datasetName } = status;
   const box = compact
     ? "rounded-lg border p-3 text-sm"
@@ -64,11 +63,11 @@ function StatusNotice({ status, onRetry, onReloadScene, compact = false }) {
         <div className="flex items-start gap-2">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" aria-hidden="true" />
           <div className="space-y-1">
-            <p className="font-medium text-white">Couldn&apos;t load {datasetName}</p>
-            <p className="text-neutral-300">{data.message}</p>
+            <p className="font-medium text-white">{t("loadFailed", { dataset: datasetName })}</p>
+            <p className="text-neutral-300">{t(`errors.${data.kind}`)}</p>
           </div>
         </div>
-        <Button onClick={onRetry} size="sm" className="mt-3 h-11 w-full sm:h-9">Retry</Button>
+        <Button onClick={onRetry} size="sm" className="mt-3 h-11 w-full sm:h-9">{t("retry")}</Button>
       </div>
     );
   }
@@ -77,18 +76,16 @@ function StatusNotice({ status, onRetry, onReloadScene, compact = false }) {
     return (
       <div role="alert" className={cn(box, "border-amber-500/30 bg-neutral-950/95 text-neutral-200")}>
         <p className="font-medium text-white">
-          {unavailable ? "3D view isn't available in this browser" : "The 3D view hasn't recovered yet"}
+          {unavailable ? t("unavailableTitle") : t("stalledTitle")}
         </p>
         <p className="mt-1 text-neutral-300">
-          {unavailable
-            ? "WebGL couldn't start. You can still search words and read their details in the panel."
-            : "The browser paused graphics and hasn't restored them. It may still recover on its own."}
+          {unavailable ? t("unavailableText") : t("stalledText")}
         </p>
         <p className="mt-1 text-xs text-neutral-400">
-          {unavailable ? "Try again to start the 3D view." : "Reload the 3D view to restore graphics. Reloading resets the camera."}
+          {unavailable ? t("unavailableHint") : t("stalledHint")}
         </p>
         <Button onClick={onReloadScene} size="sm" variant="outline" className="mt-3 h-11 w-full sm:h-9">
-          {unavailable ? "Try again" : "Reload 3D view"}
+          {unavailable ? t("tryAgain") : t("reloadView")}
         </Button>
       </div>
     );
@@ -96,12 +93,12 @@ function StatusNotice({ status, onRetry, onReloadScene, compact = false }) {
   if (graphics === "lost") {
     return (
       <div role="status" className={cn(box, "border-white/10 bg-neutral-950/95 text-neutral-300")}>
-        Graphics paused by the browser — restoring…
+        {t("graphicsLost")}
       </div>
     );
   }
   if (data.state === "loading" && compact) {
-    return <p className="text-xs text-muted-foreground">Loading {datasetName}…</p>;
+    return <p className="text-xs text-muted-foreground">{t("loadingDataset", { dataset: datasetName })}</p>;
   }
   return null;
 }
@@ -111,8 +108,9 @@ function selectionColor(info) {
 }
 
 function SelectedWordPill({ info, onClear }) {
+  const t = useTranslations("Embedding");
   if (!info) {
-    return <p className="text-xs text-muted-foreground">Search or click a point to see its details.</p>;
+    return <p className="text-xs text-muted-foreground">{t("noSelection")}</p>;
   }
 
   const hue = selectionColor(info);
@@ -123,7 +121,7 @@ function SelectedWordPill({ info, onClear }) {
       style={{ backgroundColor: badgeColor(hue), boxShadow: `0 0 0 1px ${hue}59` }}
       aria-live="polite"
     >
-      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-white/70">Selected</p>
+      <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-white/70">{t("selected")}</p>
       <div className="mt-0.5 flex items-center gap-2">
         <span className="min-w-0 flex-1 truncate text-sm font-semibold text-white">{info.word}</span>
         <Button
@@ -131,9 +129,9 @@ function SelectedWordPill({ info, onClear }) {
           size="sm"
           onClick={onClear}
           className="-mr-1.5 h-6 shrink-0 rounded px-1.5 text-[11px] font-medium text-white/80 hover:bg-white/15 hover:text-white"
-          aria-label={`Clear selection ${info.word}`}
+          aria-label={t("clearSelection", { word: info.word })}
         >
-          Clear
+          {t("clear")}
         </Button>
       </div>
     </div>
@@ -174,6 +172,7 @@ function EmbeddingControls({
   onClearSelection,
   statusLine,
 }) {
+  const t = useTranslations("Embedding");
   const controlsRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -188,7 +187,7 @@ function EmbeddingControls({
     scrollRegion.classList.add("hide-scrollbar");
     scrollRegion.setAttribute("tabindex", "0");
     scrollRegion.setAttribute("role", "region");
-    scrollRegion.setAttribute("aria-label", "Embedding controls");
+    scrollRegion.setAttribute("aria-label", t("controlsLabel"));
     const handleScrollKey = (event) => {
       if (event.target !== scrollRegion) return;
       const pageStep = Math.max(80, scrollRegion.clientHeight * 0.8);
@@ -218,7 +217,7 @@ function EmbeddingControls({
       if (previousLabel === null) scrollRegion.removeAttribute("aria-label");
       else scrollRegion.setAttribute("aria-label", previousLabel);
     };
-  }, []);
+  }, [t]);
   
   // Memoize sorted words to avoid recalculation on every render
   const sortedWords = useMemo(() => {
@@ -261,24 +260,24 @@ function EmbeddingControls({
     <div ref={controlsRef} className="flex min-h-full flex-col gap-6">
       <header>
         <h2 className="text-lg font-semibold flex items-center gap-2">
-          Embedding Space
+          {t("heading")}
         <PageGuide page="embedding" />
       </h2>
         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-          300-D word vectors projected to 3D. Distances here can distort relationships.
+          {t("intro")}
       </p>
       </header>
 
       {/* Dataset */}
       <section aria-labelledby="dataset-heading" className="space-y-3">
-        <SectionLabel id="dataset-heading">Dataset</SectionLabel>
+        <SectionLabel id="dataset-heading">{t("dataset")}</SectionLabel>
         <div className="space-y-1.5">
         <label htmlFor="embedding-select" className="text-sm font-medium">
-          Embedding Model
+          {t("model")}
         </label>
         <Select value={embeddingModel} onValueChange={onEmbeddingModelChange}>
           <SelectTrigger id="embedding-select" className="w-full">
-              <SelectValue placeholder="Select embedding model">{MODEL_LABELS[embeddingModel]}</SelectValue>
+              <SelectValue placeholder={t("modelPlaceholder")}>{MODEL_LABELS[embeddingModel]}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="glove_300D">GloVe 300D</SelectItem>
@@ -289,22 +288,22 @@ function EmbeddingControls({
       </div>
         <div className="space-y-1.5">
         <label htmlFor="word-count-select" className="text-sm font-medium">
-          Word Count
+          {t("wordCount")}
         </label>
         <Select value={wordCount} onValueChange={onWordCountChange}>
           <SelectTrigger id="word-count-select" className="w-full">
-              <SelectValue placeholder="Select word count">{COUNT_LABELS[wordCount]}</SelectValue>
+              <SelectValue placeholder={t("wordCountPlaceholder")}>{t("words", { count: Number(wordCount) })}</SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="1000">1,000 words</SelectItem>
-            <SelectItem value="5000">5,000 words</SelectItem>
-            <SelectItem value="10000">10,000 words</SelectItem>
+            <SelectItem value="1000">{t("words", { count: 1000 })}</SelectItem>
+            <SelectItem value="5000">{t("words", { count: 5000 })}</SelectItem>
+            <SelectItem value="10000">{t("words", { count: 10000 })}</SelectItem>
           </SelectContent>
         </Select>
       </div>
         <div className="space-y-1.5">
           <span id="reduction-label" className="text-sm font-medium">
-          Dimensionality Reduction
+          {t("reduction")}
           </span>
           <RadioGroup value={reductionMethod} onValueChange={onReductionMethodChange} aria-labelledby="reduction-label" className="flex gap-5">
           <div className="flex items-center space-x-2">
@@ -325,9 +324,9 @@ function EmbeddingControls({
 
       {/* Explore */}
       <section aria-labelledby="explore-heading" className="space-y-3">
-        <SectionLabel id="explore-heading">Explore</SectionLabel>
+        <SectionLabel id="explore-heading">{t("explore")}</SectionLabel>
         <div className="space-y-1.5">
-          <label htmlFor="word-search-trigger" className="text-sm font-medium">Word Search</label>
+          <label htmlFor="word-search-trigger" className="text-sm font-medium">{t("wordSearch")}</label>
         <Popover open={open} onOpenChange={(newOpen) => {
           setOpen(newOpen);
           if (!newOpen) {
@@ -341,10 +340,10 @@ function EmbeddingControls({
               variant="outline"
               role="combobox"
               aria-expanded={open}
-                aria-label={searchWord ? `Word Search, selected ${searchWord}` : "Word Search"}
+                aria-label={searchWord ? t("wordSearchSelected", { word: searchWord }) : t("wordSearch")}
               className="w-full justify-between"
             >
-                <span className="truncate">{searchWord ? searchWord : "Search for a word..."}</span>
+                <span className="truncate">{searchWord ? searchWord : t("searchPlaceholder")}</span>
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
@@ -362,14 +361,14 @@ function EmbeddingControls({
               }}
             >
               <CommandInput 
-                placeholder="Search words..." 
+                placeholder={t("searchWords")}
                 className="h-9"
                 value={searchQuery}
                 onValueChange={setSearchQuery}
               />
               <CommandList>
                 <CommandEmpty>
-                    {searchQuery ? "No word found." : wordsList.length ? `Type to search ${wordsList.length} words...` : "Loading words..."}
+                    {searchQuery ? t("noWordFound") : wordsList.length ? t("typeToSearch", { count: wordsList.length }) : t("loadingWords")}
                 </CommandEmpty>
                 <CommandGroup>
                   {filteredWords.map((word) => (
@@ -395,12 +394,12 @@ function EmbeddingControls({
                   ))}
                   {searchQuery && filteredWords.length >= 300 && (
                     <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                      Showing first 300 results. Refine your search for more.
+                      {t("first300")}
                     </div>
                   )}
                   {!searchQuery && wordsList.length > 50 && (
                     <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                      Type to search {wordsList.length} words...
+                      {t("typeToSearch", { count: wordsList.length })}
                     </div>
                   )}
                 </CommandGroup>
@@ -414,7 +413,7 @@ function EmbeddingControls({
 
       {/* Display */}
       <section aria-labelledby="display-heading" className="space-y-3">
-        <SectionLabel id="display-heading">Display</SectionLabel>
+        <SectionLabel id="display-heading">{t("display")}</SectionLabel>
         <div className="flex items-start space-x-2">
         <Checkbox
           id="cluster-colors"
@@ -428,9 +427,9 @@ function EmbeddingControls({
           htmlFor="cluster-colors"
           className="text-sm font-medium cursor-pointer"
         >
-          Color by Similarity Cluster
+          {t("colorByCluster")}
         </label>
-            <p id="cluster-colors-hint" className="text-xs text-muted-foreground">{COLOR_HINT}</p>
+            <p id="cluster-colors-hint" className="text-xs text-muted-foreground">{t("colorHint")}</p>
       </div>
         </div>
         <div className="flex items-start space-x-2">
@@ -446,9 +445,9 @@ function EmbeddingControls({
           htmlFor="cluster-edges"
           className="text-sm font-medium cursor-pointer"
         >
-          Connect Clusters with Edges
+          {t("connectClusters")}
         </label>
-            <p id="cluster-edges-hint" className="text-xs text-muted-foreground">{EDGE_HINT}</p>
+            <p id="cluster-edges-hint" className="text-xs text-muted-foreground">{t("edgeHint")}</p>
       </div>
     </div>
       </section>
@@ -461,6 +460,8 @@ function EmbeddingControls({
 }
 
 export default function EmbeddingPage() {
+  const t = useTranslations("Embedding");
+  const COUNT_LABELS = { "1000": t("words", { count: 1000 }), "5000": t("words", { count: 5000 }), "10000": t("words", { count: 10000 }) };
   const [embeddingModel, setEmbeddingModel] = useState("glove_300D");
   const [wordCount, setWordCount] = useState("1000");
   const [reductionMethod, setReductionMethod] = useState("pca");
@@ -525,7 +526,7 @@ export default function EmbeddingPage() {
       source: picked ? "canvas" : "search",
       datasetName,
       modelName: MODEL_LABELS[embeddingModel],
-      countName: COUNT_LABELS[wordCount],
+      countName: t("words", { count: Number(wordCount) }),
       methodName: METHOD_LABELS[reductionMethod],
     };
     if (!dataset) return { ...base, state: "pending" };
@@ -534,7 +535,7 @@ export default function EmbeddingPage() {
     const p = dataset.positions;
     const links = [...new Set(dataset.edges[i])].filter((t) => t !== i).map((t) => dataset.words[t]);
     return { ...base, state: "found", cluster: dataset.clusters[i], coords: [p[i * 3], p[i * 3 + 1], p[i * 3 + 2]], links };
-  }, [picked, searchWord, dataset, wordIndex, datasetName, embeddingModel, wordCount, reductionMethod]);
+  }, [picked, searchWord, dataset, wordIndex, datasetName, embeddingModel, wordCount, reductionMethod, t]);
 
   const clusters = useMemo(() => clusterSummaries(dataset), [dataset]);
   const current = picked ?? searchWord;
@@ -545,13 +546,13 @@ export default function EmbeddingPage() {
 
   const status = { data, graphics, datasetName };
   const statusText =
-    data.state === "loading" ? `Loading ${datasetName}…`
-    : data.state === "error" ? `Couldn't load ${datasetName}.`
-    : graphics === "unavailable" ? `Loaded ${wordsList.length.toLocaleString()} words. 3D view unavailable; search still works.`
-    : graphics === "lost" ? "Graphics paused. Restoring…"
-    : graphics === "stalled" ? "3D view hasn't recovered."
-    : `Ready · ${wordsList.length.toLocaleString()} words`;
-  const canvasLabel = `3D scatter plot of ${dataset ? `${wordsList.length.toLocaleString()} ` : ""}words from ${MODEL_LABELS[embeddingModel]}, ${METHOD_LABELS[reductionMethod]} projection. Use Word Search to explore the words as text.`;
+    data.state === "loading" ? t("status.loading", { dataset: datasetName })
+    : data.state === "error" ? t("status.error", { dataset: datasetName })
+    : graphics === "unavailable" ? t("status.unavailable", { count: wordsList.length.toLocaleString() })
+    : graphics === "lost" ? t("status.lost")
+    : graphics === "stalled" ? t("status.stalled")
+    : t("status.ready", { count: wordsList.length.toLocaleString() });
+  const canvasLabel = t("canvasLabel", { count: dataset ? `${wordsList.length.toLocaleString()} ` : "", model: MODEL_LABELS[embeddingModel], method: METHOD_LABELS[reductionMethod] });
 
   const drawerNotice = <StatusNotice status={status} onRetry={retry} onReloadScene={reloadScene} compact />;
 
@@ -583,20 +584,20 @@ export default function EmbeddingPage() {
           {
             id: "model",
             icon: Database,
-            label: "Model",
+            label: t("tabs.model"),
             content: (
               <div className="space-y-4">
                 {drawerNotice}
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Model & Configuration</h3>
+                  <h3 className="text-lg font-semibold mb-3">{t("modelConfig")}</h3>
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <label htmlFor="mobile-embedding-select" className="text-sm font-medium">
-                        Embedding Model
+                        {t("model")}
                       </label>
                       <Select value={embeddingModel} onValueChange={changeModel}>
                         <SelectTrigger id="mobile-embedding-select" className="w-full">
-                          <SelectValue placeholder="Select embedding model">{MODEL_LABELS[embeddingModel]}</SelectValue>
+                          <SelectValue placeholder={t("modelPlaceholder")}>{MODEL_LABELS[embeddingModel]}</SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="glove_300D">GloVe 300D</SelectItem>
@@ -607,22 +608,22 @@ export default function EmbeddingPage() {
                     </div>
                     <div className="space-y-2">
                       <label htmlFor="mobile-word-count-select" className="text-sm font-medium">
-                        Word Count
+                        {t("wordCount")}
                       </label>
                       <Select value={wordCount} onValueChange={changeCount}>
                         <SelectTrigger id="mobile-word-count-select" className="w-full">
-                          <SelectValue placeholder="Select word count">{COUNT_LABELS[wordCount]}</SelectValue>
+                          <SelectValue placeholder={t("wordCountPlaceholder")}>{t("words", { count: Number(wordCount) })}</SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="1000">1,000 words</SelectItem>
-                          <SelectItem value="5000">5,000 words</SelectItem>
-                          <SelectItem value="10000">10,000 words</SelectItem>
+                          <SelectItem value="1000">{t("words", { count: 1000 })}</SelectItem>
+                          <SelectItem value="5000">{t("words", { count: 5000 })}</SelectItem>
+                          <SelectItem value="10000">{t("words", { count: 10000 })}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
                       <span id="mobile-reduction-label" className="text-sm font-medium">
-                        Dimensionality Reduction
+                        {t("reduction")}
                       </span>
                       <RadioGroup value={reductionMethod} onValueChange={changeMethod} aria-labelledby="mobile-reduction-label" className="flex gap-6">
                         <div className="flex items-center space-x-2">
@@ -647,12 +648,12 @@ export default function EmbeddingPage() {
           {
             id: "search",
             icon: Search,
-            label: "Search",
+            label: t("tabs.search"),
             content: (closeDrawer) => (
               <div className="space-y-4">
                 {drawerNotice}
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Word Search</h3>
+                  <h3 className="text-lg font-semibold mb-3">{t("wordSearch")}</h3>
                   <div className="space-y-3">
                     {/* Current selection */}
                     {selectedInfo && (
@@ -661,17 +662,17 @@ export default function EmbeddingPage() {
                     
                     {/* Search input - built into drawer, no popover */}
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Type to search words</label>
+                      <label className="text-sm font-medium">{t("typeToSearchLabel")}</label>
                       <Command shouldFilter={false} className="rounded-lg border">
                         <CommandInput 
-                          placeholder="Type to search words..." 
+                          placeholder={t("typeToSearchPlaceholder")}
                           className="h-11"
                           value={searchQuery}
                           onValueChange={setSearchQuery}
                         />
                         <CommandList className="max-h-[300px]">
                           <CommandEmpty>
-                            {wordsList.length > 0 ? "No words found. Try a different search." : "Loading words..."}
+                            {wordsList.length > 0 ? t("noWordsFound") : t("loadingWords")}
                           </CommandEmpty>
                           <CommandGroup>
                             {wordsList
@@ -708,7 +709,7 @@ export default function EmbeddingPage() {
                               word.toLowerCase().includes(searchQuery.toLowerCase())
                             ).length > 50 && (
                               <div className="px-2 py-1.5 text-xs text-muted-foreground text-center">
-                                Showing first 50 results. Keep typing to refine search...
+                                {t("first50")}
                               </div>
                             )}
                           </CommandGroup>
@@ -718,9 +719,9 @@ export default function EmbeddingPage() {
                     
                     <div className="text-xs text-muted-foreground pt-2">
                       {wordsList.length > 0 ? (
-                        <span>Search through {wordsList.length} words. Select a word to highlight it on the canvas.</span>
+                        <span>{t("searchThrough", { count: wordsList.length })}</span>
                       ) : (
-                        <span>Loading word list...</span>
+                        <span>{t("loadingWordList")}</span>
                       )}
                     </div>
                   </div>
@@ -731,12 +732,12 @@ export default function EmbeddingPage() {
           {
             id: "display",
             icon: Palette,
-            label: "Display",
+            label: t("tabs.display"),
             content: (
               <div className="space-y-4">
                 {drawerNotice}
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Display Options</h3>
+                  <h3 className="text-lg font-semibold mb-3">{t("displayOptions")}</h3>
                   <div className="space-y-4">
                     <div className="flex items-start space-x-2">
                       <Checkbox
@@ -751,9 +752,9 @@ export default function EmbeddingPage() {
                         htmlFor="mobile-cluster-colors"
                         className="text-sm font-medium cursor-pointer"
                       >
-                        Color by Similarity Cluster
+                        {t("colorByCluster")}
                       </label>
-                        <p id="mobile-cluster-colors-hint" className="text-xs text-muted-foreground">{COLOR_HINT}</p>
+                        <p id="mobile-cluster-colors-hint" className="text-xs text-muted-foreground">{t("colorHint")}</p>
                     </div>
                     </div>
                     <div className="flex items-start space-x-2">
@@ -769,9 +770,9 @@ export default function EmbeddingPage() {
                         htmlFor="mobile-cluster-edges"
                         className="text-sm font-medium cursor-pointer"
                       >
-                        Connect Clusters with Edges
+                        {t("connectClusters")}
                       </label>
-                        <p id="mobile-cluster-edges-hint" className="text-xs text-muted-foreground">{EDGE_HINT}</p>
+                        <p id="mobile-cluster-edges-hint" className="text-xs text-muted-foreground">{t("edgeHint")}</p>
                     </div>
                   </div>
                 </div>
@@ -817,7 +818,7 @@ export default function EmbeddingPage() {
               <div className="absolute inset-0 z-40 flex items-center justify-center bg-neutral-950/80 backdrop-blur-sm" aria-hidden="true">
                 <div className="flex flex-col items-center gap-3 px-6 text-center">
                   <div className="w-8 h-8 border-4 border-neutral-700 border-t-blue-500 rounded-full animate-spin motion-reduce:animate-none" />
-                  <p className="text-sm text-neutral-300">Loading {MODEL_LABELS[embeddingModel]}</p>
+                  <p className="text-sm text-neutral-300">{t("loadingModel", { model: MODEL_LABELS[embeddingModel] })}</p>
                   <p className="text-xs text-neutral-400">{COUNT_LABELS[wordCount]} · {METHOD_LABELS[reductionMethod]}</p>
           </div>
               </div>

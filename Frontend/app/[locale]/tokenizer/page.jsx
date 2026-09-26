@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ConceptButton } from "@/components/ConceptSheet";
 import { PageGuide } from "@/components/PageGuide";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,7 +21,8 @@ import {
 const OPENAI = "OpenAI (tiktoken)";
 const LLAMA = "LLaMA (SentencePiece)";
 // Both LLaMA options run the same llama-tokenizer-js 1.2.2 tokenizer (LLaMA 1/2 vocabulary).
-const LLAMA_NOTE = "Both options use the same vocabulary, so their IDs match.";
+// `note` is a message key under Tokenizer.
+const LLAMA_NOTE = "llamaNote";
 const TOKENIZERS = [
   { label: "GPT-4.1 / 4o / mini (o200k_base)", value: "o200k_base", group: OPENAI, dot: "bg-sky-400" },
   { label: "GPT-4 / 3.5 (cl100k_base)", value: "cl100k_base", group: OPENAI, dot: "bg-cyan-400" },
@@ -30,16 +32,6 @@ const TOKENIZERS = [
   { label: "GPT-2 (gpt2)", value: "gpt2", group: OPENAI, dot: "bg-rose-400" },
   { label: "LLaMA 2 (llama2)", value: "llama2", group: LLAMA, note: LLAMA_NOTE, dot: "bg-amber-400" },
   { label: "LLaMA (llama)", value: "llama", group: LLAMA, note: LLAMA_NOTE, dot: "bg-orange-400" },
-];
-const PRESETS = [
-  { label: "Short", text: "A quiet idea can travel far." },
-  { label: "World scripts", text: "Hello, world. مرحباً بالعالم. नमस्ते दुनिया। こんにちは世界。" },
-  { label: "Emoji", text: "Build, test, celebrate: 🧩 → 🛠️ → ✅ 🎉" },
-  { label: "Code", text: "const total = items.reduce((sum, item) => sum + item.price, 0);" },
-  {
-    label: "Paragraph",
-    text: "At dusk, the library windows caught the last orange light. Inside, a reader compared two translations, noticing how punctuation, rhythm, and a single borrowed word changed the feeling of the same small scene.",
-  },
 ];
 const labelOf = (value) => TOKENIZERS.find((t) => t.value === value)?.label;
 const OPTS = { allowedSpecial: new Set(["<|endoftext|>"]) };
@@ -51,19 +43,20 @@ const indexAt = (e) => {
 };
 
 // Screen-reader wording for one token: stray bytes, specials and edge whitespace spelled out.
-const spoken = (t) =>
+// `tr` is the Tokenizer translator.
+const spoken = (t, tr) =>
   t.kind === "text" && !/^\s|\s$|[\n\t]/.test(t.parts[0].text)
     ? t.parts[0].text
     : t.kind === "special"
-    ? `special token ${t.name}`
+    ? tr("spoken.special", { name: t.name })
     : t.parts
         .map((p) =>
           "text" in p
             ? p.text
-                .replace(/^ +| +$/g, (m) => " space".repeat(m.length) + " ")
-                .replace(/\n/g, " newline ")
-                .replace(/\t/g, " tab ")
-            : ` bytes ${toHex(p.bytes)} `
+                .replace(/^ +| +$/g, (m) => ` ${tr("spoken.space")}`.repeat(m.length) + " ")
+                .replace(/\n/g, ` ${tr("spoken.newline")} `)
+                .replace(/\t/g, ` ${tr("spoken.tab")} `)
+            : ` ${tr("spoken.bytes", { hex: toHex(p.bytes) })} `
         )
         .join("")
         .replace(/\s+/g, " ")
@@ -78,7 +71,7 @@ const escapeHtml = (value) =>
     "'": "&#39;",
   })[char]);
 
-function tokenHtml(t, showWs) {
+function tokenHtml(t, showWs, tr) {
   if (t.kind === "text") return escapeHtml(showWs ? markWhitespace(t.parts[0].text) : t.parts[0].text);
   if (t.kind === "special") {
     return `<span class="rounded-sm px-0.5 font-mono text-[0.85em] outline-1 outline-dashed outline-white/70">${escapeHtml(t.name)}</span>`;
@@ -87,15 +80,15 @@ function tokenHtml(t, showWs) {
     .map((p) =>
       "text" in p
         ? escapeHtml(showWs ? markWhitespace(p.text) : p.text)
-        : `<span title="Partial UTF-8 character: these bytes combine with neighbouring tokens" class="mx-px rounded-sm px-0.5 font-mono text-[0.8em] ring-1 ring-inset ring-white/50">‹${toHex(p.bytes)}›</span>`
+        : `<span title="${escapeHtml(tr("partialTitle"))}" class="mx-px rounded-sm px-0.5 font-mono text-[0.8em] ring-1 ring-inset ring-white/50">‹${toHex(p.bytes)}›</span>`
     )
     .join("");
 }
 
 export default function TokenizerPage() {
-  const [text, setText] = useState(
-    "The quick brown fox jumps over the lazy dog."
-  );
+  const tr = useTranslations("Tokenizer");
+  const PRESETS = tr.raw("presets");
+  const [text, setText] = useState(() => tr("defaultText"));
   const [tokenizer, setTokenizer] = useState(TOKENIZERS[0].value);
   const [retry, setRetry] = useState(0);
   // Latest settled tokenization: { text, tokenizer, retry, tokens, error }.
@@ -175,14 +168,14 @@ export default function TokenizerPage() {
   const byteCount = useMemo(() => utf8.encode(text).length, [text]);
 
   const statusText = !result
-    ? "Loading tokenizer"
+    ? tr("sr.loading")
     : result.error
     ? result.error.input
-      ? "This text can't be tokenized with this encoder"
-      : "Tokenizer couldn't load. Try again."
+      ? tr("sr.inputError")
+      : tr("sr.loadError")
     : result.text === ""
-    ? "No text"
-    : `${result.tokens.length} tokens, ${result.tokenizer}`;
+    ? tr("sr.noText")
+    : tr("sr.result", { count: result.tokens.length, tokenizer: result.tokenizer });
 
   const revealWithin = (container, el) => {
     if (!container || !el) return;
@@ -258,20 +251,20 @@ export default function TokenizerPage() {
       tokens
         .map(
           (t, i) =>
-            `<span data-i="${i}" role="option" aria-label="${escapeHtml(`Token ${i + 1} of ${tokens.length}: ${spoken(t)}, ID ${t.id}`)}" data-kind="${t.kind}" class="tok-option cursor-pointer rounded-[3px] py-0.5 shadow-[inset_-1px_0_0_rgba(0,0,0,0.6)] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]" style="color:${TOKEN_TEXT};--token-color:${tokenColor(t.id)};background-color:var(--token-color)" title="id: ${t.id}">${tokenHtml(t, showWs)}</span>`
+            `<span data-i="${i}" role="option" aria-label="${escapeHtml(tr("tokenOption", { index: i + 1, total: tokens.length, spoken: spoken(t, tr), id: t.id }))}" data-kind="${t.kind}" class="tok-option cursor-pointer rounded-[3px] py-0.5 shadow-[inset_-1px_0_0_rgba(0,0,0,0.6)] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]" style="color:${TOKEN_TEXT};--token-color:${tokenColor(t.id)};background-color:var(--token-color)" title="${escapeHtml(tr("tokenTitle", { id: t.id }))}">${tokenHtml(t, showWs, tr)}</span>`
         )
         .join(""),
-    [tokens, showWs]
+    [tokens, showWs, tr]
   );
   const idOptions = useMemo(
     () =>
       ids
         .map(
           (id, i) =>
-            `<span data-i="${i}" role="option" aria-label="ID ${id}, token ${i + 1} of ${ids.length}" class="tok-id-option cursor-pointer rounded" style="--token-color:${tokenColor(id)}" title="token index: ${i}">${id}${i < ids.length - 1 ? ", " : ""}</span>`
+            `<span data-i="${i}" role="option" aria-label="${escapeHtml(tr("idOption", { id, index: i + 1, total: ids.length }))}" class="tok-id-option cursor-pointer rounded" style="--token-color:${tokenColor(id)}" title="${escapeHtml(tr("idTitle", { index: i }))}">${id}${i < ids.length - 1 ? ", " : ""}</span>`
         )
         .join(""),
-    [ids]
+    [ids, tr]
   );
 
   const copyIds = async () => {
@@ -313,14 +306,14 @@ export default function TokenizerPage() {
         <header className="mb-4 md:mb-5 max-w-7xl mx-auto w-full px-4 sm:px-6 md:px-10 lg:px-14 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div className="text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start gap-2">
-              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Tokenizer</h1>
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">{tr("title")}</h1>
               <PageGuide page="tokenizer" />
             </div>
             <p className="mt-1 text-sm text-neutral-400">
-              See how text splits into tokens and IDs. Runs in your browser; your text isn’t sent anywhere.
+              {tr("intro")}
             </p>
           </div>
-          <ConceptButton concept="tokenizer" label="Learn about tokenization" />
+          <ConceptButton concept="tokenizer" label={tr("learnButton")} />
         </header>
 
       <main className="px-4 sm:px-6 md:px-10 lg:px-14 pb-24 md:pb-10">
@@ -329,7 +322,7 @@ export default function TokenizerPage() {
           <div className={`${panel} flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between`}>
             <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3 min-w-0">
               <span id="tok-model-label" className="text-sm font-medium text-neutral-200">
-                Tokenizer
+                {tr("modelLabel")}
               </span>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -362,7 +355,7 @@ export default function TokenizerPage() {
                             <span aria-hidden="true" className={`mt-1.5 size-2 shrink-0 rounded-full ${t.dot}`} />
                             <span className="flex flex-col">
                               <span>{t.label}</span>
-                              {t.note && <span className="text-xs text-neutral-400">{t.note}</span>}
+                              {t.note && <span className="text-xs text-neutral-400">{tr(t.note)}</span>}
                             </span>
                           </span>
                         </DropdownMenuRadioItem>
@@ -380,9 +373,9 @@ export default function TokenizerPage() {
                     phase === "error" ? "bg-red-400" : phase === "loading" ? "bg-amber-300" : "bg-emerald-400"
                   }`}
                 />
-                {phase === "loading" ? "Loading tokenizer…" : phase === "error" ? "Error" : "Ready"}
+                {phase === "loading" ? tr("status.loading") : phase === "error" ? tr("status.error") : tr("status.ready")}
                 {/* Fades in only if tokenizing takes longer than 150 ms, so fast typing doesn't flicker. */}
-                {busy && <span className="transition-opacity delay-150 starting:opacity-0">· Tokenizing…</span>}
+                {busy && <span className="transition-opacity delay-150 starting:opacity-0">{tr("status.tokenizing")}</span>}
               </span>
             </div>
             <p role="status" className="sr-only">
@@ -391,7 +384,7 @@ export default function TokenizerPage() {
           </div>
 
           {selected?.note && (
-            <p className="-mt-2 text-xs text-neutral-400">{selected.note}</p>
+            <p className="-mt-2 text-xs text-neutral-400">{tr(selected.note)}</p>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 items-start">
@@ -399,11 +392,11 @@ export default function TokenizerPage() {
             <section className={`${panel} flex flex-col`}>
               <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
                 <label htmlFor="tok-input" className="text-sm font-medium text-neutral-200">
-                  Text
+                  {tr("text")}
                 </label>
                 <fieldset className="flex flex-wrap items-center justify-end gap-1.5">
-                  <legend className="sr-only">Load a text sample</legend>
-                  <span aria-hidden="true" className="mr-0.5 text-[11px] text-neutral-500">Try</span>
+                  <legend className="sr-only">{tr("sampleLegend")}</legend>
+                  <span aria-hidden="true" className="mr-0.5 text-[11px] text-neutral-500">{tr("try")}</span>
                   {PRESETS.map((preset) => (
                     <button
                       key={preset.label}
@@ -426,7 +419,7 @@ export default function TokenizerPage() {
                 spellCheck={false}
                 aria-describedby="tok-stats"
                 className="min-h-48 md:min-h-[22rem] max-h-[70vh] resize-y overflow-auto custom-scroll text-[15px] md:text-[15px] leading-7"
-                placeholder="Type or paste text…"
+                placeholder={tr("placeholder")}
               />
             </section>
 
@@ -435,7 +428,7 @@ export default function TokenizerPage() {
               <div className={panel}>
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <h2 id="tok-tokens-label" className="text-sm font-medium text-neutral-200">
-                    Tokens
+                    {tr("tokens")}
                   </h2>
                   <label className="inline-flex min-h-8 cursor-pointer items-center gap-2 text-xs text-neutral-300">
                     <input
@@ -444,22 +437,22 @@ export default function TokenizerPage() {
                       onChange={(e) => setShowWs(e.target.checked)}
                       className="size-4 accent-sky-500"
                     />
-                    Show whitespace
+                    {tr("showWhitespace")}
                   </label>
                 </div>
-                <div id="tok-stats" className="mb-3 grid grid-cols-3 gap-1.5" aria-label="Text statistics">
+                <div id="tok-stats" className="mb-3 grid grid-cols-3 gap-1.5" aria-label={tr("statsLabel")}>
                   <div className="min-w-0 rounded-md border border-sky-400/20 bg-sky-400/[0.07] px-2 py-1.5">
-                    <div className="text-[10px] uppercase tracking-wide text-sky-300/80">Tokens</div>
+                    <div className="text-[10px] uppercase tracking-wide text-sky-300/80">{tr("tokens")}</div>
                     <div className="truncate text-sm font-semibold tabular-nums text-sky-100">
                       {result && !result.error ? tokens.length : "–"}
                     </div>
                   </div>
                   <div className="min-w-0 rounded-md border border-violet-400/20 bg-violet-400/[0.07] px-2 py-1.5">
-                    <div className="text-[10px] uppercase tracking-wide text-violet-300/80">Code points</div>
+                    <div className="text-[10px] uppercase tracking-wide text-violet-300/80">{tr("codePoints")}</div>
                     <div className="truncate text-sm font-semibold tabular-nums text-violet-100">{codePoints}</div>
                   </div>
                   <div className="min-w-0 rounded-md border border-amber-400/20 bg-amber-400/[0.07] px-2 py-1.5">
-                    <div className="text-[10px] uppercase tracking-wide text-amber-300/80">UTF-8 bytes</div>
+                    <div className="text-[10px] uppercase tracking-wide text-amber-300/80">{tr("utf8Bytes")}</div>
                     <div className="truncate text-sm font-semibold tabular-nums text-amber-100">{byteCount}</div>
                   </div>
                 </div>
@@ -467,12 +460,12 @@ export default function TokenizerPage() {
                   <div role="alert" className="rounded-md border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-100">
                     <p className="font-medium">
                       {result.error.input
-                        ? `This text can't be tokenized with ${labelOf(result.tokenizer)}.`
-                        : `Couldn't load the ${labelOf(result.tokenizer)} tokenizer.`}
+                        ? tr("inputError", { tokenizer: labelOf(result.tokenizer) })
+                        : tr("loadError", { tokenizer: labelOf(result.tokenizer) })}
                     </p>
                     <p className="mt-1 text-xs text-red-200/80">
                       {result.error.input
-                        ? `${result.error.message}. Only <|endoftext|> is accepted as a special token here.`
+                        ? tr("inputErrorDetail", { message: result.error.message, special: "<|endoftext|>" })
                         : String(result.error?.message ?? result.error)}
                     </p>
                     {!result.error.input && (
@@ -483,7 +476,7 @@ export default function TokenizerPage() {
                         className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-md border border-red-300/40 px-3 py-1.5 text-sm text-red-50 hover:bg-red-500/20 disabled:opacity-60"
                       >
                         <RotateCw className="size-4" aria-hidden="true" />
-                        {busy ? "Retrying…" : "Retry"}
+                        {busy ? tr("retrying") : tr("retry")}
                       </button>
                     )}
                   </div>
@@ -505,7 +498,7 @@ export default function TokenizerPage() {
                     {phase === "loading" ? (
                       skeleton
                     ) : tokens.length === 0 ? (
-                      <span className="text-sm text-neutral-400">Type or paste text to see its tokens.</span>
+                      <span className="text-sm text-neutral-400">{tr("empty")}</span>
                     ) : (
                       <span dangerouslySetInnerHTML={{ __html: tokenOptions }} />
                     )}
@@ -516,27 +509,27 @@ export default function TokenizerPage() {
                   {activeToken ? (
                     <>
                       <span className="font-semibold text-sky-200">
-                        #{activeIndex + 1} of {tokens.length}
+                        {tr("inspector.position", { index: activeIndex + 1, total: tokens.length })}
                       </span>
                       {" · "}
                       <span className="font-mono text-neutral-100">
                         {JSON.stringify(tokenLabel(activeToken))}
                       </span>
-                      {" · ID "}
+                      {tr("inspector.id")}
                       <span className="font-mono text-violet-200">{activeToken.id}</span>
                       {activeToken.bytes && (
                         <>
-                          {` · ${activeToken.bytes.length} ${activeToken.bytes.length === 1 ? "byte" : "bytes"}: `}
+                          {tr("inspector.bytes", { count: activeToken.bytes.length })}
                           <span className="font-mono text-amber-200">{toHex(activeToken.bytes)}</span>
                         </>
                       )}
-                      {activeToken.piece !== undefined && ` · vocabulary piece ${JSON.stringify(activeToken.piece)}`}
-                      {activeToken.kind === "special" && " · special token"}
+                      {activeToken.piece !== undefined && tr("inspector.piece", { piece: JSON.stringify(activeToken.piece) })}
+                      {activeToken.kind === "special" && tr("inspector.special")}
                       {(activeToken.kind === "fragment" || activeToken.kind === "mixed") &&
-                        " · includes a partial UTF-8 character that combines with neighbouring tokens"}
+                        tr("inspector.partial")}
                     </>
                   ) : (
-                    "Hover, tap, or use the arrow keys on a token to inspect it."
+                    tr("inspector.hint")
                   )}
                 </p>
               </div>
@@ -545,7 +538,7 @@ export default function TokenizerPage() {
               <div className={panel}>
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <h2 id="tok-ids-label" className="text-sm font-medium text-neutral-200">
-                    Token IDs
+                    {tr("tokenIds")}
                   </h2>
                   <button
                     type="button"
@@ -554,7 +547,7 @@ export default function TokenizerPage() {
                     className="inline-flex min-h-8 items-center gap-1.5 rounded-md border border-neutral-700 bg-neutral-900 px-2.5 py-1 text-xs text-neutral-200 hover:bg-neutral-800 disabled:opacity-50"
                   >
                     <Copy className="size-3.5" aria-hidden="true" />
-                    Copy IDs
+                    {tr("copyIds")}
                   </button>
                 </div>
                 <div
@@ -581,9 +574,9 @@ export default function TokenizerPage() {
                 </div>
                 <p role="status" className={`mt-2 text-xs ${copyState === "failed" ? "text-red-300" : "text-neutral-400"}`}>
                   {copyState === "copied"
-                    ? "Copied IDs to the clipboard."
+                    ? tr("copied")
                     : copyState === "failed"
-                    ? "Copy failed. Select the IDs above and copy them manually."
+                    ? tr("copyFailed")
                     : ""}
                 </p>
               </div>

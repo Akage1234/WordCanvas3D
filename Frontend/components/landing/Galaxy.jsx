@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
 import { rng, gauss } from "./random";
 import styles from "./landing.module.css";
@@ -40,6 +41,7 @@ function buildStars() {
 }
 
 export default function Galaxy() {
+  const t = useTranslations("Home");
   const ref = useRef(null);
 
   useEffect(() => {
@@ -139,7 +141,7 @@ export default function Galaxy() {
 
   return (
     <div className={styles.galaxy}>
-      <canvas ref={ref} aria-label="A slowly rotating galaxy of words, coloured by cluster" role="img" />
+      <canvas ref={ref} aria-label={t("galaxyLabel")} role="img" />
     </div>
   );
 }

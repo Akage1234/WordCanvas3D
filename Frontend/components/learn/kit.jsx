@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import s from "./learn.module.css";
 
 // Shared building blocks for Learn articles.

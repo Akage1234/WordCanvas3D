@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import VisualizerLayout from "@/components/VisualizerLayout";
 import { useLayoutMode } from "@/components/LayoutContext";
 import VectorPlaygroundCanvas from "@/components/VectorPlaygroundCanvas";
@@ -41,10 +42,7 @@ const ANSWER_COLOR = "#26de81";
 const HELPER_COLOR = "#f9ca24";
 const FIELDS = ["a", "b", "c"];
 
-const VIEWS = {
-  centred: { label: "Group centre", origin: "centre = average of these words", hint: "Arrows start from the average of the plotted words. Good for seeing how the words spread out." },
-  zero: { label: "From zero", origin: "real zero", hint: "Arrows start from the model's real zero, where directions decide the nearest word. Arrows bunch up because most words point a similar way." },
-};
+// View label, origin text and hint live in messages under Vectors.views.<view>.
 
 function PresetChips({ onPick }) {
   return (
@@ -64,6 +62,7 @@ function PresetChips({ onPick }) {
 }
 
 function WordChips({ words, colors, modelLabel, dimmed }) {
+  const t = useTranslations("Vectors");
   if (!words.length) return null;
   const missing = words.filter((w) => !colors[w]);
   return (
@@ -76,14 +75,15 @@ function WordChips({ words, colors, modelLabel, dimmed }) {
         ))}
       </div>
       <p className="text-[11px] leading-snug text-muted-foreground">
-        Whole words, looked up directly in {modelLabel} (no tokenizer).{missing.length > 0 && ` Struck-out words aren't in its 10,000-word vocabulary.`}
-        {dimmed && " Hidden while an analogy is shown."}
+        {t("wholeWords", { model: modelLabel })}{missing.length > 0 && t("struckOut")}
+        {dimmed && t("hiddenWhileAnalogy")}
       </p>
     </div>
   );
 }
 
 function ResultCard({ result, onClose, top: topClass, open, onToggle }) {
+  const t = useTranslations("Vectors");
   if (!result) return null;
   const [top, ...rest] = result.neighbors;
   const [a, b, c] = result.keys;
@@ -91,20 +91,20 @@ function ResultCard({ result, onClose, top: topClass, open, onToggle }) {
     <div className={`absolute right-3 bottom-28 md:bottom-auto ${topClass} z-40 w-[min(240px,calc(100%-24px))] rounded-xl border border-white/10 bg-neutral-950/85 p-2 md:p-3 shadow-2xl backdrop-blur-md space-y-1.5 md:space-y-2 animate-in fade-in slide-in-from-top-2 duration-500`}>
       <div className="hidden md:flex items-start justify-between gap-2">
         <p className="font-mono text-xs text-neutral-400">{a} − {b} + {c} ≈</p>
-        <button type="button" onClick={onClose} aria-label="Clear analogy" className="-m-1 rounded p-1 text-neutral-400 hover:bg-white/10 hover:text-white">
+        <button type="button" onClick={onClose} aria-label={t("clearAnalogy")} className="-m-1 rounded p-1 text-neutral-400 hover:bg-white/10 hover:text-white">
           <X className="h-4 w-4" />
         </button>
       </div>
       <div className="flex items-center justify-between gap-2">
         <span className="rounded-md px-2 py-0.5 text-base md:text-lg font-bold text-white" style={{ background: `color-mix(in srgb, ${ANSWER_COLOR} 55%, #0b0e14)` }}>{top.word}</span>
         <span className="font-mono text-xs text-emerald-300">cos {top.similarity.toFixed(2)}</span>
-        <button type="button" onClick={onClose} aria-label="Clear analogy" className="md:hidden rounded p-1 text-neutral-400 hover:bg-white/10 hover:text-white">
+        <button type="button" onClick={onClose} aria-label={t("clearAnalogy")} className="md:hidden rounded p-1 text-neutral-400 hover:bg-white/10 hover:text-white">
           <X className="h-4 w-4" />
         </button>
       </div>
       <button type="button" onClick={onToggle} aria-pressed={open} className={cn("flex w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-[11px] transition-colors", open ? "bg-sky-500/15 text-sky-200" : "text-neutral-400 hover:bg-white/5 hover:text-white")}>
         <Radar className="h-3.5 w-3.5" />
-        <span>{open ? "Hide" : "Show"} the next {rest.length} closest words</span>
+        <span>{t(open ? "hideNext" : "showNext", { count: rest.length })}</span>
       </button>
       {open && <ul className="space-y-0.5">
         {rest.map((n) => (
@@ -119,10 +119,12 @@ function ResultCard({ result, onClose, top: topClass, open, onToggle }) {
 }
 
 function PlotLegend({ result, view }) {
+  const t = useTranslations("Vectors");
   const [open, setOpen] = useState(false);
   if (!result) return null;
   const [a, b, c] = result.keys;
   const answer = result.neighbors[0].word;
+  const bold = (chunks) => <b className="text-white">{chunks}</b>;
   const row = (mark, text) => (
     <li className="flex items-start gap-2">
       <svg width="26" height="12" viewBox="0 0 26 12" className="mt-0.5 shrink-0" aria-hidden="true">{mark}</svg>
@@ -131,35 +133,37 @@ function PlotLegend({ result, view }) {
   );
   if (!open) return (
     <button type="button" onClick={() => setOpen(true)} className="absolute bottom-3 left-3 z-40 hidden md:flex items-center gap-1.5 rounded-full border border-white/15 bg-neutral-950/80 px-3 py-1.5 text-xs text-neutral-200 backdrop-blur-md hover:bg-neutral-800">
-      <HelpCircle className="h-3.5 w-3.5 text-sky-300" /> How to read this
+      <HelpCircle className="h-3.5 w-3.5 text-sky-300" /> {t("howToRead")}
     </button>
   );
   return (
     <div className="absolute bottom-3 left-3 z-40 hidden md:block max-w-[300px] rounded-xl border border-white/10 bg-neutral-950/80 p-3 text-[11px] leading-snug text-neutral-300 backdrop-blur-md animate-in fade-in duration-300">
       <div className="mb-2 flex items-center justify-between">
-        <p className="font-semibold text-white text-xs">How to read this</p>
-        <button type="button" onClick={() => setOpen(false)} aria-label="Close legend" className="-m-1 rounded p-1 text-neutral-400 hover:bg-white/10 hover:text-white"><X className="h-3.5 w-3.5" /></button>
+        <p className="font-semibold text-white text-xs">{t("howToRead")}</p>
+        <button type="button" onClick={() => setOpen(false)} aria-label={t("closeLegend")} className="-m-1 rounded p-1 text-neutral-400 hover:bg-white/10 hover:text-white"><X className="h-3.5 w-3.5" /></button>
       </div>
       <ul className="space-y-1.5">
         {view === "zero"
-          ? row(<circle cx="6" cy="6" r="3.5" fill="#fff" />, <>The white dot is the model&apos;s <b className="text-white">real zero</b>. The nearest word is the one whose arrow points most nearly the same way as the green dot&apos;s.</>)
-          : row(<circle cx="6" cy="6" r="3.5" fill="#fff" />, <>The white dot is the <b className="text-white">average</b> of these words, not zero. Where things sit around it is not meaningful on its own.</>)}
-        {row(<path d="M2 6h20m-5-4 5 4-5 4" stroke={HELPER_COLOR} strokeWidth="2" fill="none" />, <>Yellow: the step from <b className="text-white">{b}</b> to <b className="text-white">{a}</b>, then the same step taken from <b className="text-white">{c}</b>.</>)}
-        {row(<circle cx="6" cy="6" r="4" fill={ANSWER_COLOR} />, <>Green dot: where that step lands. Usually empty space, not a word.</>)}
-        {row(<path d="M2 6h22" stroke={ANSWER_COLOR} strokeWidth="2" strokeDasharray="3 3" />, <>Dashed: the gap to <b className="text-white">{answer}</b>, the closest real word out of 10,000.</>)}
+          ? row(<circle cx="6" cy="6" r="3.5" fill="#fff" />, t.rich("legendZero", { b: bold }))
+          : row(<circle cx="6" cy="6" r="3.5" fill="#fff" />, t.rich("legendCentred", { b: bold }))}
+        {row(<path d="M2 6h20m-5-4 5 4-5 4" stroke={HELPER_COLOR} strokeWidth="2" fill="none" />, t.rich("legendStep", { from: b, to: a, start: c, b: bold }))}
+        {row(<circle cx="6" cy="6" r="4" fill={ANSWER_COLOR} />, t("legendPoint"))}
+        {row(<path d="M2 6h22" stroke={ANSWER_COLOR} strokeWidth="2" strokeDasharray="3 3" />, t.rich("legendGap", { answer, b: bold }))}
       </ul>
     </div>
   );
 }
 
+// Captions live in messages under Vectors.operations.
 const OPERATIONS = [
-  { caption: "start with" },
-  { sign: "−", caption: "take away" },
-  { sign: "+", caption: "add" },
+  {},
+  { sign: "−" },
+  { sign: "+" },
 ];
 const OPERATION_STYLES = ["bg-sky-500/15 text-sky-300", "bg-red-500/15 text-red-300", "bg-emerald-500/15 text-emerald-300"];
 
 function EquationInputs({ inputs, onInputChange, onCalculate, errorField }) {
+  const captions = useTranslations("Vectors").raw("operations");
   return (
     <div>
       {FIELDS.map((field, i) => (
@@ -174,11 +178,11 @@ function EquationInputs({ inputs, onInputChange, onCalculate, errorField }) {
               {field}
             </span>
             <Input
-              aria-label={`${field}: ${OPERATIONS[i].caption}`}
+              aria-label={`${field}: ${captions[i]}`}
               value={inputs[field]}
               onChange={(e) => onInputChange(field, e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") onCalculate(); }}
-              placeholder={`${OPERATIONS[i].caption}: ${["king", "man", "woman"][i]}`}
+              placeholder={`${captions[i]}: ${["king", "man", "woman"][i]}`}
               className={cn("h-9 min-w-0 flex-1", errorField === field && "border-destructive focus-visible:ring-destructive")}
             />
           </label>
@@ -193,24 +197,25 @@ function VectorPlaygroundControls({
   wordsText, onWordsTextChange, manualWords, wordColors, inputs, onInputChange, onPreset,
   onCalculate, calcDisabled, calcLabel, result, errorMessage, errorField,
 }) {
+  const t = useTranslations("Vectors");
   return (
     <div className="w-full min-w-0 overflow-hidden">
       <h2 className="text-lg md:text-xl font-semibold mb-2 flex items-center gap-2">
-        Vector Playground{" "}
+        {t("heading")}{" "}
         <PageGuide page="vectors" />
       </h2>
       <p className="text-xs text-muted-foreground mb-3 md:mb-4">
-        Perform vector math and analogy experiments here.
+        {t("intro")}
       </p>
       <Separator className="my-3 md:my-4" />
 
       <div className="space-y-2">
         <label htmlFor="embedding-select" className="text-sm font-medium">
-          Embedding Model
+          {t("model")}
         </label>
         <Select value={embeddingModel} onValueChange={onEmbeddingModelChange}>
           <SelectTrigger id="embedding-select" className="w-full">
-            <SelectValue placeholder="Select embedding model" />
+            <SelectValue placeholder={t("modelPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="glove_300D">GloVe 300D</SelectItem>
@@ -225,7 +230,7 @@ function VectorPlaygroundControls({
       <div className="flex items-center space-x-2">
         <Checkbox id="gridlines" checked={showGridlines} onCheckedChange={onShowGridlinesChange} />
         <label htmlFor="gridlines" className="text-sm font-medium cursor-pointer">
-          Show Gridlines
+          {t("gridlines")}
         </label>
       </div>
 
@@ -233,18 +238,18 @@ function VectorPlaygroundControls({
 
       <div className="space-y-2">
         <Label htmlFor="words-input" className="text-sm font-medium">
-          Words to Plot (up to 50)
+          {t("wordsToPlotLimit")}
         </Label>
         <Textarea
           id="words-input"
           value={wordsText}
           onChange={(e) => onWordsTextChange(e.target.value)}
-          placeholder="Type words separated by spaces (e.g., man woman king queen)"
+          placeholder={t("wordsPlaceholder")}
           className="min-h-[80px] md:min-h-[100px] resize-none"
           maxLength={1000}
         />
         <p className="text-xs text-muted-foreground">
-          {Math.min(wordsText.split(/\s+/).filter((w) => w.trim().length > 0).length, 50)} / 50 words
+          {t("wordCount", { count: Math.min(wordsText.split(/\s+/).filter((w) => w.trim().length > 0).length, 50) })}
         </p>
         <WordChips words={manualWords} colors={wordColors} modelLabel={MODELS[embeddingModel].label} dimmed={!!result} />
       </div>
@@ -252,16 +257,16 @@ function VectorPlaygroundControls({
       <Separator className="my-3 md:my-4" />
 
       <div className="space-y-2 max-w-full overflow-hidden">
-        <Label className="text-sm font-medium">Word analogy</Label>
+        <Label className="text-sm font-medium">{t("analogy")}</Label>
         <p className="text-xs leading-snug text-muted-foreground">
-          Start with a word, take one idea away, add another, and see which real word it lands on.
+          {t("analogyIntro")}
         </p>
         <EquationInputs inputs={inputs} onInputChange={onInputChange} onCalculate={onCalculate} errorField={errorField} />
         {errorMessage && <p className="text-xs text-destructive">{errorMessage}</p>}
         <Button onClick={onCalculate} variant="default" className="w-full" disabled={calcDisabled}>
           {calcLabel}
         </Button>
-        <p className="pt-1 text-[11px] uppercase tracking-wide text-neutral-500">Or try an example</p>
+        <p className="pt-1 text-[11px] uppercase tracking-wide text-neutral-500">{t("orTryExample")}</p>
         <PresetChips onPick={onPreset} />
       </div>
 
@@ -271,9 +276,10 @@ function VectorPlaygroundControls({
 }
 
 export default function PlaygroundPage() {
+  const t = useTranslations("Vectors");
   const [embeddingModel, setEmbeddingModel] = useState("glove_300D");
   const [showGridlines, setShowGridlines] = useState(true);
-  const [wordsText, setWordsText] = useState("If the path be beautiful , let us not ask where it leads");
+  const [wordsText, setWordsText] = useState(() => t("defaultWords"));
   const [inputs, setInputs] = useState({ a: "", b: "", c: "" });
   const [equation, setEquation] = useState(null);
   const [models, setModels] = useState({});
@@ -311,10 +317,10 @@ export default function PlaygroundPage() {
     if (!equation || !embeddings) return null;
     const keys = FIELDS.map((f) => lookup(embeddings, equation[f]));
     const missing = FIELDS.find((f, i) => !keys[i]);
-    if (missing) return { errorField: missing, error: `"${equation[missing]}" is not in ${modelLabel}.` };
+    if (missing) return { errorField: missing, error: t("notInModel", { word: equation[missing], model: modelLabel }) };
     const vector = analogy(...keys.map((k) => embeddings[k]));
     return { keys, vector, neighbors: nearest(vector, embeddings, keys, 5) };
-  }, [equation, embeddings, modelLabel]);
+  }, [equation, embeddings, modelLabel, t]);
   const result = calc?.neighbors ? calc : null;
 
 
@@ -388,7 +394,7 @@ export default function PlaygroundPage() {
 
   const incomplete = FIELDS.some((f) => !inputs[f].trim());
   const calcDisabled = !embeddings || incomplete;
-  const calcLabel = embeddings ? "Calculate" : `Loading ${modelLabel}… ${Math.round(progress * 100)}%`;
+  const calcLabel = embeddings ? t("calculate") : t("loadingProgress", { model: modelLabel, percent: Math.round(progress * 100) });
   const errorMessage = calc?.error ?? null;
   const errorField = calc?.errorField ?? null;
 
@@ -421,18 +427,18 @@ export default function PlaygroundPage() {
           {
             id: "model",
             icon: Database,
-            label: "Model",
+            label: t("tabs.model"),
             content: (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Embedding Model</h3>
+                  <h3 className="text-lg font-semibold mb-3">{t("model")}</h3>
                   <div className="space-y-2">
                     <label htmlFor="mobile-embedding-select" className="text-sm font-medium">
-                      Embedding Model
+                      {t("model")}
                     </label>
                     <Select value={embeddingModel} onValueChange={setEmbeddingModel}>
                       <SelectTrigger id="mobile-embedding-select" className="w-full">
-                        <SelectValue placeholder="Select embedding model" />
+                        <SelectValue placeholder={t("modelPlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="glove_300D">GloVe 300D</SelectItem>
@@ -448,15 +454,15 @@ export default function PlaygroundPage() {
           {
             id: "display",
             icon: Grid,
-            label: "Display",
+            label: t("tabs.display"),
             content: (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Display Options</h3>
+                  <h3 className="text-lg font-semibold mb-3">{t("displayOptions")}</h3>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="mobile-gridlines" checked={showGridlines} onCheckedChange={setShowGridlines} />
                     <label htmlFor="mobile-gridlines" className="text-sm font-medium cursor-pointer">
-                      Show Gridlines
+                      {t("gridlines")}
                     </label>
                   </div>
                 </div>
@@ -466,25 +472,25 @@ export default function PlaygroundPage() {
           {
             id: "words",
             icon: FileText,
-            label: "Words",
+            label: t("tabs.words"),
             content: (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Words to Plot</h3>
+                  <h3 className="text-lg font-semibold mb-3">{t("wordsToPlot")}</h3>
                   <div className="space-y-2">
                     <Label htmlFor="mobile-words-input" className="text-sm font-medium">
-                      Words to Plot (up to 50)
+                      {t("wordsToPlotLimit")}
                     </Label>
                     <Textarea
                       id="mobile-words-input"
                       value={wordsText}
                       onChange={(e) => setWordsText(e.target.value)}
-                      placeholder="Type words separated by spaces (e.g., man woman king queen)"
+                      placeholder={t("wordsPlaceholder")}
                       className="min-h-[120px] resize-none"
                       maxLength={1000}
                     />
                     <p className="text-xs text-muted-foreground">
-                      {Math.min(wordsText.split(/\s+/).filter((w) => w.trim().length > 0).length, 50)} / 50 words
+                      {t("wordCount", { count: Math.min(wordsText.split(/\s+/).filter((w) => w.trim().length > 0).length, 50) })}
                     </p>
                     <WordChips words={manualWords} colors={wordColors} modelLabel={modelLabel} dimmed={!!result} />
                   </div>
@@ -495,18 +501,18 @@ export default function PlaygroundPage() {
           {
             id: "calculation",
             icon: Calculator,
-            label: "Calc",
+            label: t("tabs.calc"),
             content: (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">Vector Calculation</h3>
+                  <h3 className="text-lg font-semibold mb-3">{t("calculation")}</h3>
                   <div className="space-y-4">
                     <EquationInputs inputs={inputs} onInputChange={onInputChange} onCalculate={handleCalculate} errorField={errorField} />
                     {errorMessage && <p className="text-xs text-destructive">{errorMessage}</p>}
                     <Button onClick={handleCalculate} variant="default" className="w-full" disabled={calcDisabled}>
                       {calcLabel}
                     </Button>
-                    <p className="text-[11px] uppercase tracking-wide text-neutral-500">Or try an example</p>
+                    <p className="text-[11px] uppercase tracking-wide text-neutral-500">{t("orTryExample")}</p>
                     <PresetChips onPick={handlePreset} />
                   </div>
                 </div>
@@ -519,7 +525,7 @@ export default function PlaygroundPage() {
             {!embeddings && (
               <div className="absolute inset-0 z-50 flex items-center justify-center bg-neutral-950/80 backdrop-blur-sm">
                 <div className="flex w-56 flex-col items-center gap-3">
-                  <p className="text-sm text-neutral-300">Loading {modelLabel} embeddings…</p>
+                  <p className="text-sm text-neutral-300">{t("loadingEmbeddings", { model: modelLabel })}</p>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-800" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
                     <div className="h-full rounded-full bg-blue-500 transition-[width]" style={{ width: `${Math.round(progress * 100)}%` }} />
                   </div>
@@ -532,14 +538,14 @@ export default function PlaygroundPage() {
             <button
               type="button"
               onClick={() => setView((v) => (v === "centred" ? "zero" : "centred"))}
-              title={VIEWS[view].hint}
-              aria-label={`Change view. Current view: ${VIEWS[view].label}`}
+              title={t(`views.${view}.hint`)}
+              aria-label={t("changeView", { view: t(`views.${view}.label`) })}
               className={`absolute left-3 top-20 ${isMinimalistMode ? "md:top-20" : "md:top-3"} z-40 flex items-center gap-2 rounded-full border border-white/15 bg-neutral-950/80 py-1.5 pl-2.5 pr-3.5 text-xs font-medium text-neutral-200 backdrop-blur-md transition-colors hover:bg-neutral-800`}
             >
               <Eye className="h-4 w-4 text-sky-300" />
-              <span className="text-neutral-400">View:</span> {VIEWS[view].label}
+              <span className="text-neutral-400">{t("view")}</span> {t(`views.${view}.label`)}
             </button>
-            <VectorPlaygroundCanvas showGridlines={showGridlines} items={scene.items} links={scene.links} originLabel={VIEWS[view].origin} />
+            <VectorPlaygroundCanvas showGridlines={showGridlines} items={scene.items} links={scene.links} originLabel={t(`views.${view}.origin`)} />
           </div>
         }
       />

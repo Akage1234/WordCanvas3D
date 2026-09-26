@@ -1,3 +1,4 @@
+import { Link } from "@/i18n/navigation";
 import { ArticleLink, Callout, Fig, FurtherReading } from "../kit";
 import s from "./tokenization-algorithms.module.css";
 import { BpeApply, BpeTrainer } from "./tokenization-algorithms.figures";
@@ -156,7 +157,7 @@ export default function TokenizationAlgorithms() {
       <p>
         That last point has real consequences. A tokenizer trained mostly on English splits other languages into more, smaller pieces, which makes them slower and more expensive to process; see <ArticleLink slug="why-emoji-cost-more-tokens">Why emoji and some languages cost more tokens</ArticleLink>.
         Once text is tokens, each token ID is turned into a vector, as explained in <ArticleLink slug="what-are-embeddings">What are embeddings?</ArticleLink>
-        You can compare the splits of several real BPE tokenizers on your own text in the <a href="/tokenizer">Tokenizer</a>.
+        You can compare the splits of several real BPE tokenizers on your own text in the <Link href="/tokenizer">Tokenizer</Link>.
       </p>
 
       <FurtherReading links={[

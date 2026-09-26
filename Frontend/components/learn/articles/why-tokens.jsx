@@ -1,3 +1,4 @@
+import { Link } from "@/i18n/navigation";
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
 import { ArticleLink, Callout, Fig, FurtherReading } from "../kit";
 import l from "../learn.module.css";
@@ -160,7 +161,7 @@ export default function WhyTokens() {
       <p>
         Once text is a list of token IDs, the next step inside a model is to turn each ID into a list of meaningful numbers. That is the idea behind <ArticleLink slug="what-are-embeddings">embeddings</ArticleLink>,
         and <ArticleLink slug="how-llms-work">How a language model turns your words into an answer</ArticleLink> shows where both steps fit in the whole pipeline.
-        To split your own text with several real tokenizers side by side, try the <a href="/tokenizer">Tokenizer</a>.
+        To split your own text with several real tokenizers side by side, try the <Link href="/tokenizer">Tokenizer</Link>.
       </p>
 
       <FurtherReading links={[

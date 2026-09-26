@@ -1,5 +1,6 @@
 "use client";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { ArrowUpRight, Info, X } from "lucide-react";
 import {
   Drawer,
@@ -11,19 +12,11 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
-// "What even is this?" for each tool: a short plain-language brief, one small picture, and the Learn
-// articles that explain it properly. Titles are duplicated from the Learn registry on purpose, so this
-// client component doesn't pull every article body into the page bundle.
+// "What even is this?" for each tool: a short plain-language brief (messages: Concepts.<concept>), one
+// small picture, and the Learn articles that explain it properly. Titles are duplicated from the Learn
+// registry on purpose, so this client component doesn't pull every article body into the page bundle.
 const CONCEPTS = {
   tokenizer: {
-    kicker: "Tokenizer",
-    title: "What is tokenization?",
-    lede: "A language model can't read letters. Before it sees your text, a tokenizer cuts it into pieces called tokens and swaps each piece for a number.",
-    points: [
-      "A token is often a whole common word, sometimes part of a word, a space or a punctuation mark.",
-      "Every model has a fixed list of tokens, its vocabulary, with a number (ID) for each.",
-      "Rare words, other languages and emoji take more tokens, so they cost more to process.",
-    ],
     picture: "tokens",
     reads: [
       ["why-tokens", "Why models read tokens, not letters or words", 6],
@@ -32,14 +25,6 @@ const CONCEPTS = {
     ],
   },
   embedding: {
-    kicker: "Embedding",
-    title: "What is an embedding?",
-    lede: "An embedding turns a word into a long list of numbers, here 300 of them, so that words used in similar ways end up with similar numbers.",
-    points: [
-      "Think of each list as a point in a space with 300 directions. Close points mean related words.",
-      "Nobody writes these numbers by hand. They are learned by reading huge amounts of text.",
-      "We can’t see 300 dimensions, so this page squashes them into 3D with PCA or UMAP. Some distances get distorted.",
-    ],
     picture: "cluster",
     reads: [
       ["what-are-embeddings", "What are embeddings?", 7],
@@ -48,14 +33,6 @@ const CONCEPTS = {
     ],
   },
   vectors: {
-    kicker: "Vector Playground",
-    title: "What are word vectors?",
-    lede: "Each word’s embedding is a vector: an arrow from the origin to a point. Because they are arrows, you can add and subtract them, and the result often still means something.",
-    points: [
-      "king − man + woman lands close to queen: the “royalty” step is roughly the same arrow either way.",
-      "Similarity is measured by angle (cosine), not by distance on screen.",
-      "The arrows here are a flattened view of 300 dimensions; the maths uses all of them.",
-    ],
     picture: "arrows",
     reads: [
       ["king-man-woman", "King − man + woman, explained", 4],
@@ -111,8 +88,9 @@ function Picture({ kind }) {
 
 // Icon-only by default; pass `label` for a text button (used on the tokenizer header).
 export function ConceptButton({ concept, label, className = "" }) {
-  const c = CONCEPTS[concept];
-  if (!c) return null;
+  const t = useTranslations("Concepts");
+  if (!CONCEPTS[concept]) return null;
+  const c = { ...CONCEPTS[concept], ...t.raw(concept) };
   return (
     <Drawer direction="right">
       <DrawerTrigger asChild>
@@ -140,7 +118,7 @@ export function ConceptButton({ concept, label, className = "" }) {
               <DrawerDescription className="mt-3 text-[15px] leading-relaxed text-neutral-300">{c.lede}</DrawerDescription>
             </DrawerHeader>
             <DrawerClose asChild>
-              <button className="-mr-2 inline-flex h-9 w-9 flex-none items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-white/10 hover:text-white" aria-label="Close">
+              <button className="-mr-2 inline-flex h-9 w-9 flex-none items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-white/10 hover:text-white" aria-label={t("close")}>
                 <X className="h-5 w-5" />
               </button>
             </DrawerClose>
@@ -160,7 +138,7 @@ export function ConceptButton({ concept, label, className = "" }) {
           </ul>
 
           <div className="mt-auto px-6 pb-6 pt-8">
-            <div className="mb-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Read more on Learn</div>
+            <div className="mb-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">{t("readMore")}</div>
             <div className="space-y-2">
               {c.reads.map(([slug, title, minutes]) => (
                 <DrawerClose asChild key={slug}>
@@ -170,7 +148,7 @@ export function ConceptButton({ concept, label, className = "" }) {
                   >
                     <span className="min-w-0">
                       <span className="block text-sm font-medium text-neutral-100">{title}</span>
-                      <span className="font-mono text-[11px] text-neutral-500">{minutes} min read</span>
+                      <span className="font-mono text-[11px] text-neutral-500">{t("minRead", { count: minutes })}</span>
                     </span>
                     <ArrowUpRight className="h-4 w-4 flex-none text-neutral-500 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-cyan-300" />
                   </Link>

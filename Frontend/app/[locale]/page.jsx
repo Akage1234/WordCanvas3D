@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { Instrument_Serif } from "next/font/google";
 import Galaxy from "@/components/landing/Galaxy";
@@ -7,14 +8,14 @@ import { TokenSplit, MiniClusters, VectorMath } from "@/components/landing/LensV
 import { Reveal, ShareBar } from "@/components/landing/Interactive";
 import { ARTICLES as LEARN } from "@/components/learn/registry";
 import s from "@/components/landing/landing.module.css";
-import { AUTHOR as SITE_AUTHOR, REPO_URL, SITE_DESCRIPTION, SITE_NAME, SITE_URL, jsonLd } from "@/lib/site";
+import { AUTHOR as SITE_AUTHOR, REPO_URL, SITE_NAME, SITE_URL, jsonLd } from "@/lib/site";
 
 export const metadata = { alternates: { canonical: "/" } };
 
-const SCHEMA = [
-  { "@context": "https://schema.org", "@type": "WebSite", name: SITE_NAME, url: SITE_URL, description: SITE_DESCRIPTION, inLanguage: "en" },
+const schema = (description, locale) => [
+  { "@context": "https://schema.org", "@type": "WebSite", name: SITE_NAME, url: SITE_URL, description, inLanguage: locale },
   {
-    "@context": "https://schema.org", "@type": "WebApplication", name: SITE_NAME, url: SITE_URL, description: SITE_DESCRIPTION,
+    "@context": "https://schema.org", "@type": "WebApplication", name: SITE_NAME, url: SITE_URL, description,
     applicationCategory: "EducationalApplication", operatingSystem: "Any (runs in the browser)", isAccessibleForFree: true,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, author: { "@type": "Person", ...SITE_AUTHOR }, codeRepository: REPO_URL,
   },
@@ -37,37 +38,42 @@ const GitHubMark = () => (
   </svg>
 );
 
+// Copy for each lens lives in messages under Home.lenses.<id>.
 const LENSES = [
-  { href: "/tokenizer", accent: "#f9ca24", step: "01 · Tokenizer", title: "Text into pieces", text: "Compare how GPT and other tokenizers cut the same sentence, and why emoji and rare words cost more.", cta: "Open Tokenizer", visual: <TokenSplit /> },
-  { href: "/embedding", accent: "#4ecdc4", step: "02 · Embedding", title: "Words as a map", text: "Fly through up to 10,000 GloVe words. Clusters form on their own: numbers, places, feelings, verbs.", cta: "Open Embedding", visual: <MiniClusters /> },
-  { href: "/vector-playground", accent: "#a55eea", step: "03 · Vector Playground", title: "Math with meaning", text: "Plot your own words as arrows and try the famous analogy: king − man + woman lands near queen.", cta: "Open Playground", visual: <VectorMath /> },
+  { id: "tokenizer", href: "/tokenizer", accent: "#f9ca24", visual: <TokenSplit /> },
+  { id: "embedding", href: "/embedding", accent: "#4ecdc4", visual: <MiniClusters /> },
+  { id: "vectors", href: "/vector-playground", accent: "#a55eea", visual: <VectorMath /> },
 ];
+const CHIP_COLORS = ["#f9ca24", "#fd79a8", "#4ecdc4"];
 
 // A short reading path for the landing page; titles and reading times come from the Learn registry.
 const FEATURED = ["how-llms-work", "why-tokens", "what-are-embeddings", "attention-and-transformers", "king-man-woman"];
 const ARTICLES = FEATURED.map((slug) => LEARN.find((a) => a.slug === slug));
 
-export default function Home() {
+export default async function Home({ params }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("Home");
+  const tm = await getTranslations("Metadata");
+  const tl = await getTranslations("Learn");
   return (
     <main className={s.page}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(SCHEMA)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(schema(tm("description"), locale))} />
       <div className={`${s.wrap} ${s.hero}`}>
         <div>
-          <span className={s.eyebrow}><i /> Free &amp; open source · no sign-up</span>
+          <span className={s.eyebrow}><i /> {t("eyebrow")}</span>
           <Headline serifClass={serif.className} />
           <p className={s.pitch}>
-            <strong>WordCanvas3D</strong> is a free playground for how AI understands text. Tokenize it, map it in 3D, and do math with meaning, right in your browser.
+            {t.rich("pitch", { strong: (chunks) => <strong>{chunks}</strong> })}
           </p>
           <div className={s.ctas}>
             <Link className={`${s.cta} ${s.ctaExplore}`} href="/embedding">
               <span className={s.orbit} aria-hidden="true"><i /><i /><i /></span>
-              Explore embeddings
+              {t("exploreCta")}
               <Arrow />
             </Link>
-            <Link className={`${s.cta} ${s.ctaTokens}`} href="/tokenizer" aria-label="Tokenize text">
-              <span className={s.t} style={{ "--tc": "#f9ca24" }}>Token</span>
-              <span className={s.t} style={{ "--tc": "#fd79a8" }}>ize</span>
-              <span className={s.t} style={{ "--tc": "#4ecdc4" }}>&nbsp;text</span>
+            <Link className={`${s.cta} ${s.ctaTokens}`} href="/tokenizer" aria-label={t("tokenizeCta")}>
+              {t.raw("tokenizeChips").map((chip, i) => <span key={i} className={s.t} style={{ "--tc": CHIP_COLORS[i % CHIP_COLORS.length] }}>{chip}</span>)}
             </Link>
           </div>
         </div>
@@ -77,19 +83,19 @@ export default function Home() {
       <section className={s.section}>
         <div className={s.wrap}>
           <Reveal className={s.reveal}>
-            <span className={s.kicker}>Three tools, one idea</span>
-            <h2 className={s.h2}>How a model sees language.</h2>
-            <p className={s.sub}>Each tool shows one step of the journey. Start anywhere; they link into each other.</p>
+            <span className={s.kicker}>{t("tools.kicker")}</span>
+            <h2 className={s.h2}>{t("tools.title")}</h2>
+            <p className={s.sub}>{t("tools.sub")}</p>
           </Reveal>
           <div className={s.lenses}>
             {LENSES.map((lens) => (
               <Reveal as="link" key={lens.href} href={lens.href} className={`${s.lens} ${s.reveal}`} style={{ "--accent": lens.accent }}>
                 <div className={s.lensViz}>{lens.visual}</div>
                 <div className={s.lensBody}>
-                  <span className={s.lensStep}>{lens.step}</span>
-                  <h3 className={s.lensTitle}>{lens.title}</h3>
-                  <p className={s.lensText}>{lens.text}</p>
-                  <span className={s.go}>{lens.cta} <Arrow /></span>
+                  <span className={s.lensStep}>{t(`lenses.${lens.id}.step`)}</span>
+                  <h3 className={s.lensTitle}>{t(`lenses.${lens.id}.title`)}</h3>
+                  <p className={s.lensText}>{t(`lenses.${lens.id}.text`)}</p>
+                  <span className={s.go}>{t(`lenses.${lens.id}.cta`)} <Arrow /></span>
                 </div>
               </Reveal>
             ))}
@@ -100,18 +106,18 @@ export default function Home() {
       <section className={s.section}>
         <div className={`${s.wrap} ${s.learn}`}>
           <Reveal className={`${s.learnIntro} ${s.reveal}`}>
-            <span className={s.kicker}>Learn</span>
-            <h2 className={s.h2}>Understand what<br />you’re looking at.</h2>
-            <p className={s.sub}>Beginner-friendly articles on how language models read text, from your first word to the next one they write.</p>
-            <Link className={`${s.cta} ${s.ctaQuiet}`} href="/learn">Read the guides <Arrow /></Link>
+            <span className={s.kicker}>{t("learn.kicker")}</span>
+            <h2 className={s.h2}>{t.rich("learn.title", { br: () => <br /> })}</h2>
+            <p className={s.sub}>{t("learn.sub")}</p>
+            <Link className={`${s.cta} ${s.ctaQuiet}`} href="/learn">{t("learn.cta")} <Arrow /></Link>
           </Reveal>
           <Reveal as="ol" className={`${s.articles} ${s.reveal}`}>
             {ARTICLES.map((a) => (
               <li key={a.slug}>
                 <Link href={`/learn/${a.slug}`}>
-                  <span className={s.tag} style={{ "--tc": a.color }}>{a.tag}</span>
+                  <span className={s.tag} style={{ "--tc": a.color }}>{tl(`tags.${a.tag}`)}</span>
                   <strong>{a.title}</strong>
-                  <small>{a.minutes} min</small>
+                  <small>{t("learn.minutes", { count: a.minutes })}</small>
                   <Arrow />
                 </Link>
               </li>
@@ -123,22 +129,22 @@ export default function Home() {
       <section className={s.section}>
         <div className={s.wrap}>
           <Reveal className={`${s.center} ${s.reveal}`}>
-            <span className={s.kicker}>Works on any device</span>
-            <h2 className={s.h2}>Your desk, your couch, your commute.</h2>
-            <p className={s.sub}>Every tool is built for touch as well as mouse. Rotate, pinch and tap your way through language.</p>
+            <span className={s.kicker}>{t("devices.kicker")}</span>
+            <h2 className={s.h2}>{t("devices.title")}</h2>
+            <p className={s.sub}>{t("devices.sub")}</p>
           </Reveal>
           <Reveal className={s.devices} inClass={s.devicesIn}>
             <figure className={`${s.device} ${s.desktop}`}>
-              <div className={s.screen}><Image src="/landing/desktop-embedding.webp" alt="The Embedding page on a desktop screen" width={1440} height={900} sizes="(max-width: 960px) 82vw, 820px" /></div>
+              <div className={s.screen}><Image src="/landing/desktop-embedding.webp" alt={t("devices.desktopAlt")} width={1440} height={900} sizes="(max-width: 960px) 82vw, 820px" /></div>
               <div className={s.stand} />
             </figure>
             <figure className={`${s.device} ${s.tablet}`}>
-              <div className={s.screen}><Image src="/landing/tablet-tokenizer.webp" alt="The Tokenizer page on a tablet" width={1180} height={820} sizes="(max-width: 960px) 36vw, 360px" /></div>
-              <figcaption>Tokenizer</figcaption>
+              <div className={s.screen}><Image src="/landing/tablet-tokenizer.webp" alt={t("devices.tabletAlt")} width={1180} height={820} sizes="(max-width: 960px) 36vw, 360px" /></div>
+              <figcaption>{t("devices.tabletCaption")}</figcaption>
             </figure>
             <figure className={`${s.device} ${s.phone}`}>
-              <div className={s.screen}><Image src="/landing/phone-vector.webp" alt="The Vector Playground on a phone" width={390} height={844} sizes="(max-width: 960px) 15vw, 150px" /></div>
-              <figcaption>Vector Playground</figcaption>
+              <div className={s.screen}><Image src="/landing/phone-vector.webp" alt={t("devices.phoneAlt")} width={390} height={844} sizes="(max-width: 960px) 15vw, 150px" /></div>
+              <figcaption>{t("devices.phoneCaption")}</figcaption>
             </figure>
           </Reveal>
         </div>
@@ -148,23 +154,23 @@ export default function Home() {
         <div className={s.wrap}>
           <Reveal className={`${s.oss} ${s.reveal}`}>
             <div>
-              <span className={s.kicker}>Open source</span>
-              <h2 className={s.h2}>Built in the open.</h2>
-              <p className={s.sub}>Every line of WordCanvas3D is on GitHub. Read how it works, run it locally, open an issue, or send a pull request.</p>
+              <span className={s.kicker}>{t("oss.kicker")}</span>
+              <h2 className={s.h2}>{t("oss.title")}</h2>
+              <p className={s.sub}>{t("oss.sub")}</p>
               <div className={s.ossActions}>
-                <a className={`${s.cta} ${s.ctaGh}`} href={REPO} target="_blank" rel="noopener noreferrer"><GitHubMark /> View on GitHub</a>
-                <a className={`${s.cta} ${s.ctaQuiet}`} href={`${REPO}/stargazers`} target="_blank" rel="noopener noreferrer"><span className={s.star}>★</span> Star the repo</a>
+                <a className={`${s.cta} ${s.ctaGh}`} href={REPO} target="_blank" rel="noopener noreferrer"><GitHubMark /> {t("oss.github")}</a>
+                <a className={`${s.cta} ${s.ctaQuiet}`} href={`${REPO}/stargazers`} target="_blank" rel="noopener noreferrer"><span className={s.star}>★</span> {t("oss.star")}</a>
               </div>
             </div>
-            <div className={s.terminal} aria-label="Commands to run WordCanvas3D locally">
+            <div className={s.terminal} aria-label={t("oss.terminalLabel")}>
               <div className={s.termBar}><i /><i /><i /><span>Akage1234/WordCanvas3D</span></div>
               <pre>
-                <span className={s.cmt}># run it on your machine</span>{"\n"}
+                <span className={s.cmt}>{t("oss.terminalComment")}</span>{"\n"}
                 <span className={s.prompt}>$</span> git clone {REPO}{"\n"}
                 <span className={s.prompt}>$</span> cd WordCanvas3D/Frontend{"\n"}
                 <span className={s.prompt}>$</span> npm install{"\n"}
                 <span className={s.prompt}>$</span> npm run dev{"\n"}
-                <span className={s.ok}>✓ Ready on http://localhost:3000</span><span className={s.caret} />
+                <span className={s.ok}>{t("oss.ready")}</span><span className={s.caret} />
               </pre>
             </div>
           </Reveal>
@@ -173,17 +179,20 @@ export default function Home() {
 
       <section className={s.final}>
         <Reveal className={`${s.wrap} ${s.reveal}`}>
-          <span className={`${s.enjoy} ${serif.className}`}>Enjoying it?</span>
-          <h2 className={s.h2}>Share it with someone <em className={`${s.serif} ${serif.className}`}>curious.</em></h2>
-          <p className={s.sub}>Free, no ads, no sign-up. If it helped, pass it on to a friend.</p>
+          <span className={`${s.enjoy} ${serif.className}`}>{t("final.enjoy")}</span>
+          <h2 className={s.h2}>{t.rich("final.title", { em: (chunks) => <em className={`${s.serif} ${serif.className}`}>{chunks}</em> })}</h2>
+          <p className={s.sub}>{t("final.sub")}</p>
           <ShareBar buttonClass={`${s.cta} ${s.ctaExplore} ${s.shareBtn}`} />
         </Reveal>
       </section>
 
       <footer className={s.footer}>
         <div className={s.wrap}>
-          <span>© 2026 WordCanvas3D</span>
-          <span>Made with <span className={s.heart} role="img" aria-label="love">❤️</span> by <a className={s.author} href={AUTHOR} target="_blank" rel="noopener noreferrer">@Akage</a></span>
+          <span>{t("footer.copyright")}</span>
+          <span>{t.rich("footer.madeWith", {
+            heart: () => <span className={s.heart} role="img" aria-label={t("footer.love")}>❤️</span>,
+            author: (chunks) => <a className={s.author} href={AUTHOR} target="_blank" rel="noopener noreferrer">{chunks}</a>,
+          })}</span>
         </div>
       </footer>
     </main>

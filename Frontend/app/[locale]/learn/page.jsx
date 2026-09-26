@@ -1,4 +1,6 @@
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { Instrument_Serif } from "next/font/google";
 import { ARTICLES, TRACKS } from "@/components/learn/registry";
 import s from "@/components/landing/landing.module.css";
@@ -9,26 +11,31 @@ import { SITE_URL, jsonLd } from "@/lib/site";
 
 const serif = Instrument_Serif({ weight: "400", style: "italic", subsets: ["latin"] });
 
-const DESCRIPTION = "Beginner-friendly articles on how language models read text: tokens, embeddings, attention and transformers, plus quick guides to each WordCanvas3D tool.";
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Learn" });
+  const title = t("metaTitle");
+  const description = t("description");
+  return {
+    title,
+    description,
+    alternates: { canonical: "/learn" },
+    openGraph: { title, description, url: "/learn" },
+    twitter: { title, description },
+  };
+}
 
-export const metadata = {
-  title: "Learn: how language models read text",
-  description: DESCRIPTION,
-  alternates: { canonical: "/learn" },
-  openGraph: { title: "Learn: how language models read text", description: DESCRIPTION, url: "/learn" },
-  twitter: { title: "Learn: how language models read text", description: DESCRIPTION },
-};
-
-const SCHEMA = {
+const schema = (name, description) => ({
   "@context": "https://schema.org",
   "@type": "CollectionPage",
-  name: "Learn",
+  name,
   url: `${SITE_URL}/learn`,
-  description: DESCRIPTION,
+  description,
   hasPart: ARTICLES.map((a) => ({ "@type": "Article", headline: a.title, url: `${SITE_URL}/learn/${a.slug}` })),
-};
+});
 
-const TOOL_NAMES = { "/tokenizer": "Tokenizer", "/embedding": "Embedding explorer", "/vector-playground": "Vector Playground" };
+// Keys into Learn.tools for the "Pairs with" line on guide cards.
+const TOOL_KEYS = { "/tokenizer": "tokenizer", "/embedding": "embedding", "/vector-playground": "vectors" };
 
 // Small line drawings, one per idea, drawn in the same stroke as the rest of the site.
 const GLYPHS = {
@@ -47,31 +54,33 @@ function Glyph({ name, className }) {
 }
 
 function Card({ a, featured, num }) {
-  const tool = a.track === "guides" && TOOL_NAMES[a.cta?.href];
+  const t = useTranslations("Learn");
+  const tool = a.track === "guides" && TOOL_KEYS[a.cta?.href];
   return (
     <li className={featured ? l.featured : undefined}>
       <Link href={`/learn/${a.slug}`} className={l.card} style={{ "--tc": a.color }}>
         <span className={l.meta}>
           {num && <span className={l.num}>{String(num).padStart(2, "0")}</span>}
-          <span className={s.tag}>{a.tag}</span>
-          <span>{a.minutes} min read</span>
+          <span className={s.tag}>{t(`tags.${a.tag}`)}</span>
+          <span>{t("minRead", { count: a.minutes })}</span>
         </span>
         <h2>{a.title}</h2>
         <p>{a.summary}</p>
         {featured && <PipelineAnim className={l.pipeArt} serif={serif.style.fontFamily} />}
-        {tool && <span className={l.pairs}><Glyph name={a.tag} className={l.pairsIcon} />Pairs with: <b>{tool}</b></span>}
+        {tool && <span className={l.pairs}><Glyph name={a.tag} className={l.pairsIcon} />{t.rich("pairsWith", { tool: t(`tools.${tool}`), b: (chunks) => <b>{chunks}</b> })}</span>}
       </Link>
     </li>
   );
 }
 
 function Grid({ articles, numbered, className = l.grid }) {
+  const t = useTranslations("Learn");
   const topics = [...new Set(articles.map((a) => a.topic).filter(Boolean))];
   return (
     <ol className={className}>
       {topics.length
         ? topics.flatMap((topic, i) => [
-            <li key={topic} className={l.topic} aria-hidden="true"><Glyph name={topic} className={l.topicIcon} />Chapter {i + 1} · {topic}</li>,
+            <li key={topic} className={l.topic} aria-hidden="true"><Glyph name={topic} className={l.topicIcon} />{t("chapter", { number: i + 1, topic: t(`tags.${topic}`) })}</li>,
             ...articles.filter((a) => a.topic === topic).map((a) => <Card key={a.slug} a={a} num={numbered && articles.indexOf(a) + 1} />),
           ])
         : articles.map((a) => <Card key={a.slug} a={a} />)}
@@ -79,30 +88,33 @@ function Grid({ articles, numbered, className = l.grid }) {
   );
 }
 
-export default function LearnIndex() {
+export default async function LearnIndex({ params }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("Learn");
   const start = ARTICLES.find((a) => a.track === "start");
   const count = (id) => ARTICLES.filter((a) => a.track === id).length;
-  const sections = TRACKS.filter((t) => t.id !== "start");
+  const sections = TRACKS.filter((id) => id !== "start");
 
   return (
     <main className={`${s.page} ${l.main}`}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(SCHEMA)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(schema(t("title"), t("description")))} />
       <div className={`${s.wrap} ${l.indexWrap}`}>
         <LearnArt className={l.headArt} />
         <header id="top" className={l.head}>
-          <span className={s.kicker}>Learn</span>
-          <h1 className={l.h1}>Understand what you’re looking at.</h1>
-          <p className={s.sub}>How language models read text, from the very first step to the next word they write.</p>
-          <nav className={l.jump} aria-label="Sections on this page">
-            <a href="#start" className={l.jumpMain}>Quick Start <i aria-hidden="true">↓</i></a>
-            {sections.map((t) => (
-              <a key={t.id} href={`#track-${t.id}`}>{t.title} <small>{count(t.id)}</small><i aria-hidden="true">↓</i></a>
+          <span className={s.kicker}>{t("title")}</span>
+          <h1 className={l.h1}>{t("heading")}</h1>
+          <p className={s.sub}>{t("sub")}</p>
+          <nav className={l.jump} aria-label={t("sectionsLabel")}>
+            <a href="#start" className={l.jumpMain}>{t("quickStart")} <i aria-hidden="true">↓</i></a>
+            {sections.map((id) => (
+              <a key={id} href={`#track-${id}`}>{t(`tracks.${id}.title`)} <small>{count(id)}</small><i aria-hidden="true">↓</i></a>
             ))}
           </nav>
         </header>
 
         <div id="start" className={l.prompt}>
-          <p>Don’t know where to start? <em className={serif.className}>Start here</em></p>
+          <p>{t.rich("startPrompt", { em: (chunks) => <em className={serif.className}>{chunks}</em> })}</p>
           <svg className={l.arrow} viewBox="0 0 92 70" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path pathLength="1" d="M4 22 C 30 4, 66 8, 62 30 C 59 45, 38 42, 43 28 C 48 16, 76 26, 76 62" />
             <path pathLength="1" d="M68 55 L76 63 L83 54" />
@@ -112,16 +124,16 @@ export default function LearnIndex() {
           <Card a={start} featured />
         </ol>
 
-        {sections.map((track) => (
-          <section key={track.id} id={`track-${track.id}`} className={`${l.track} ${track.id === "guides" ? l.guides : ""}`} aria-labelledby={`track-${track.id}-title`}>
+        {sections.map((id) => (
+          <section key={id} id={`track-${id}`} className={`${l.track} ${id === "guides" ? l.guides : ""}`} aria-labelledby={`track-${id}-title`}>
             <div className={l.trackHead}>
-              <h2 id={`track-${track.id}-title`}>{track.title}</h2>
-              <p>{track.blurb}</p>
+              <h2 id={`track-${id}-title`}>{t(`tracks.${id}.title`)}</h2>
+              <p>{t(`tracks.${id}.blurb`)}</p>
             </div>
-            <Grid articles={ARTICLES.filter((a) => a.track === track.id)} numbered={track.id === "foundations"} className={track.id === "guides" ? l.guideGrid : l.grid} />
+            <Grid articles={ARTICLES.filter((a) => a.track === id)} numbered={id === "foundations"} className={id === "guides" ? l.guideGrid : l.grid} />
           </section>
         ))}
-        <a href="#top" className={l.toTop}><i aria-hidden="true">↑</i>Back to top</a>
+        <a href="#top" className={l.toTop}><i aria-hidden="true">↑</i>{t("backToTop")}</a>
       </div>
     </main>
   );

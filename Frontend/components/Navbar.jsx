@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link, usePathname } from "@/i18n/navigation";
 import {
   Drawer,
   DrawerClose,
@@ -10,16 +11,16 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { usePathname } from "next/navigation";
 import { BookOpen, Box, Check, Globe, Menu, Sigma, Type, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useLayoutMode } from "@/components/LayoutContext";
 
+// Label and hint for each item live in messages under Nav.<id>.
 const NAV_ITEMS = [
-  { href: "/learn", label: "Learn", hint: "Articles and guides", Icon: BookOpen },
-  { href: "/tokenizer", label: "Tokenizer", hint: "See how text is split", Icon: Type },
-  { href: "/embedding", label: "Embedding", hint: "Explore words in 3D", Icon: Box },
-  { href: "/vector-playground", label: "Vector Playground", hint: "Do math with meaning", Icon: Sigma },
+  { id: "learn", href: "/learn", Icon: BookOpen },
+  { id: "tokenizer", href: "/tokenizer", Icon: Type },
+  { id: "embedding", href: "/embedding", Icon: Box },
+  { id: "vectors", href: "/vector-playground", Icon: Sigma },
 ];
 
 const REPO_URL = "https://github.com/Akage1234/WordCanvas3D";
@@ -37,12 +38,13 @@ function GithubMark({ className }) {
 const LANGUAGES = [["en", "English", "EN"], ["zh", "中文", "中"], ["ja", "日本語", "日"], ["es", "Español", "ES"]];
 
 function LanguageMenu({ variant = "icon" }) {
+  const t = useTranslations("Nav");
   if (variant === "rows") {
     return (
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 px-3 py-2 text-sm">
         <Globe className="h-4 w-4 flex-none text-neutral-400" />
         {LANGUAGES.map(([code, name]) => (
-          <span key={code} className={`whitespace-nowrap ${code === "en" ? "rounded-full bg-white/10 px-2.5 py-0.5 text-white" : "px-1 text-neutral-600"}`} title={code === "en" ? undefined : "Coming soon"}>{name}</span>
+          <span key={code} className={`whitespace-nowrap ${code === "en" ? "rounded-full bg-white/10 px-2.5 py-0.5 text-white" : "px-1 text-neutral-600"}`} title={code === "en" ? undefined : t("comingSoon")}>{name}</span>
         ))}
       </div>
     );
@@ -50,7 +52,7 @@ function LanguageMenu({ variant = "icon" }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className={`inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`} aria-label="Language: English">
+        <button className={`inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`} aria-label={t("languageLabel")}>
           <Globe className="h-4 w-4" />EN
         </button>
       </PopoverTrigger>
@@ -58,7 +60,7 @@ function LanguageMenu({ variant = "icon" }) {
         {LANGUAGES.map(([code, name]) => (
           <div key={code} aria-disabled={code !== "en"} className={`flex items-center justify-between rounded-xl px-3 py-2 text-sm ${code === "en" ? "bg-white/[0.06] text-white" : "text-neutral-600"}`}>
             {name}
-            {code === "en" ? <Check className="h-4 w-4 text-cyan-300" /> : <span className="font-mono text-[10px] uppercase tracking-wide">soon</span>}
+            {code === "en" ? <Check className="h-4 w-4 text-cyan-300" /> : <span className="font-mono text-[10px] uppercase tracking-wide">{t("soon")}</span>}
           </div>
         ))}
       </PopoverContent>
@@ -68,14 +70,15 @@ function LanguageMenu({ variant = "icon" }) {
 
 // Repo and author links: a small corner cluster on wide screens, rows in the phone menu.
 function SocialLinks({ variant = "icons" }) {
+  const t = useTranslations("Nav");
   if (variant === "rows") {
     const row = "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-neutral-300 transition-colors hover:bg-white/[0.05] hover:text-white";
     return (
       <div className="flex flex-col gap-1">
         <LanguageMenu variant="rows" />
-        <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className={row}><GithubMark className="h-4 w-4" />Source code on GitHub</a>
+        <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className={row}><GithubMark className="h-4 w-4" />{t("sourceCode")}</a>
         <a href={PROFILE_URL} target="_blank" rel="noopener noreferrer" className={row}>
-          <img src="https://github.com/Akage1234.png?size=64" alt="" className="h-5 w-5 rounded-full" />Made by @Akage
+          <img src="https://github.com/Akage1234.png?size=64" alt="" className="h-5 w-5 rounded-full" />{t("madeBy")}
         </a>
       </div>
     );
@@ -84,10 +87,10 @@ function SocialLinks({ variant = "icons" }) {
   return (
     <div className="flex items-center gap-1">
       <LanguageMenu />
-      <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className={btn} aria-label="WordCanvas3D on GitHub" title="Source code on GitHub">
+      <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className={btn} aria-label={t("repoLabel")} title={t("sourceCode")}>
         <GithubMark className="h-[18px] w-[18px]" />
       </a>
-      <a href={PROFILE_URL} target="_blank" rel="noopener noreferrer" className={btn} aria-label="About the author, @Akage" title="Made by @Akage">
+      <a href={PROFILE_URL} target="_blank" rel="noopener noreferrer" className={btn} aria-label={t("authorLabel")} title={t("madeBy")}>
         <img src="https://github.com/Akage1234.png?size=64" alt="" className="h-7 w-7 rounded-full ring-1 ring-white/20" />
       </a>
     </div>
@@ -113,9 +116,10 @@ function Logo({ size = "md", onClick }) {
 }
 
 function DesktopLinks({ isActive, compact }) {
+  const t = useTranslations("Nav");
   return (
     <ul className="flex items-center gap-1">
-      {NAV_ITEMS.map(({ href, label }) => {
+      {NAV_ITEMS.map(({ id, href }) => {
         const active = isActive(href);
         return (
           <li key={href}>
@@ -126,7 +130,7 @@ function DesktopLinks({ isActive, compact }) {
                 active ? "bg-white/[0.08] text-white" : "text-neutral-400 hover:bg-white/[0.05] hover:text-neutral-100"
               }`}
             >
-              {label}
+              {t(`${id}.label`)}
             </Link>
           </li>
         );
@@ -138,32 +142,33 @@ function DesktopLinks({ isActive, compact }) {
 function MobileMenu({ isActive, triggerClassName }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
+  const t = useTranslations("Nav");
   return (
     <Drawer open={open} onOpenChange={setOpen} direction="right">
       <DrawerTrigger asChild>
         <button
           className={`md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full text-neutral-200 transition-colors hover:bg-white/10 active:bg-white/15 ${focusRing} ${triggerClassName ?? ""}`}
-          aria-label="Open menu"
+          aria-label={t("openMenu")}
         >
           <Menu className="h-5 w-5" />
         </button>
       </DrawerTrigger>
       <DrawerContent className="bg-neutral-950/90 backdrop-blur-2xl border-l border-white/10">
         <DrawerHeader className="sr-only">
-          <DrawerTitle>Navigation</DrawerTitle>
-          <DrawerDescription>Pages on WordCanvas3D</DrawerDescription>
+          <DrawerTitle>{t("drawerTitle")}</DrawerTitle>
+          <DrawerDescription>{t("drawerDescription")}</DrawerDescription>
         </DrawerHeader>
         <div className="flex h-full min-h-0 flex-col overflow-y-auto overscroll-contain p-5 custom-scroll">
           <div className="mb-8 flex items-center justify-between">
             <Logo size="lg" onClick={close} />
             <DrawerClose asChild>
-              <button className={`inline-flex h-10 w-10 items-center justify-center rounded-full text-neutral-300 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`} aria-label="Close menu">
+              <button className={`inline-flex h-10 w-10 items-center justify-center rounded-full text-neutral-300 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`} aria-label={t("closeMenu")}>
                 <X className="h-5 w-5" />
               </button>
             </DrawerClose>
           </div>
-          <nav className="flex flex-1 flex-col gap-1.5 pb-2" aria-label="Main">
-            {NAV_ITEMS.map(({ href, label, hint, Icon }, i) => {
+          <nav className="flex flex-1 flex-col gap-1.5 pb-2" aria-label={t("main")}>
+            {NAV_ITEMS.map(({ id, href, Icon }, i) => {
               const active = isActive(href);
               return (
                 <Link
@@ -182,8 +187,8 @@ function MobileMenu({ isActive, triggerClassName }) {
                     <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
                   </span>
                   <span className="flex min-w-0 flex-col">
-                    <span className="text-[17px] font-medium leading-tight">{label}</span>
-                    <span className="mt-0.5 text-[13px] text-neutral-500">{hint}</span>
+                    <span className="text-[17px] font-medium leading-tight">{t(`${id}.label`)}</span>
+                    <span className="mt-0.5 text-[13px] text-neutral-500">{t(`${id}.hint`)}</span>
                   </span>
                   {active && <span aria-hidden="true" className="ml-auto h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(103,232,249,0.9)]" />}
                 </Link>
@@ -200,6 +205,7 @@ function MobileMenu({ isActive, triggerClassName }) {
 }
 
 export function Navbar() {
+  const t = useTranslations("Nav");
   const pathname = usePathname();
   const isActive = (href) => pathname === href || pathname.startsWith(`${href}/`);
   const { isMinimalistMode } = useLayoutMode();
@@ -222,7 +228,7 @@ export function Navbar() {
         <div className={`fixed top-3 left-3 z-50 rounded-full px-3.5 py-2 ${glass}`}>
           <Logo size="sm" />
         </div>
-        <nav className={`fixed top-3 right-3 z-50 hidden md:flex items-center gap-1 rounded-full p-1 ${glass}`} aria-label="Main">
+        <nav className={`fixed top-3 right-3 z-50 hidden md:flex items-center gap-1 rounded-full p-1 ${glass}`} aria-label={t("main")}>
           <DesktopLinks isActive={isActive} compact />
           <span className="mx-1 h-5 w-px bg-white/10" aria-hidden="true" />
           <SocialLinks />
@@ -238,7 +244,7 @@ export function Navbar() {
   return (
     <>
     <nav
-      aria-label="Main"
+      aria-label={t("main")}
       className={`flex sticky top-2 mx-auto max-w-3xl z-50 items-center justify-between rounded-full pl-4 pr-2 md:pl-6 md:pr-3 py-1.5 md:py-2.5 mb-4 md:mb-8 transition-[background-color,box-shadow] duration-300 ${glass} ${scrolled ? "bg-black/60 supports-[backdrop-filter]:bg-black/55" : ""}`}
     >
       <Logo />

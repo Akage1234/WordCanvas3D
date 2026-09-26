@@ -1,10 +1,11 @@
-import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
+import { SITE_NAME } from "@/lib/site";
+import en from "@/messages/en.json";
 
 export default function manifest() {
   return {
     name: SITE_NAME,
     short_name: SITE_NAME,
-    description: SITE_DESCRIPTION,
+    description: en.Metadata.description,
     start_url: "/",
     display: "standalone",
     background_color: "#05070b",

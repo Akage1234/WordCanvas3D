@@ -1,0 +1,437 @@
+{
+  "Metadata": {
+    "title": "WordCanvas3D · See how AI reads text",
+    "description": "A free, interactive playground for how AI reads text: split text into tokens, explore word embeddings in 3D, do vector math with meaning, and learn how language models work.",
+    "keywords": ["tokenizer", "token counter", "word embeddings", "embedding visualizer", "vector arithmetic", "king - man + woman", "PCA", "UMAP", "GloVe", "Word2Vec", "FastText", "how LLMs work", "transformer", "attention", "learn AI"],
+    "ogLocale": "en_US"
+  },
+  "Nav": {
+    "learn": { "label": "Learn", "hint": "Articles and guides" },
+    "tokenizer": { "label": "Tokenizer", "hint": "See how text is split" },
+    "embedding": { "label": "Embedding", "hint": "Explore words in 3D" },
+    "vectors": { "label": "Vector Playground", "hint": "Do math with meaning" },
+    "main": "Main",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "drawerTitle": "Navigation",
+    "drawerDescription": "Pages on WordCanvas3D",
+    "sourceCode": "Source code on GitHub",
+    "madeBy": "Made by @Akage",
+    "repoLabel": "WordCanvas3D on GitHub",
+    "authorLabel": "About the author, @Akage",
+    "languageLabel": "Language: English",
+    "comingSoon": "Coming soon",
+    "soon": "soon"
+  },
+  "Home": {
+    "eyebrow": "Free & open source · no sign-up",
+    "headlines": [
+      ["Language, made", "visible."],
+      ["See how AI", "reads text."],
+      ["Split text into", "tokens."],
+      ["Fly through", "words in 3D."],
+      ["Do math with", "meaning."],
+      ["Every word has", "a place."]
+    ],
+    "pitch": "<strong>WordCanvas3D</strong> is a free playground for how AI understands text. Tokenize it, map it in 3D, and do math with meaning, right in your browser.",
+    "exploreCta": "Explore embeddings",
+    "tokenizeCta": "Tokenize text",
+    "tokenizeChips": ["Token", "ize", " text"],
+    "galaxyLabel": "A slowly rotating galaxy of words, coloured by cluster",
+    "tools": {
+      "kicker": "Three tools, one idea",
+      "title": "How a model sees language.",
+      "sub": "Each tool shows one step of the journey. Start anywhere; they link into each other."
+    },
+    "lenses": {
+      "tokenizer": { "step": "01 · Tokenizer", "title": "Text into pieces", "text": "Compare how GPT and other tokenizers cut the same sentence, and why emoji and rare words cost more.", "cta": "Open Tokenizer" },
+      "embedding": { "step": "02 · Embedding", "title": "Words as a map", "text": "Fly through up to 10,000 GloVe words. Clusters form on their own: numbers, places, feelings, verbs.", "cta": "Open Embedding" },
+      "vectors": { "step": "03 · Vector Playground", "title": "Math with meaning", "text": "Plot your own words as arrows and try the famous analogy: king − man + woman lands near queen.", "cta": "Open Playground" }
+    },
+    "learn": {
+      "kicker": "Learn",
+      "title": "Understand what<br></br>you’re looking at.",
+      "sub": "Beginner-friendly articles on how language models read text, from your first word to the next one they write.",
+      "cta": "Read the guides",
+      "minutes": "{count} min"
+    },
+    "devices": {
+      "kicker": "Works on any device",
+      "title": "Your desk, your couch, your commute.",
+      "sub": "Every tool is built for touch as well as mouse. Rotate, pinch and tap your way through language.",
+      "desktopAlt": "The Embedding page on a desktop screen",
+      "tabletAlt": "The Tokenizer page on a tablet",
+      "phoneAlt": "The Vector Playground on a phone",
+      "tabletCaption": "Tokenizer",
+      "phoneCaption": "Vector Playground"
+    },
+    "oss": {
+      "kicker": "Open source",
+      "title": "Built in the open.",
+      "sub": "Every line of WordCanvas3D is on GitHub. Read how it works, run it locally, open an issue, or send a pull request.",
+      "github": "View on GitHub",
+      "star": "Star the repo",
+      "terminalLabel": "Commands to run WordCanvas3D locally",
+      "terminalComment": "# run it on your machine",
+      "ready": "✓ Ready on http://localhost:3000"
+    },
+    "final": {
+      "enjoy": "Enjoying it?",
+      "title": "Share it with someone <em>curious.</em>",
+      "sub": "Free, no ads, no sign-up. If it helped, pass it on to a friend."
+    },
+    "footer": {
+      "copyright": "© 2026 WordCanvas3D",
+      "madeWith": "Made with <heart></heart> by <author>@Akage</author>",
+      "love": "love"
+    }
+  },
+  "Share": {
+    "text": "WordCanvas3D: see how AI reads text. Tokenize it, map words in 3D and do math with meaning, free in your browser.",
+    "button": "Share WordCanvas3D",
+    "copied": "Link copied",
+    "shareOn": "or share on"
+  },
+  "Learn": {
+    "title": "Learn",
+    "metaTitle": "Learn: how language models read text",
+    "description": "Beginner-friendly articles on how language models read text: tokens, embeddings, attention and transformers, plus quick guides to each WordCanvas3D tool.",
+    "heading": "Understand what you’re looking at.",
+    "sub": "How language models read text, from the very first step to the next word they write.",
+    "sectionsLabel": "Sections on this page",
+    "quickStart": "Quick Start",
+    "startPrompt": "Don’t know where to start? <em>Start here</em>",
+    "minRead": "{count} min read",
+    "pairsWith": "Pairs with: <b>{tool}</b>",
+    "chapter": "Chapter {number} · {topic}",
+    "backToTop": "Back to top",
+    "tools": {
+      "tokenizer": "Tokenizer",
+      "embedding": "Embedding explorer",
+      "vectors": "Vector Playground"
+    },
+    "tags": {
+      "Quick Start": "Quick Start",
+      "Tokens": "Tokens",
+      "Embeddings": "Embeddings",
+      "Transformers": "Transformers",
+      "Vectors": "Vectors"
+    },
+    "tracks": {
+      "start": { "title": "Start here", "blurb": "No background needed. The whole journey from your text to the model's answer, in one picture." },
+      "foundations": { "title": "Foundations", "blurb": "General study material. Each article explains one idea properly, the way a good textbook chapter would." },
+      "guides": { "title": "Site guides", "blurb": "Quick tours of what each WordCanvas3D tool shows, with links back to the foundations." }
+    },
+    "back": "← Learn · {track}",
+    "tryIt": "Try it yourself",
+    "pagerLabel": "More guides",
+    "previous": "← Previous",
+    "next": "Next →"
+  },
+  "Concepts": {
+    "readMore": "Read more on Learn",
+    "minRead": "{count} min read",
+    "close": "Close",
+    "tokenizer": {
+      "kicker": "Tokenizer",
+      "title": "What is tokenization?",
+      "lede": "A language model can't read letters. Before it sees your text, a tokenizer cuts it into pieces called tokens and swaps each piece for a number.",
+      "points": [
+        "A token is often a whole common word, sometimes part of a word, a space or a punctuation mark.",
+        "Every model has a fixed list of tokens, its vocabulary, with a number (ID) for each.",
+        "Rare words, other languages and emoji take more tokens, so they cost more to process."
+      ]
+    },
+    "embedding": {
+      "kicker": "Embedding",
+      "title": "What is an embedding?",
+      "lede": "An embedding turns a word into a long list of numbers, here 300 of them, so that words used in similar ways end up with similar numbers.",
+      "points": [
+        "Think of each list as a point in a space with 300 directions. Close points mean related words.",
+        "Nobody writes these numbers by hand. They are learned by reading huge amounts of text.",
+        "We can’t see 300 dimensions, so this page squashes them into 3D with PCA or UMAP. Some distances get distorted."
+      ]
+    },
+    "vectors": {
+      "kicker": "Vector Playground",
+      "title": "What are word vectors?",
+      "lede": "Each word’s embedding is a vector: an arrow from the origin to a point. Because they are arrows, you can add and subtract them, and the result often still means something.",
+      "points": [
+        "king − man + woman lands close to queen: the “royalty” step is roughly the same arrow either way.",
+        "Similarity is measured by angle (cosine), not by distance on screen.",
+        "The arrows here are a flattened view of 300 dimensions; the maths uses all of them."
+      ]
+    }
+  },
+  "PageGuide": {
+    "buttonTitle": "How to use this page",
+    "kicker": "How to use",
+    "tokenizer": {
+      "title": "Using the Tokenizer",
+      "steps": [
+        "Type or paste text on the left, or pick a preset: Short, World scripts, Emoji, Code or Paragraph.",
+        "Choose a tokenizer from the menu at the top to see how a different model splits the same text.",
+        "Hover or tap any token to highlight its ID, and the other way round. Arrow keys work too.",
+        "Turn on Show whitespace to reveal spaces and line breaks inside tokens."
+      ],
+      "tip": "Emoji and non-English text show the biggest differences between tokenizers."
+    },
+    "embedding": {
+      "title": "Using the Embedding explorer",
+      "steps": [
+        "Pick a model, how many words to load, and PCA or UMAP in the sidebar.",
+        "Drag to rotate the cloud, scroll or pinch to zoom.",
+        "Click a point, or use Word Search, to select a word and see its nearest neighbours.",
+        "Use Show labels, Motion and Clusters on the canvas to change what you see."
+      ],
+      "tip": "Distances in the 3D view are approximate, because 300 dimensions are squashed into 3."
+    },
+    "vectors": {
+      "title": "Using the Vector Playground",
+      "steps": [
+        "Type words into the Words box to plot each one as an arrow.",
+        "Fill in a, b and c to compute a − b + c, or pick a preset, then press Calculate.",
+        "The result card shows the closest word. Open “Show the next 4 closest words” for runners-up.",
+        "Use the eye button to switch between the From zero and Group centre views. Drag to rotate."
+      ],
+      "tip": "Try paris − france + italy, or walking − walk + swim."
+    }
+  },
+  "Visualizer": {
+    "controls": "Controls",
+    "controlsTitle": "Visualization Controls",
+    "close": "Close",
+    "fullScreen": "Full screen",
+    "toFullScreen": "Switch to full-screen layout",
+    "toSidebar": "Switch to sidebar layout"
+  },
+  "Tokenizer": {
+    "metaTitle": "Tokenizer: see how text becomes tokens",
+    "description": "Paste any text and see exactly how GPT, LLaMA and other tokenizers split it into tokens and IDs. Count tokens, compare models, and see why emoji and other languages cost more.",
+    "title": "Tokenizer",
+    "intro": "See how text splits into tokens and IDs. Runs in your browser; your text isn’t sent anywhere.",
+    "learnButton": "Learn about tokenization",
+    "modelLabel": "Tokenizer",
+    "llamaNote": "Both options use the same vocabulary, so their IDs match.",
+    "defaultText": "The quick brown fox jumps over the lazy dog.",
+    "presets": [
+      { "label": "Short", "text": "A quiet idea can travel far." },
+      { "label": "World scripts", "text": "Hello, world. مرحباً بالعالم. नमस्ते दुनिया। こんにちは世界。" },
+      { "label": "Emoji", "text": "Build, test, celebrate: 🧩 → 🛠️ → ✅ 🎉" },
+      { "label": "Code", "text": "const total = items.reduce((sum, item) => sum + item.price, 0);" },
+      { "label": "Paragraph", "text": "At dusk, the library windows caught the last orange light. Inside, a reader compared two translations, noticing how punctuation, rhythm, and a single borrowed word changed the feeling of the same small scene." }
+    ],
+    "status": {
+      "loading": "Loading tokenizer…",
+      "error": "Error",
+      "ready": "Ready",
+      "tokenizing": "· Tokenizing…"
+    },
+    "sr": {
+      "loading": "Loading tokenizer",
+      "inputError": "This text can't be tokenized with this encoder",
+      "loadError": "Tokenizer couldn't load. Try again.",
+      "noText": "No text",
+      "result": "{count} tokens, {tokenizer}"
+    },
+    "text": "Text",
+    "sampleLegend": "Load a text sample",
+    "try": "Try",
+    "placeholder": "Type or paste text…",
+    "tokens": "Tokens",
+    "showWhitespace": "Show whitespace",
+    "statsLabel": "Text statistics",
+    "codePoints": "Code points",
+    "utf8Bytes": "UTF-8 bytes",
+    "inputError": "This text can't be tokenized with {tokenizer}.",
+    "loadError": "Couldn't load the {tokenizer} tokenizer.",
+    "inputErrorDetail": "{message}. Only {special} is accepted as a special token here.",
+    "retrying": "Retrying…",
+    "retry": "Retry",
+    "empty": "Type or paste text to see its tokens.",
+    "inspector": {
+      "position": "#{index} of {total}",
+      "id": " · ID ",
+      "bytes": " · {count, plural, one {# byte} other {# bytes}}: ",
+      "piece": " · vocabulary piece {piece}",
+      "special": " · special token",
+      "partial": " · includes a partial UTF-8 character that combines with neighbouring tokens",
+      "hint": "Hover, tap, or use the arrow keys on a token to inspect it."
+    },
+    "spoken": {
+      "special": "special token {name}",
+      "space": "space",
+      "newline": "newline",
+      "tab": "tab",
+      "bytes": "bytes {hex}"
+    },
+    "tokenOption": "Token {index} of {total}: {spoken}, ID {id}",
+    "tokenTitle": "id: {id}",
+    "idOption": "ID {id}, token {index} of {total}",
+    "idTitle": "token index: {index}",
+    "partialTitle": "Partial UTF-8 character: these bytes combine with neighbouring tokens",
+    "tokenIds": "Token IDs",
+    "copyIds": "Copy IDs",
+    "copied": "Copied IDs to the clipboard.",
+    "copyFailed": "Copy failed. Select the IDs above and copy them manually."
+  },
+  "Embedding": {
+    "metaTitle": "Embedding explorer: word embeddings in 3D",
+    "description": "Explore thousands of words from GloVe, Word2Vec and FastText in an interactive 3D map. Search a word, see its nearest neighbours, and compare PCA and UMAP projections.",
+    "words": "{count, number} words",
+    "colorHint": "Cluster IDs stored with the dataset.",
+    "edgeHint": "Draws stored neighbour links. Not every stored link is drawn, so lines are not a complete neighbour list.",
+    "errors": {
+      "network": "Couldn't reach the dataset. Check your connection and try again.",
+      "http": "This dataset isn't available right now. Try again.",
+      "decode": "The dataset download was incomplete. Try again.",
+      "invalid": "This dataset couldn't be read. Try again."
+    },
+    "loadFailed": "Couldn't load {dataset}",
+    "retry": "Retry",
+    "unavailableTitle": "3D view isn't available in this browser",
+    "stalledTitle": "The 3D view hasn't recovered yet",
+    "unavailableText": "WebGL couldn't start. You can still search words and read their details in the panel.",
+    "stalledText": "The browser paused graphics and hasn't restored them. It may still recover on its own.",
+    "unavailableHint": "Try again to start the 3D view.",
+    "stalledHint": "Reload the 3D view to restore graphics. Reloading resets the camera.",
+    "tryAgain": "Try again",
+    "reloadView": "Reload 3D view",
+    "graphicsLost": "Graphics paused by the browser — restoring…",
+    "loadingDataset": "Loading {dataset}…",
+    "noSelection": "Search or click a point to see its details.",
+    "selected": "Selected",
+    "clearSelection": "Clear selection {word}",
+    "clear": "Clear",
+    "controlsLabel": "Embedding controls",
+    "heading": "Embedding Space",
+    "intro": "300-D word vectors projected to 3D. Distances here can distort relationships.",
+    "dataset": "Dataset",
+    "model": "Embedding Model",
+    "modelPlaceholder": "Select embedding model",
+    "wordCount": "Word Count",
+    "wordCountPlaceholder": "Select word count",
+    "reduction": "Dimensionality Reduction",
+    "explore": "Explore",
+    "wordSearch": "Word Search",
+    "wordSearchSelected": "Word Search, selected {word}",
+    "searchPlaceholder": "Search for a word...",
+    "searchWords": "Search words...",
+    "noWordFound": "No word found.",
+    "typeToSearch": "Type to search {count} words...",
+    "loadingWords": "Loading words...",
+    "first300": "Showing first 300 results. Refine your search for more.",
+    "display": "Display",
+    "colorByCluster": "Color by Similarity Cluster",
+    "connectClusters": "Connect Clusters with Edges",
+    "status": {
+      "loading": "Loading {dataset}…",
+      "error": "Couldn't load {dataset}.",
+      "unavailable": "Loaded {count} words. 3D view unavailable; search still works.",
+      "lost": "Graphics paused. Restoring…",
+      "stalled": "3D view hasn't recovered.",
+      "ready": "Ready · {count} words"
+    },
+    "canvasLabel": "3D scatter plot of {count}words from {model}, {method} projection. Use Word Search to explore the words as text.",
+    "tabs": {
+      "model": "Model",
+      "search": "Search",
+      "display": "Display"
+    },
+    "modelConfig": "Model & Configuration",
+    "typeToSearchLabel": "Type to search words",
+    "typeToSearchPlaceholder": "Type to search words...",
+    "noWordsFound": "No words found. Try a different search.",
+    "first50": "Showing first 50 results. Keep typing to refine search...",
+    "searchThrough": "Search through {count} words. Select a word to highlight it on the canvas.",
+    "loadingWordList": "Loading word list...",
+    "displayOptions": "Display Options",
+    "loadingModel": "Loading {model}"
+  },
+  "Exploration": {
+    "unassigned": "Unassigned",
+    "cluster": "Cluster {id}",
+    "toolsLabel": "Canvas exploration",
+    "showLabelsTitle": "Show readable labels for visible words",
+    "showLabels": "Show labels",
+    "motionTitle": "Auto-rotate and drift",
+    "motion": "Motion",
+    "clusters": "Clusters",
+    "clearSpotlight": "Clear cluster spotlight",
+    "clearCluster": "Clear {label}",
+    "spotlightLabel": "Cluster spotlight",
+    "searchCluster": "Search {label} · {count}",
+    "findInCluster": "Find a word in {label}",
+    "zoomToCluster": "Zoom to cluster",
+    "wordsIn": "Words in {label}",
+    "noMatches": "No matches",
+    "hint": "Select a word to explore its connections",
+    "trayLabel": "Word exploration",
+    "unpin": "Unpin",
+    "pinToCompare": "Pin to compare",
+    "unpinWord": "Unpin word",
+    "pinWord": "Pin word to compare",
+    "locate": "Locate word",
+    "exitFocus": "Exit focus",
+    "focus": "Focus connections",
+    "collapse": "Collapse word details",
+    "expand": "Expand word details",
+    "clearSelection": "Clear selection",
+    "clear": "Clear",
+    "comparison": "Comparison",
+    "shared": "{count} shared",
+    "directlyLinked": "Directly linked",
+    "selectToCompare": "Select a word to compare",
+    "notIn": "Not in {dataset}",
+    "storedLinks": "Stored links for {word}"
+  },
+  "Vectors": {
+    "metaTitle": "Vector Playground: word vector arithmetic",
+    "description": "Do math with word meanings: try king − man + woman and other analogies, and see word vectors as arrows in 3D, computed on all 300 dimensions.",
+    "views": {
+      "centred": { "label": "Group centre", "origin": "centre = average of these words", "hint": "Arrows start from the average of the plotted words. Good for seeing how the words spread out." },
+      "zero": { "label": "From zero", "origin": "real zero", "hint": "Arrows start from the model's real zero, where directions decide the nearest word. Arrows bunch up because most words point a similar way." }
+    },
+    "wholeWords": "Whole words, looked up directly in {model} (no tokenizer).",
+    "struckOut": " Struck-out words aren't in its 10,000-word vocabulary.",
+    "hiddenWhileAnalogy": " Hidden while an analogy is shown.",
+    "clearAnalogy": "Clear analogy",
+    "showNext": "Show the next {count} closest words",
+    "hideNext": "Hide the next {count} closest words",
+    "howToRead": "How to read this",
+    "closeLegend": "Close legend",
+    "legendZero": "The white dot is the model's <b>real zero</b>. The nearest word is the one whose arrow points most nearly the same way as the green dot's.",
+    "legendCentred": "The white dot is the <b>average</b> of these words, not zero. Where things sit around it is not meaningful on its own.",
+    "legendStep": "Yellow: the step from <b>{from}</b> to <b>{to}</b>, then the same step taken from <b>{start}</b>.",
+    "legendPoint": "Green dot: where that step lands. Usually empty space, not a word.",
+    "legendGap": "Dashed: the gap to <b>{answer}</b>, the closest real word out of 10,000.",
+    "operations": ["start with", "take away", "add"],
+    "heading": "Vector Playground",
+    "intro": "Perform vector math and analogy experiments here.",
+    "model": "Embedding Model",
+    "modelPlaceholder": "Select embedding model",
+    "gridlines": "Show Gridlines",
+    "wordsToPlot": "Words to Plot",
+    "wordsToPlotLimit": "Words to Plot (up to 50)",
+    "wordsPlaceholder": "Type words separated by spaces (e.g., man woman king queen)",
+    "wordCount": "{count} / 50 words",
+    "analogy": "Word analogy",
+    "analogyIntro": "Start with a word, take one idea away, add another, and see which real word it lands on.",
+    "orTryExample": "Or try an example",
+    "defaultWords": "If the path be beautiful , let us not ask where it leads",
+    "notInModel": "\"{word}\" is not in {model}.",
+    "calculate": "Calculate",
+    "loadingProgress": "Loading {model}… {percent}%",
+    "tabs": {
+      "model": "Model",
+      "display": "Display",
+      "words": "Words",
+      "calc": "Calc"
+    },
+    "displayOptions": "Display Options",
+    "calculation": "Vector Calculation",
+    "loadingEmbeddings": "Loading {model} embeddings…",
+    "changeView": "Change view. Current view: {view}",
+    "view": "View:"
+  }
+}

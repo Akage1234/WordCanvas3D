@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import styles from "./landing.module.css";
 
 export function Reveal({ as: Tag = "div", className = "", inClass = styles.revealIn, children, ...props }) {
@@ -18,10 +19,11 @@ export function Reveal({ as: Tag = "div", className = "", inClass = styles.revea
 }
 
 const SITE_URL = "https://wordcanvas3d.vercel.app";
-const SHARE_TEXT = "WordCanvas3D: see how AI reads text. Tokenize it, map words in 3D and do math with meaning, free in your browser.";
 
 // Share the site: the native share sheet where there is one, otherwise copy the link; plus a few direct links.
 export function ShareBar({ buttonClass }) {
+  const t = useTranslations("Share");
+  const SHARE_TEXT = t("text");
   const [copied, setCopied] = useState(false);
   const share = async () => {
     if (navigator.share) {
@@ -43,10 +45,10 @@ export function ShareBar({ buttonClass }) {
     <>
       <button type="button" className={buttonClass} onClick={share}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v14" /></svg>
-        <span aria-live="polite">{copied ? "Link copied" : "Share WordCanvas3D"}</span>
+        <span aria-live="polite">{copied ? t("copied") : t("button")}</span>
       </button>
       <div className={styles.shareTo}>
-        <span>or share on</span>
+        <span>{t("shareOn")}</span>
         {targets.map(([name, make]) => <button key={name} type="button" onClick={open(make)}>{name}</button>)}
       </div>
     </>

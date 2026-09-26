@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { usePathname } from "@/i18n/navigation";
 import {
   Drawer,
   DrawerClose,
@@ -21,6 +22,7 @@ export default function VisualizerLayout({
   rightCanvas,
   mobileControlSections = null // Array of { icon: IconComponent, label: string, content: ReactNode }
 }) {
+  const t = useTranslations("Visualizer");
   // State for each mobile control drawer
   const [openDrawers, setOpenDrawers] = useState({});
   // Get layout mode from global context
@@ -96,7 +98,7 @@ export default function VisualizerLayout({
                   <div className="flex justify-center pb-4 pt-2 border-t border-white/10">
                     <DrawerClose asChild>
                       <button className="rounded-full px-6 py-2 text-sm font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 transition-colors">
-                        Close
+                        {t("close")}
                       </button>
                     </DrawerClose>
                   </div>
@@ -122,12 +124,12 @@ export default function VisualizerLayout({
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
-              <span className="text-sm font-medium">Controls</span>
+              <span className="text-sm font-medium">{t("controls")}</span>
             </button>
           </DrawerTrigger>
           <DrawerContent className="bg-neutral-950/95 backdrop-blur-xl border-t border-white/10 max-h-[85vh]">
             <DrawerHeader className="sr-only">
-              <DrawerTitle>Visualization Controls</DrawerTitle>
+              <DrawerTitle>{t("controlsTitle")}</DrawerTitle>
             </DrawerHeader>
             <div className="w-full overflow-y-auto custom-scroll flex-1 px-4 pt-4 pb-6">
               {leftPanel}
@@ -135,7 +137,7 @@ export default function VisualizerLayout({
             <div className="flex justify-center pb-4 pt-2 border-t border-white/10">
               <DrawerClose asChild>
                 <button className="rounded-full px-6 py-2 text-sm font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 transition-colors">
-                  Close
+                  {t("close")}
                 </button>
               </DrawerClose>
             </div>
@@ -166,8 +168,8 @@ export default function VisualizerLayout({
               <button
                 onClick={() => setIsMinimalistMode(true)}
                 className={`flex h-[38px] w-[38px] items-center justify-center rounded-full text-neutral-200 transition-colors hover:bg-white/10 hover:text-white ${roundGlass}`}
-                aria-label="Switch to full-screen layout"
-                title="Full screen"
+                aria-label={t("toFullScreen")}
+                title={t("fullScreen")}
               >
                 <Maximize2 className="h-4 w-4" />
               </button>
@@ -184,7 +186,7 @@ export default function VisualizerLayout({
         <button
           onClick={() => setIsMinimalistMode(false)}
           className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center justify-center rounded-full p-2.5 bg-white/50 dark:bg-black/40 backdrop-blur-lg supports-[backdrop-filter]:bg-white/40 dark:supports-[backdrop-filter]:bg-black/30 border border-white/20 dark:border-white/10 shadow-xl outline outline-white/20 dark:outline-white/10 text-neutral-200 hover:bg-neutral-800/50 transition-colors"
-          aria-label="Switch to sidebar layout"
+          aria-label={t("toSidebar")}
         >
           <Minimize2 className="h-4 w-4" />
         </button>
@@ -262,7 +264,7 @@ export default function VisualizerLayout({
                       <div className="flex justify-center pb-4 pt-2 border-t border-white/10">
                         <DrawerClose asChild>
                           <button className="rounded-full px-6 py-2 text-sm font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 transition-colors">
-                            Close
+                            {t("close")}
                           </button>
                         </DrawerClose>
                       </div>
@@ -288,12 +290,12 @@ export default function VisualizerLayout({
                   <svg className="h-4 w-4 landscape:h-3.5 landscape:w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                   </svg>
-                  <span className="text-xs landscape:text-[10px] font-medium">Controls</span>
+                  <span className="text-xs landscape:text-[10px] font-medium">{t("controls")}</span>
                 </button>
               </DrawerTrigger>
               <DrawerContent className="bg-neutral-950/95 backdrop-blur-xl border-t border-white/10 max-h-[85vh] landscape:max-h-[75vh]">
                 <DrawerHeader className="sr-only">
-                  <DrawerTitle>Visualization Controls</DrawerTitle>
+                  <DrawerTitle>{t("controlsTitle")}</DrawerTitle>
                 </DrawerHeader>
                 <div className="w-full overflow-y-auto custom-scroll flex-1 px-4 pt-4 pb-6">
                   {leftPanel}
@@ -301,7 +303,7 @@ export default function VisualizerLayout({
                 <div className="flex justify-center pb-4 pt-2 border-t border-white/10">
                   <DrawerClose asChild>
                     <button className="rounded-full px-6 py-2 text-sm font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 transition-colors">
-                      Close
+                      {t("close")}
                     </button>
                   </DrawerClose>
                 </div>
@@ -370,7 +372,7 @@ export default function VisualizerLayout({
                         <div className="flex justify-center pb-4 pt-2 border-t border-white/10">
                           <DrawerClose asChild>
                             <button className="rounded-full px-6 py-2 text-sm font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 transition-colors">
-                              Close
+                              {t("close")}
                             </button>
                           </DrawerClose>
                         </div>
@@ -396,12 +398,12 @@ export default function VisualizerLayout({
                   <svg className="h-4 w-4 landscape:h-3.5 landscape:w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                   </svg>
-                  <span className="text-xs landscape:text-[10px] font-medium">Controls</span>
+                  <span className="text-xs landscape:text-[10px] font-medium">{t("controls")}</span>
                 </button>
               </DrawerTrigger>
               <DrawerContent className="bg-neutral-950/95 backdrop-blur-xl border-t border-white/10 max-h-[85vh] landscape:max-h-[75vh]">
                 <DrawerHeader className="sr-only">
-                  <DrawerTitle>Visualization Controls</DrawerTitle>
+                  <DrawerTitle>{t("controlsTitle")}</DrawerTitle>
                 </DrawerHeader>
                 <div className="w-full overflow-y-auto custom-scroll flex-1 px-4 pt-4 pb-6">
                   {leftPanel}
@@ -409,7 +411,7 @@ export default function VisualizerLayout({
                 <div className="flex justify-center pb-4 pt-2 border-t border-white/10">
                   <DrawerClose asChild>
                     <button className="rounded-full px-6 py-2 text-sm font-medium bg-neutral-800 hover:bg-neutral-700 text-neutral-200 transition-colors">
-                      Close
+                      {t("close")}
                     </button>
                   </DrawerClose>
                 </div>

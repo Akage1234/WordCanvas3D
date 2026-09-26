@@ -1,3 +1,4 @@
+import { Link } from "@/i18n/navigation";
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
 import { ArticleLink, Callout, Fig, FurtherReading } from "../kit";
 import { WordMap } from "./what-are-embeddings.figures";
@@ -203,7 +204,7 @@ export default function WhatAreEmbeddings() {
       <p>
         The space these vectors live in has more structure than just “near” and “far”: directions can carry meaning too. That is the subject of{" "}
         <ArticleLink slug="latent-space">Latent space</ArticleLink>. How to draw 300 dimensions on a flat screen without fooling yourself is covered in{" "}
-        <ArticleLink slug="dimensionality-reduction">Seeing high dimensions</ArticleLink>. To explore 10,000 real word vectors in 3D, open the <a href="/embedding">Embedding explorer</a>,
+        <ArticleLink slug="dimensionality-reduction">Seeing high dimensions</ArticleLink>. To explore 10,000 real word vectors in 3D, open the <Link href="/embedding">Embedding explorer</Link>,
         and for a site-specific tour see <ArticleLink slug="how-a-word-becomes-300-numbers">How a word becomes 300 numbers</ArticleLink>.
       </p>
 

@@ -12,11 +12,8 @@ import NextTokenPrediction, { minutes as NextTokenPredictionMinutes } from "./ar
 
 const [RED, TEAL, SKY, YELLOW, INDIGO, PURPLE, GREEN, PINK] = CLUSTER_COLORS;
 
-export const TRACKS = [
-  { id: "start", title: "Start here", blurb: "No background needed. The whole journey from your text to the model's answer, in one picture." },
-  { id: "foundations", title: "Foundations", blurb: "General study material. Each article explains one idea properly, the way a good textbook chapter would." },
-  { id: "guides", title: "Site guides", blurb: "Quick tours of what each WordCanvas3D tool shows, with links back to the foundations." },
-];
+// Track titles and blurbs live in messages under Learn.tracks.<id>.
+export const TRACKS = ["start", "foundations", "guides"];
 
 // Order here is reading order: it drives the index, the previous/next links and the static routes.
 export const ARTICLES = [

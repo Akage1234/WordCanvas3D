@@ -1,12 +1,14 @@
-import Link from "next/link";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
-import { ARTICLES, TRACKS } from "@/components/learn/registry";
+import { ARTICLES } from "@/components/learn/registry";
 import s from "@/components/landing/landing.module.css";
 import l from "@/components/learn/learn.module.css";
 import { AUTHOR, SITE_NAME, SITE_URL, jsonLd } from "@/lib/site";
 
 export const dynamicParams = false;
 
+// Runs per locale: the [locale] layout supplies the locale params.
 export function generateStaticParams() {
   return ARTICLES.map((a) => ({ slug: a.slug }));
 }
@@ -32,7 +34,9 @@ const Arrow = () => (
 );
 
 export default async function Article({ params }) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("Learn");
   const i = ARTICLES.findIndex((x) => x.slug === slug);
   if (i < 0) notFound();
   const a = ARTICLES[i];
@@ -40,7 +44,7 @@ export default async function Article({ params }) {
   const next = ARTICLES[i + 1];
 
   const url = `${SITE_URL}/learn/${a.slug}`;
-  const trackTitle = TRACKS.find((t) => t.id === a.track)?.title;
+  const trackTitle = t(`tracks.${a.track}.title`);
   const schema = [
     {
       "@context": "https://schema.org",
@@ -48,8 +52,8 @@ export default async function Article({ params }) {
       headline: a.title,
       description: a.summary,
       url,
-      image: `${url}/opengraph-image`,
-      inLanguage: "en",
+      image: `${SITE_URL}/${locale}/learn/${a.slug}/opengraph-image`, // the path Next generates for og:image
+      inLanguage: "en", // article bodies are English-only for now
       timeRequired: `PT${a.minutes}M`,
       articleSection: a.tag,
       isAccessibleForFree: true,
@@ -61,7 +65,7 @@ export default async function Article({ params }) {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Learn", item: `${SITE_URL}/learn` },
+        { "@type": "ListItem", position: 1, name: t("title"), item: `${SITE_URL}/learn` },
         { "@type": "ListItem", position: 2, name: trackTitle, item: `${SITE_URL}/learn#track-${a.track}` },
         { "@type": "ListItem", position: 3, name: a.title, item: url },
       ],
@@ -72,10 +76,10 @@ export default async function Article({ params }) {
     <main className={`${s.page} ${l.main}`}>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(schema)} />
       <article className={l.article}>
-        <Link href="/learn" className={l.back}>← Learn · {trackTitle}</Link>
+        <Link href="/learn" className={l.back}>{t("back", { track: trackTitle })}</Link>
         <div className={l.meta}>
-          <span className={s.tag} style={{ "--tc": a.color }}>{a.tag}</span>
-          <span>{a.minutes} min read</span>
+          <span className={s.tag} style={{ "--tc": a.color }}>{t(`tags.${a.tag}`)}</span>
+          <span>{t("minRead", { count: a.minutes })}</span>
         </div>
         <h1 className={l.h1}>{a.title}</h1>
         <p className={l.lede}>{a.summary}</p>
@@ -84,22 +88,22 @@ export default async function Article({ params }) {
         </div>
 
         {a.cta && <aside className={l.cta}>
-          <span className={s.kicker}>Try it yourself</span>
+          <span className={s.kicker}>{t("tryIt")}</span>
           <h2>{a.cta.label}</h2>
           <p>{a.cta.text}</p>
           <Link className={`${s.cta} ${s.ctaExplore}`} href={a.cta.href}>{a.cta.label} <Arrow /></Link>
         </aside>}
 
-        <nav className={l.pager} aria-label="More guides">
+        <nav className={l.pager} aria-label={t("pagerLabel")}>
           {prev && (
             <Link href={`/learn/${prev.slug}`}>
-              <small>← Previous</small>
+              <small>{t("previous")}</small>
               <strong>{prev.title}</strong>
             </Link>
           )}
           {next && (
             <Link href={`/learn/${next.slug}`} className={l.next}>
-              <small>Next →</small>
+              <small>{t("next")}</small>
               <strong>{next.title}</strong>
             </Link>
           )}
