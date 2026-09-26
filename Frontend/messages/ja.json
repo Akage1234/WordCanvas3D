@@ -1,0 +1,453 @@
+{
+  "Og": {
+    "footer": "無料 · 広告なし · ブラウザで動作",
+    "home": { "title": "AI はどうやって", "serif": "文章を読むのか。", "sub": "トークンに分け、単語を 3D で眺め、意味で計算しよう。" },
+    "tokenizer": { "kicker": "トークナイザー", "title": "文章が", "serif": "トークンになるまで。" },
+    "embedding": { "kicker": "埋め込み", "title": "3D の単語の中を", "serif": "飛び回ろう。", "sub": "GloVe、Word2Vec、FastText。似た単語は自然に集まります。" },
+    "vectors": { "kicker": "ベクトル・プレイグラウンド", "title": "意味で", "serif": "計算しよう。" },
+    "learn": { "kicker": "学ぶ", "title": "言語モデルは", "serif": "文章をどう読むのか。", "sub": "トークン、埋め込み、アテンション、Transformer を初心者向けに解説。" },
+    "article": { "kicker": "{minutes} 分で読めます", "learn": "学ぶ" }
+  },
+  "Metadata": {
+    "title": "WordCanvas3D · AI が文章を読むしくみを見てみよう",
+    "description": "AI が文章を読むしくみを体験できる無料のインタラクティブなプレイグラウンド。文章をトークンに分割し、単語の埋め込みを 3D で探索し、意味でベクトル計算をして、言語モデルのしくみを学べます。",
+    "keywords": ["トークナイザー", "トークン数", "単語埋め込み", "埋め込み 可視化", "ベクトル演算", "king - man + woman", "PCA", "UMAP", "GloVe", "Word2Vec", "FastText", "大規模言語モデル しくみ", "Transformer", "アテンション", "AI 入門"],
+    "ogLocale": "ja_JP"
+  },
+  "Nav": {
+    "learn": { "label": "学ぶ", "hint": "記事とガイド" },
+    "tokenizer": { "label": "トークナイザー", "hint": "文章の分かれ方を見る" },
+    "embedding": { "label": "埋め込み", "hint": "単語を 3D で探索" },
+    "vectors": { "label": "ベクトル・プレイグラウンド", "hint": "意味で計算する" },
+    "main": "メイン",
+    "openMenu": "メニューを開く",
+    "closeMenu": "メニューを閉じる",
+    "drawerTitle": "ナビゲーション",
+    "drawerDescription": "WordCanvas3D のページ",
+    "sourceCode": "GitHub のソースコード",
+    "madeBy": "作者: @Akage",
+    "repoLabel": "GitHub の WordCanvas3D",
+    "authorLabel": "作者 @Akage について",
+    "languageLabel": "言語: 日本語"
+  },
+  "Home": {
+    "eyebrow": "無料・オープンソース · 登録不要",
+    "headlines": [
+      ["言葉を、", "目に見える形に。"],
+      ["AI はどうやって", "文章を読むのか。"],
+      ["文章を", "トークンに分ける。"],
+      ["3D の単語の中を", "飛び回ろう。"],
+      ["意味で", "計算しよう。"],
+      ["どの単語にも", "居場所がある。"]
+    ],
+    "pitch": "<strong>WordCanvas3D</strong> は、AI が文章を理解するしくみを体験できる無料のプレイグラウンドです。トークンに分け、3D で眺め、意味で計算する。すべてブラウザの中で完結します。",
+    "exploreCta": "埋め込みを探索",
+    "tokenizeCta": "文章をトークン化",
+    "tokenizeChips": ["Token", "ize", " text"],
+    "galaxyLabel": "クラスターごとに色分けされた、ゆっくり回転する単語の銀河",
+    "tools": {
+      "kicker": "3 つのツール、1 つのアイデア",
+      "title": "モデルには言葉がどう見えるのか。",
+      "sub": "それぞれのツールが旅の 1 ステップを見せてくれます。どこから始めても大丈夫。ツール同士はつながっています。"
+    },
+    "lenses": {
+      "tokenizer": { "step": "01 · トークナイザー", "title": "文章を小さく分ける", "text": "GPT などのトークナイザーが同じ文をどう区切るかを比べ、絵文字や珍しい単語がなぜ多くのトークンを使うのかを確かめましょう。", "cta": "トークナイザーを開く" },
+      "embedding": { "step": "02 · 埋め込み", "title": "単語の地図", "text": "最大 10,000 語の GloVe の単語の中を飛び回りましょう。数字、場所、感情、動詞など、クラスターが自然に生まれます。", "cta": "埋め込みを開く" },
+      "vectors": { "step": "03 · ベクトル・プレイグラウンド", "title": "意味で計算", "text": "好きな単語を矢印として描き、有名な類推を試してみましょう。king − man + woman は queen の近くに着地します。", "cta": "プレイグラウンドを開く" }
+    },
+    "learn": {
+      "kicker": "学ぶ",
+      "title": "目の前のものを<br></br>理解しよう。",
+      "sub": "言語モデルが文章を読むしくみを、初心者向けに解説した記事です。あなたが入力した最初の単語から、モデルが書く次の単語まで。",
+      "cta": "ガイドを読む",
+      "minutes": "{count} 分"
+    },
+    "devices": {
+      "kicker": "どんなデバイスでも",
+      "title": "デスクでも、ソファでも、通勤中でも。",
+      "sub": "どのツールもマウスだけでなくタッチ操作にも対応。回転、ピンチ、タップで言葉の世界を探検しましょう。",
+      "desktopAlt": "デスクトップ画面の埋め込みページ",
+      "tabletAlt": "タブレットのトークナイザーページ",
+      "phoneAlt": "スマートフォンのベクトル・プレイグラウンド",
+      "tabletCaption": "トークナイザー",
+      "phoneCaption": "ベクトル・プレイグラウンド"
+    },
+    "oss": {
+      "kicker": "オープンソース",
+      "title": "オープンに開発。",
+      "sub": "WordCanvas3D のコードはすべて GitHub で公開しています。しくみを読んだり、ローカルで動かしたり、issue を立てたり、pull request を送ったりしてみてください。",
+      "github": "GitHub で見る",
+      "star": "リポジトリにスターを付ける",
+      "terminalLabel": "WordCanvas3D をローカルで動かすコマンド",
+      "terminalComment": "# 自分のマシンで動かす",
+      "ready": "✓ http://localhost:3000 で起動しました"
+    },
+    "final": {
+      "enjoy": "楽しんでいますか？",
+      "title": "<em>好奇心旺盛な</em>誰かにシェアしよう。",
+      "sub": "無料、広告なし、登録不要。役に立ったら、友だちにも教えてあげてください。"
+    },
+    "footer": {
+      "copyright": "© 2026 WordCanvas3D",
+      "madeWith": "<author>@Akage</author> が <heart></heart> を込めて制作",
+      "love": "愛"
+    }
+  },
+  "Share": {
+    "text": "WordCanvas3D: AI が文章を読むしくみを見てみよう。トークンに分け、単語を 3D で眺め、意味で計算。ブラウザで無料で使えます。",
+    "button": "WordCanvas3D をシェア",
+    "copied": "リンクをコピーしました",
+    "shareOn": "または次でシェア"
+  },
+  "Learn": {
+    "title": "学ぶ",
+    "metaTitle": "学ぶ: 言語モデルが文章を読むしくみ",
+    "description": "言語モデルが文章を読むしくみを初心者向けに解説した記事集。トークン、埋め込み、アテンション、Transformer に加えて、WordCanvas3D の各ツールのクイックガイドもあります。",
+    "heading": "目の前のものを理解しよう。",
+    "sub": "言語モデルが文章を読むしくみを、最初のステップからモデルが書く次の単語まで。",
+    "sectionsLabel": "このページのセクション",
+    "quickStart": "クイックスタート",
+    "startPrompt": "どこから始めればいいかわからない？<em>ここから始めよう</em>",
+    "minRead": "{count} 分で読めます",
+    "pairsWith": "関連ツール: <b>{tool}</b>",
+    "chapter": "第 {number} 章 · {topic}",
+    "backToTop": "トップに戻る",
+    "englishOnly": "この記事は現在、英語のみです。サイトのほかの部分は翻訳されています。",
+    "tools": {
+      "tokenizer": "トークナイザー",
+      "embedding": "埋め込みエクスプローラー",
+      "vectors": "ベクトル・プレイグラウンド"
+    },
+    "tags": {
+      "Quick Start": "クイックスタート",
+      "Tokens": "トークン",
+      "Embeddings": "埋め込み",
+      "Transformers": "Transformer",
+      "Vectors": "ベクトル"
+    },
+    "tracks": {
+      "start": { "title": "ここから始めよう", "blurb": "予備知識は不要です。あなたの文章からモデルの答えまでの全体の流れを、1 枚の図で。" },
+      "foundations": { "title": "基礎", "blurb": "一般的な学習用の教材です。良い教科書の 1 章のように、各記事で 1 つの考え方をしっかり説明します。" },
+      "guides": { "title": "サイトガイド", "blurb": "WordCanvas3D の各ツールで何が見えるのかを手短に紹介し、基礎の記事へのリンクも付けています。" }
+    },
+    "back": "← 学ぶ · {track}",
+    "tryIt": "自分で試してみよう",
+    "pagerLabel": "ほかのガイド",
+    "previous": "← 前へ",
+    "next": "次へ →"
+  },
+  "Concepts": {
+    "readMore": "「学ぶ」で詳しく読む",
+    "minRead": "{count} 分で読めます",
+    "close": "閉じる",
+    "tokenizer": {
+      "kicker": "トークナイザー",
+      "title": "トークン化とは？",
+      "lede": "言語モデルは文字をそのまま読めません。モデルが文章を見る前に、トークナイザーが文章をトークンと呼ばれる小さな単位に分け、それぞれを数字に置き換えます。",
+      "points": [
+        "トークンは、よく使われる単語まるごとのこともあれば、単語の一部、空白、句読点のこともあります。",
+        "どのモデルにも決まったトークンの一覧（語彙）があり、それぞれに番号（ID）が付いています。",
+        "珍しい単語、英語以外の言語、絵文字は多くのトークンを使うため、処理のコストが高くなります。"
+      ]
+    },
+    "embedding": {
+      "kicker": "埋め込み",
+      "title": "埋め込みとは？",
+      "lede": "埋め込みは、単語を長い数字の列（ここでは 300 個）に変換したものです。使われ方が似ている単語は、似た数字になります。",
+      "points": [
+        "それぞれの数字の列を、300 の方向を持つ空間の中の 1 点と考えてみましょう。近い点ほど関連の深い単語です。",
+        "この数字は誰かが手で書いたものではありません。大量の文章を読むことで学習されます。",
+        "300 次元は目で見られないので、このページでは PCA や UMAP で 3D に圧縮しています。そのため一部の距離はゆがみます。"
+      ]
+    },
+    "vectors": {
+      "kicker": "ベクトル・プレイグラウンド",
+      "title": "単語ベクトルとは？",
+      "lede": "各単語の埋め込みはベクトル、つまり原点からある点へ向かう矢印です。矢印なので足したり引いたりでき、その結果にもたいてい意味があります。",
+      "points": [
+        "king − man + woman は queen の近くに着地します。「王族」への一歩は、どちらでもほぼ同じ矢印だからです。",
+        "類似度は画面上の距離ではなく、角度（コサイン）で測ります。",
+        "ここの矢印は 300 次元を平らにした見た目にすぎません。計算にはすべての次元を使っています。"
+      ]
+    }
+  },
+  "PageGuide": {
+    "buttonTitle": "このページの使い方",
+    "kicker": "使い方",
+    "tokenizer": {
+      "title": "トークナイザーの使い方",
+      "steps": [
+        "左側に文章を入力するか貼り付けます。または「短文」「世界の文字」「絵文字」「コード」「段落」のプリセットを選びます。",
+        "上部のメニューでトークナイザーを選ぶと、別のモデルが同じ文章をどう分けるかがわかります。",
+        "トークンにカーソルを合わせるかタップすると、その ID がハイライトされます（逆も同様）。矢印キーも使えます。",
+        "「空白文字を表示」をオンにすると、トークン内の空白や改行が見えるようになります。"
+      ],
+      "tip": "絵文字や英語以外の文章では、トークナイザーごとの違いが最も大きく現れます。"
+    },
+    "embedding": {
+      "title": "埋め込みエクスプローラーの使い方",
+      "steps": [
+        "サイドバーでモデル、読み込む単語数、PCA または UMAP を選びます。",
+        "ドラッグで点群を回転し、スクロールやピンチでズームします。",
+        "点をクリックするか「単語検索」を使って単語を選ぶと、その最近傍が表示されます。",
+        "キャンバス上の「ラベル表示」「モーション」「クラスター」で表示を切り替えられます。"
+      ],
+      "tip": "300 次元を 3 次元に圧縮しているため、3D 表示の距離はおおよその値です。"
+    },
+    "vectors": {
+      "title": "ベクトル・プレイグラウンドの使い方",
+      "steps": [
+        "「単語」欄に単語を入力すると、それぞれが矢印として描かれます。",
+        "a、b、c を入力して a − b + c を計算するか、プリセットを選んでから「計算」を押します。",
+        "結果カードに最も近い単語が表示されます。「次に近い 4 語を表示」を開くと、ほかの候補も見られます。",
+        "目のボタンで「ゼロから」と「グループの中心」の表示を切り替えます。ドラッグで回転できます。"
+      ],
+      "tip": "paris − france + italy や walking − walk + swim を試してみましょう。"
+    }
+  },
+  "Visualizer": {
+    "controls": "コントロール",
+    "controlsTitle": "表示コントロール",
+    "close": "閉じる",
+    "fullScreen": "全画面",
+    "toFullScreen": "全画面レイアウトに切り替え",
+    "toSidebar": "サイドバーレイアウトに切り替え"
+  },
+  "Tokenizer": {
+    "metaTitle": "トークナイザー: 文章がトークンになるまで",
+    "description": "好きな文章を貼り付けて、GPT、LLaMA などのトークナイザーがそれをどうトークンと ID に分けるかを確かめましょう。トークン数を数え、モデルを比べ、絵文字や英語以外の言語がなぜコスト高になるのかがわかります。",
+    "title": "トークナイザー",
+    "intro": "文章がトークンと ID にどう分かれるかを見てみましょう。ブラウザ内で動作し、入力した文章はどこにも送信されません。",
+    "learnButton": "トークン化について学ぶ",
+    "modelLabel": "トークナイザー",
+    "llamaNote": "どちらの選択肢も同じ語彙を使うので、ID は一致します。",
+    "defaultText": "いろはにほへと ちりぬるを わかよたれそ つねならむ。",
+    "presets": [
+      { "label": "短文", "text": "静かなアイデアでも、遠くまで届くことがある。" },
+      { "label": "世界の文字", "text": "Hello, world. مرحباً بالعالم. नमस्ते दुनिया। こんにちは世界。" },
+      { "label": "絵文字", "text": "作って、試して、お祝い: 🧩 → 🛠️ → ✅ 🎉" },
+      { "label": "コード", "text": "const total = items.reduce((sum, item) => sum + item.price, 0);" },
+      { "label": "段落", "text": "夕暮れどき、図書館の窓が最後のオレンジ色の光を受けていた。中では一人の読者が二つの翻訳を読み比べ、句読点やリズム、たった一つの借用語が、同じ小さな場面の印象をどう変えるのかに気づいていた。" }
+    ],
+    "status": {
+      "loading": "トークナイザーを読み込み中…",
+      "error": "エラー",
+      "ready": "準備完了",
+      "tokenizing": "· トークン化中…"
+    },
+    "sr": {
+      "loading": "トークナイザーを読み込み中",
+      "inputError": "このエンコーダーではこの文章をトークン化できません",
+      "loadError": "トークナイザーを読み込めませんでした。もう一度お試しください。",
+      "noText": "文章がありません",
+      "result": "{count} トークン、{tokenizer}"
+    },
+    "text": "文章",
+    "sampleLegend": "サンプル文章を読み込む",
+    "try": "試す",
+    "placeholder": "文章を入力または貼り付け…",
+    "tokens": "トークン",
+    "showWhitespace": "空白文字を表示",
+    "statsLabel": "文章の統計",
+    "codePoints": "コードポイント",
+    "utf8Bytes": "UTF-8 バイト",
+    "inputError": "{tokenizer} ではこの文章をトークン化できません。",
+    "loadError": "{tokenizer} トークナイザーを読み込めませんでした。",
+    "inputErrorDetail": "{message}。ここで特殊トークンとして使えるのは {special} だけです。",
+    "retrying": "再試行中…",
+    "retry": "再試行",
+    "empty": "文章を入力または貼り付けると、トークンが表示されます。",
+    "inspector": {
+      "position": "{total} 個中 {index} 番目",
+      "id": " · ID ",
+      "bytes": " · {count, plural, other {# バイト}}: ",
+      "piece": " · 語彙の断片 {piece}",
+      "special": " · 特殊トークン",
+      "partial": " · 隣のトークンと組み合わさる不完全な UTF-8 文字を含みます",
+      "hint": "トークンにカーソルを合わせる、タップする、または矢印キーで詳細を確認できます。"
+    },
+    "spoken": {
+      "special": "特殊トークン {name}",
+      "space": "スペース",
+      "newline": "改行",
+      "tab": "タブ",
+      "bytes": "バイト {hex}"
+    },
+    "tokenOption": "トークン {index} / {total}: {spoken}、ID {id}",
+    "tokenTitle": "id: {id}",
+    "idOption": "ID {id}、トークン {index} / {total}",
+    "idTitle": "トークン番号: {index}",
+    "partialTitle": "不完全な UTF-8 文字: これらのバイトは隣のトークンと組み合わさります",
+    "tokenIds": "トークン ID",
+    "copyIds": "ID をコピー",
+    "copied": "ID をクリップボードにコピーしました。",
+    "copyFailed": "コピーできませんでした。上の ID を選択して手動でコピーしてください。"
+  },
+  "Embedding": {
+    "metaTitle": "埋め込みエクスプローラー: 単語埋め込みを 3D で",
+    "description": "GloVe、Word2Vec、FastText の数千語を、インタラクティブな 3D マップで探索しましょう。単語を検索して最近傍を確認し、PCA と UMAP の射影を比べられます。",
+    "words": "{count, number} 語",
+    "colorHint": "データセットに保存されたクラスター ID。",
+    "edgeHint": "保存された近傍リンクを描画します。すべてのリンクが描かれるわけではないので、線は近傍の完全な一覧ではありません。",
+    "errors": {
+      "network": "データセットに接続できませんでした。接続を確認して、もう一度お試しください。",
+      "http": "このデータセットは現在利用できません。もう一度お試しください。",
+      "decode": "データセットのダウンロードが完了しませんでした。もう一度お試しください。",
+      "invalid": "このデータセットを読み取れませんでした。もう一度お試しください。"
+    },
+    "loadFailed": "{dataset} を読み込めませんでした",
+    "retry": "再試行",
+    "unavailableTitle": "このブラウザでは 3D 表示を利用できません",
+    "stalledTitle": "3D 表示がまだ復帰していません",
+    "unavailableText": "WebGL を開始できませんでした。パネルで単語を検索して詳細を見ることはできます。",
+    "stalledText": "ブラウザがグラフィックスを一時停止し、まだ復帰していません。自動的に復帰する可能性もあります。",
+    "unavailableHint": "もう一度試して 3D 表示を開始します。",
+    "stalledHint": "3D 表示を再読み込みしてグラフィックスを復帰させます。再読み込みするとカメラがリセットされます。",
+    "tryAgain": "もう一度試す",
+    "reloadView": "3D 表示を再読み込み",
+    "graphicsLost": "ブラウザがグラフィックスを一時停止しました — 復帰中…",
+    "loadingDataset": "{dataset} を読み込み中…",
+    "noSelection": "検索するか点をクリックすると、詳細が表示されます。",
+    "selected": "選択中",
+    "clearSelection": "{word} の選択を解除",
+    "clear": "解除",
+    "controlsLabel": "埋め込みのコントロール",
+    "heading": "埋め込み空間",
+    "intro": "300 次元の単語ベクトルを 3D に射影しています。ここでの距離は関係をゆがめることがあります。",
+    "dataset": "データセット",
+    "model": "埋め込みモデル",
+    "modelPlaceholder": "埋め込みモデルを選択",
+    "wordCount": "単語数",
+    "wordCountPlaceholder": "単語数を選択",
+    "reduction": "次元削減",
+    "explore": "探索",
+    "wordSearch": "単語検索",
+    "wordSearchSelected": "単語検索、{word} を選択中",
+    "searchPlaceholder": "単語を検索...",
+    "searchWords": "単語を検索...",
+    "noWordFound": "単語が見つかりません。",
+    "typeToSearch": "入力して {count} 語から検索...",
+    "loadingWords": "単語を読み込み中...",
+    "first300": "最初の 300 件を表示しています。さらに見るには検索を絞り込んでください。",
+    "display": "表示",
+    "colorByCluster": "類似クラスターで色分け",
+    "connectClusters": "クラスターを線で結ぶ",
+    "status": {
+      "loading": "{dataset} を読み込み中…",
+      "error": "{dataset} を読み込めませんでした。",
+      "unavailable": "{count} 語を読み込みました。3D 表示は利用できませんが、検索は使えます。",
+      "lost": "グラフィックスが一時停止しました。復帰中…",
+      "stalled": "3D 表示が復帰していません。",
+      "ready": "準備完了 · {count} 語"
+    },
+    "canvasLabel": "{model} の {count}語の 3D 散布図（{method} 射影）。単語検索を使うと、単語をテキストとして探索できます。",
+    "tabs": {
+      "model": "モデル",
+      "search": "検索",
+      "display": "表示"
+    },
+    "modelConfig": "モデルと設定",
+    "typeToSearchLabel": "入力して単語を検索",
+    "typeToSearchPlaceholder": "入力して単語を検索...",
+    "noWordsFound": "単語が見つかりません。別の検索語を試してください。",
+    "first50": "最初の 50 件を表示しています。入力を続けて絞り込んでください...",
+    "searchThrough": "{count} 語から検索します。単語を選ぶとキャンバス上でハイライトされます。",
+    "loadingWordList": "単語リストを読み込み中...",
+    "displayOptions": "表示オプション",
+    "loadingModel": "{model} を読み込み中"
+  },
+  "Exploration": {
+    "unassigned": "未分類",
+    "cluster": "クラスター {id}",
+    "toolsLabel": "キャンバスの探索",
+    "showLabelsTitle": "表示中の単語に読みやすいラベルを表示",
+    "showLabels": "ラベル表示",
+    "motionTitle": "自動回転とゆらぎ",
+    "motion": "モーション",
+    "clusters": "クラスター",
+    "clearSpotlight": "クラスターのスポットライトを解除",
+    "clearCluster": "{label} を解除",
+    "spotlightLabel": "クラスターのスポットライト",
+    "searchCluster": "{label} を検索 · {count}",
+    "findInCluster": "{label} の中の単語を探す",
+    "zoomToCluster": "クラスターにズーム",
+    "wordsIn": "{label} の単語",
+    "noMatches": "一致なし",
+    "hint": "単語を選ぶと、そのつながりを探索できます",
+    "trayLabel": "単語の探索",
+    "unpin": "固定を解除",
+    "pinToCompare": "固定して比較",
+    "unpinWord": "単語の固定を解除",
+    "pinWord": "単語を固定して比較",
+    "locate": "単語の位置へ移動",
+    "exitFocus": "フォーカスを終了",
+    "focus": "つながりにフォーカス",
+    "collapse": "単語の詳細を折りたたむ",
+    "expand": "単語の詳細を展開",
+    "clearSelection": "選択を解除",
+    "clear": "解除",
+    "comparison": "比較",
+    "shared": "共通 {count} 語",
+    "directlyLinked": "直接つながっています",
+    "selectToCompare": "比較する単語を選択",
+    "notIn": "{dataset} にはありません",
+    "storedLinks": "{word} の保存されたリンク"
+  },
+  "Vectors": {
+    "metaTitle": "ベクトル・プレイグラウンド: 単語ベクトルの演算",
+    "description": "単語の意味で計算してみましょう。king − man + woman などの類推を試し、単語ベクトルを 3D の矢印として見られます。計算には 300 次元すべてを使います。",
+    "views": {
+      "centred": { "label": "グループの中心", "origin": "中心 = これらの単語の平均", "hint": "矢印は描いた単語の平均から出ます。単語の広がり方を見るのに向いています。" },
+      "zero": { "label": "ゼロから", "origin": "本当のゼロ点", "hint": "矢印はモデルの本当のゼロ点から出ます。最も近い単語は向きで決まります。ほとんどの単語が似た方向を向いているため、矢印は密集します。" }
+    },
+    "wholeWords": "単語はそのまま {model} で調べます（トークナイザーは使いません）。",
+    "struckOut": " 取り消し線の単語は、10,000 語の語彙に含まれていません。",
+    "hiddenWhileAnalogy": " 類推の表示中は非表示になります。",
+    "clearAnalogy": "類推を解除",
+    "showNext": "次に近い {count} 語を表示",
+    "hideNext": "次に近い {count} 語を隠す",
+    "howToRead": "見方",
+    "closeLegend": "凡例を閉じる",
+    "legendZero": "白い点はモデルの<b>本当のゼロ点</b>です。最も近い単語とは、矢印の向きが緑の点の向きに最も近い単語のことです。",
+    "legendCentred": "白い点はこれらの単語の<b>平均</b>で、ゼロではありません。その周りの位置関係自体には意味がありません。",
+    "legendStep": "黄色: <b>{from}</b> から <b>{to}</b> への一歩と、<b>{start}</b> から同じ一歩を進んだもの。",
+    "legendPoint": "緑の点: その一歩の着地点。たいていは単語のない空間です。",
+    "legendGap": "破線: 10,000 語の中で最も近い実在の単語 <b>{answer}</b> までの差。",
+    "operations": ["はじめの単語", "引く", "足す"],
+    "heading": "ベクトル・プレイグラウンド",
+    "intro": "ここでベクトル演算や類推の実験ができます。",
+    "model": "埋め込みモデル",
+    "modelPlaceholder": "埋め込みモデルを選択",
+    "gridlines": "グリッド線を表示",
+    "wordsToPlot": "描く単語",
+    "wordsToPlotLimit": "描く単語（最大 50 語）",
+    "wordsPlaceholder": "英単語をスペースで区切って入力（例: man woman king queen）",
+    "wordCount": "{count} / 50 語",
+    "analogy": "単語の類推",
+    "analogyIntro": "ある単語から始めて、1 つの概念を引き、別の概念を足すと、どの実在の単語に着地するかを見てみましょう。",
+    "orTryExample": "または例を試す",
+    "defaultWords": "If the path be beautiful , let us not ask where it leads",
+    "notInModel": "「{word}」は {model} にありません。",
+    "calculate": "計算",
+    "loadingProgress": "{model} を読み込み中… {percent}%",
+    "tabs": {
+      "model": "モデル",
+      "display": "表示",
+      "words": "単語",
+      "calc": "計算"
+    },
+    "displayOptions": "表示オプション",
+    "calculation": "ベクトル計算",
+    "loadingEmbeddings": "{model} の埋め込みを読み込み中…",
+    "changeView": "表示を切り替え。現在の表示: {view}",
+    "view": "表示:"
+  },
+  "NotFound": {
+    "title": "ページが見つかりません",
+    "kicker": "エラー 404",
+    "heading": "このページは語彙にありません。",
+    "sub": "リンクが切れているか、ページが移動した可能性があります。ホームに戻るか、モデルが文章を読むしくみを学んでみましょう。",
+    "home": "ホームに戻る",
+    "learn": "「学ぶ」を見る"
+  }
+}
