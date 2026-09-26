@@ -252,3 +252,4 @@ html:has(.jump) { scroll-behavior: smooth; }
   .headArt { position: static; display: block; width: 92px; margin: 0 0 6px -6px; }
   .indexWrap .head { max-width: none; }
 }
+.langNote { margin: -12px 0 28px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); background: #ffffff06; color: var(--muted); font-size: 14px; line-height: 1.5; }

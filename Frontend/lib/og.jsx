@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { Fragment } from "react";
 import { ImageResponse } from "next/og";
+import { getTranslations } from "next-intl/server";
 
 // Link-preview cards (1200×630), one design per kind of page. Rendered at build time by next/og,
 // which supports flexbox, absolute positioning, gradients and inline SVG (no CSS grid or filters).
@@ -36,6 +37,20 @@ async function loadFonts() {
   return fonts;
 }
 
+// Chinese and Japanese need their own fonts. Google Fonts can subset a font to just the characters a
+// card uses (the `text` parameter), which keeps each download small.
+const CJK = { zh: "Noto+Sans+SC", ja: "Noto+Sans+JP" };
+async function cjkFonts(locale, text) {
+  if (!CJK[locale]) return [];
+  try {
+    const css = await (await fetch(`https://fonts.googleapis.com/css2?family=${CJK[locale]}:wght@400;800&text=${encodeURIComponent(text)}`)).text();
+    const faces = [...css.matchAll(/font-weight: (\d+);[\s\S]*?src: url\((.+?)\) format\('(?:truetype|opentype)'\)/g)];
+    return Promise.all(faces.map(async ([, weight, src]) => ({ name: "CJK", style: "normal", weight: Number(weight), data: await (await fetch(src)).arrayBuffer() })));
+  } catch {
+    return [];
+  }
+}
+
 let logoSrc;
 async function logo() {
   logoSrc ??= `data:image/png;base64,${(await readFile(path.join(process.cwd(), "public/logo.png"))).toString("base64")}`;
@@ -52,8 +67,9 @@ function DotGrid() {
 }
 
 // Shared frame: background, brand row, footer. `left` is the text column, `right` the artwork.
-async function card({ left, right, kicker, accent = CYAN, glow = "#1d4ed8", leftWidth = 600 }) {
-  const [loaded, src] = await Promise.all([loadFonts(), logo()]);
+async function card({ left, right, kicker, accent = CYAN, glow = "#1d4ed8", leftWidth = 600, locale, footer, text }) {
+  const [latin, src, cjk] = await Promise.all([loadFonts(), logo(), cjkFonts(locale, `${text} ${kicker ?? ""} ${footer}`)]);
+  const loaded = [...latin, ...cjk];
   return new ImageResponse(
     (
       <div style={{ width: 1200, height: 630, display: "flex", position: "relative", background: INK, color: "#f2f5fa", fontFamily: loaded.length ? "Inter" : "sans-serif" }}>
@@ -78,7 +94,7 @@ async function card({ left, right, kicker, accent = CYAN, glow = "#1d4ed8", left
           <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 21, color: DIM }}>
             <span>wordcanvas3d.vercel.app</span>
             <span style={{ width: 5, height: 5, borderRadius: 5, background: "#3a4252" }} />
-            <span>free · no ads · runs in your browser</span>
+            <span>{footer}</span>
           </div>
         </div>
       </div>
@@ -273,28 +289,42 @@ function Pipeline({ color }) {
 
 /* ---------- the cards ---------- */
 
-export function ogHome() {
+// Every card's words come from messages (Og namespace), so each language gets its own preview.
+async function words(locale, key) {
+  const t = await getTranslations({ locale, namespace: "Og" });
+  const m = t.raw(key);
+  // CJK characters are about twice as wide as Latin letters at the same size, so headlines shrink.
+  const k = CJK[locale] ? 0.62 : 1;
+  return { ...m, locale, footer: t("footer"), text: Object.values(m).join(" "), sz: (n) => Math.round(n * k) };
+}
+
+export async function ogHome(locale) {
+  const m = await words(locale, "home");
+  const { sz: _sz, ...rest } = m;
   return card({
+    ...rest,
     left: (<>
-      <Title size={92}>See how AI</Title>
-      <SerifLine size={104}>reads text.</SerifLine>
-      <Sub>Tokenize it, map words in 3D and do math with meaning.</Sub>
+      <Title size={m.sz(92)}>{m.title}</Title>
+      <SerifLine size={m.sz(104)}>{m.serif}</SerifLine>
+      <Sub>{m.sub}</Sub>
     </>),
     right: <Galaxy />,
     leftWidth: 540,
   });
 }
 
-export function ogTokenizer() {
+export async function ogTokenizer(locale) {
+  const m = await words(locale, "tokenizer");
   const toks = [["The", 976], ["·cat", 9059], ["·sat", 10139], ["·on", 402], ["·the", 290], ["·mat", 2450], [".", 13]];
+  const { sz: _sz, ...rest } = m;
   return card({
-    kicker: "TOKENIZER",
+    ...rest,
     glow: "#b8860b",
     accent: PALETTE[3],
     leftWidth: 1056,
     left: (<>
-      <Title size={76}>See how text</Title>
-      <SerifLine size={92} color={PALETTE[3]}>becomes tokens.</SerifLine>
+      <Title size={m.sz(76)}>{m.title}</Title>
+      <SerifLine size={m.sz(92)} color={PALETTE[3]}>{m.serif}</SerifLine>
       <div style={{ display: "flex", gap: 14, marginTop: 44 }}>
         {toks.map(([t, id], i) => <Chip key={t + id} text={t} id={id} color={PALETTE[i % PALETTE.length]} size={40} />)}
       </div>
@@ -302,30 +332,34 @@ export function ogTokenizer() {
   });
 }
 
-export function ogEmbedding() {
+export async function ogEmbedding(locale) {
+  const m = await words(locale, "embedding");
+  const { sz: _sz, ...rest } = m;
   return card({
-    kicker: "EMBEDDINGS",
+    ...rest,
     glow: "#0f766e",
     accent: PALETTE[1],
     leftWidth: 540,
     left: (<>
-      <Title size={76}>Fly through</Title>
-      <SerifLine size={92} color={PALETTE[1]}>words in 3D.</SerifLine>
-      <Sub>GloVe, Word2Vec and FastText, where similar words cluster together.</Sub>
+      <Title size={m.sz(76)}>{m.title}</Title>
+      <SerifLine size={m.sz(92)} color={PALETTE[1]}>{m.serif}</SerifLine>
+      <Sub>{m.sub}</Sub>
     </>),
     right: <Clusters />,
   });
 }
 
-export function ogVectors() {
+export async function ogVectors(locale) {
+  const m = await words(locale, "vectors");
+  const { sz: _sz, ...rest } = m;
   return card({
-    kicker: "VECTOR PLAYGROUND",
+    ...rest,
     glow: "#7c3aed",
     accent: PALETTE[4],
     leftWidth: 560,
     left: (<>
-      <Title size={76}>Do math</Title>
-      <SerifLine size={92} color={PALETTE[4]}>with meaning.</SerifLine>
+      <Title size={m.sz(76)}>{m.title}</Title>
+      <SerifLine size={m.sz(92)} color={PALETTE[4]}>{m.serif}</SerifLine>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 40, fontFamily: "Mono", fontSize: 28 }}>
         <Chip text="king" color={PALETTE[0]} size={24} />
         <span style={{ color: DIM }}>−</span>
@@ -340,15 +374,17 @@ export function ogVectors() {
   });
 }
 
-export function ogLearn() {
+export async function ogLearn(locale) {
+  const m = await words(locale, "learn");
+  const { sz: _sz, ...rest } = m;
   return card({
-    kicker: "LEARN",
+    ...rest,
     glow: "#1d4ed8",
     leftWidth: 580,
     left: (<>
-      <Title size={70}>How language models</Title>
-      <SerifLine size={96}>read text.</SerifLine>
-      <Sub>Beginner-friendly articles on tokens, embeddings, attention and transformers.</Sub>
+      <Title size={m.sz(70)}>{m.title}</Title>
+      <SerifLine size={m.sz(96)}>{m.serif}</SerifLine>
+      <Sub>{m.sub}</Sub>
     </>),
     right: <ChalkBulb />,
   });
@@ -361,17 +397,22 @@ const ARTICLE_ART = {
   Vectors: () => <Parallelogram />,
 };
 
-export function ogArticle(a, trackTitle) {
+export async function ogArticle(a, trackTitle, locale) {
+  const t = await getTranslations({ locale, namespace: "Og" });
+  const learn = t("article.learn");
   const art = ARTICLE_ART[a.tag]?.(a.color) ?? <Pipeline color={a.color} />;
   const size = a.title.length > 58 ? 44 : a.title.length > 40 ? 50 : 60;
   return card({
-    kicker: `${a.minutes} MIN READ`,
+    kicker: t("article.kicker", { minutes: a.minutes }),
+    locale,
+    footer: t("footer"),
+    text: `${learn} ${trackTitle}`,
     accent: a.color,
     glow: a.color,
     leftWidth: 560,
     left: (<>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 22, fontFamily: "Mono", fontSize: 22, color: a.color }}>
-        <span>Learn</span><span style={{ color: DIM }}>/</span><span>{trackTitle}</span>
+        <span>{learn}</span><span style={{ color: DIM }}>/</span><span>{trackTitle}</span>
       </div>
       <Title size={size}>{a.title}</Title>
       <Sub>{a.summary}</Sub>

@@ -7,7 +7,7 @@ import s from "@/components/landing/landing.module.css";
 import l from "@/components/learn/learn.module.css";
 import PipelineAnim from "@/components/learn/PipelineAnim";
 import LearnArt from "@/components/learn/LearnArt";
-import { SITE_URL, jsonLd } from "@/lib/site";
+import { SITE_URL, jsonLd, localeAlternates, localePath } from "@/lib/site";
 
 const serif = Instrument_Serif({ weight: "400", style: "italic", subsets: ["latin"] });
 
@@ -19,8 +19,8 @@ export async function generateMetadata({ params }) {
   return {
     title,
     description,
-    alternates: { canonical: "/learn" },
-    openGraph: { title, description, url: "/learn" },
+    alternates: localeAlternates("/learn", locale),
+    openGraph: { title, description, url: localePath("/learn", locale) },
     twitter: { title, description },
   };
 }

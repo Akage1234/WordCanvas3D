@@ -8,9 +8,12 @@ import { TokenSplit, MiniClusters, VectorMath } from "@/components/landing/LensV
 import { Reveal, ShareBar } from "@/components/landing/Interactive";
 import { ARTICLES as LEARN } from "@/components/learn/registry";
 import s from "@/components/landing/landing.module.css";
-import { AUTHOR as SITE_AUTHOR, REPO_URL, SITE_NAME, SITE_URL, jsonLd } from "@/lib/site";
+import { AUTHOR as SITE_AUTHOR, REPO_URL, SITE_NAME, SITE_URL, jsonLd, localeAlternates, localePath } from "@/lib/site";
 
-export const metadata = { alternates: { canonical: "/" } };
+export async function generateMetadata({ params }) {
+  const { locale } = await params;
+  return { alternates: localeAlternates("/", locale), openGraph: { url: localePath("/", locale) } };
+}
 
 const schema = (description, locale) => [
   { "@context": "https://schema.org", "@type": "WebSite", name: SITE_NAME, url: SITE_URL, description, inLanguage: locale },

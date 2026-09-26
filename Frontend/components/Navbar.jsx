@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import {
   Drawer,
@@ -34,34 +34,55 @@ function GithubMark({ className }) {
   );
 }
 
-// Only English exists today; the others are listed, faded, so the switcher's place is already set.
+// Language names stay in their own script. Switching keeps you on the same page.
 const LANGUAGES = [["en", "English", "EN"], ["zh", "中文", "中"], ["ja", "日本語", "日"], ["es", "Español", "ES"]];
 
 function LanguageMenu({ variant = "icon" }) {
   const t = useTranslations("Nav");
+  const locale = useLocale();
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
   if (variant === "rows") {
     return (
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 px-3 py-2 text-sm">
+      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5 px-3 py-2 text-sm">
         <Globe className="h-4 w-4 flex-none text-neutral-400" />
         {LANGUAGES.map(([code, name]) => (
-          <span key={code} className={`whitespace-nowrap ${code === "en" ? "rounded-full bg-white/10 px-2.5 py-0.5 text-white" : "px-1 text-neutral-600"}`} title={code === "en" ? undefined : t("comingSoon")}>{name}</span>
+          <Link
+            key={code}
+            href={pathname}
+            locale={code}
+            lang={code}
+            aria-current={code === locale ? "true" : undefined}
+            className={`whitespace-nowrap rounded-full px-2.5 py-0.5 transition-colors ${code === locale ? "bg-white/10 text-white" : "text-neutral-400 hover:bg-white/[0.06] hover:text-white"}`}
+          >
+            {name}
+          </Link>
         ))}
       </div>
     );
   }
+  const current = LANGUAGES.find(([code]) => code === locale) ?? LANGUAGES[0];
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button className={`inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`} aria-label={t("languageLabel")}>
-          <Globe className="h-4 w-4" />EN
+          <Globe className="h-4 w-4" />{current[2]}
         </button>
       </PopoverTrigger>
       <PopoverContent align="end" className="z-[1000] w-44 rounded-2xl border-white/10 bg-neutral-950/95 p-1.5 backdrop-blur-xl">
         {LANGUAGES.map(([code, name]) => (
-          <div key={code} aria-disabled={code !== "en"} className={`flex items-center justify-between rounded-xl px-3 py-2 text-sm ${code === "en" ? "bg-white/[0.06] text-white" : "text-neutral-600"}`}>
+          <Link
+            key={code}
+            href={pathname}
+            locale={code}
+            lang={code}
+            onClick={() => setOpen(false)}
+            aria-current={code === locale ? "true" : undefined}
+            className={`flex items-center justify-between rounded-xl px-3 py-2 text-sm transition-colors ${code === locale ? "bg-white/[0.06] text-white" : "text-neutral-300 hover:bg-white/[0.04] hover:text-white"}`}
+          >
             {name}
-            {code === "en" ? <Check className="h-4 w-4 text-cyan-300" /> : <span className="font-mono text-[10px] uppercase tracking-wide">{t("soon")}</span>}
-          </div>
+            {code === locale && <Check className="h-4 w-4 text-cyan-300" />}
+          </Link>
         ))}
       </PopoverContent>
     </Popover>

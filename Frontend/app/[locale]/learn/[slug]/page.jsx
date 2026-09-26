@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ARTICLES } from "@/components/learn/registry";
 import s from "@/components/landing/landing.module.css";
 import l from "@/components/learn/learn.module.css";
-import { AUTHOR, SITE_NAME, SITE_URL, jsonLd } from "@/lib/site";
+import { AUTHOR, SITE_NAME, SITE_URL, jsonLd, localeAlternates, localePath } from "@/lib/site";
 
 export const dynamicParams = false;
 
@@ -14,14 +14,15 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const a = ARTICLES.find((x) => x.slug === slug);
   if (!a) return {};
-  const url = `/learn/${a.slug}`;
+  const path = `/learn/${a.slug}`;
+  const url = localePath(path, locale);
   return {
     title: a.title,
     description: a.summary,
-    alternates: { canonical: url },
+    alternates: localeAlternates(path, locale),
     openGraph: { type: "article", title: a.title, description: a.summary, url, authors: [AUTHOR.url], section: a.tag },
     twitter: { title: a.title, description: a.summary },
   };
@@ -43,7 +44,7 @@ export default async function Article({ params }) {
   const prev = ARTICLES[i - 1];
   const next = ARTICLES[i + 1];
 
-  const url = `${SITE_URL}/learn/${a.slug}`;
+  const url = `${SITE_URL}${localePath(`/learn/${a.slug}`, locale)}`;
   const trackTitle = t(`tracks.${a.track}.title`);
   const schema = [
     {
@@ -65,8 +66,8 @@ export default async function Article({ params }) {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: t("title"), item: `${SITE_URL}/learn` },
-        { "@type": "ListItem", position: 2, name: trackTitle, item: `${SITE_URL}/learn#track-${a.track}` },
+        { "@type": "ListItem", position: 1, name: t("title"), item: `${SITE_URL}${localePath("/learn", locale)}` },
+        { "@type": "ListItem", position: 2, name: trackTitle, item: `${SITE_URL}${localePath("/learn", locale)}#track-${a.track}` },
         { "@type": "ListItem", position: 3, name: a.title, item: url },
       ],
     },
@@ -83,6 +84,7 @@ export default async function Article({ params }) {
         </div>
         <h1 className={l.h1}>{a.title}</h1>
         <p className={l.lede}>{a.summary}</p>
+        {locale !== "en" && <p className={l.langNote} lang={locale}>{t("englishOnly")}</p>}
         <div className={l.body}>
           <a.Body />
         </div>

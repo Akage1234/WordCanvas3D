@@ -1,4 +1,13 @@
 {
+  "Og": {
+    "footer": "free · no ads · runs in your browser",
+    "home": { "title": "See how AI", "serif": "reads text.", "sub": "Tokenize it, map words in 3D and do math with meaning." },
+    "tokenizer": { "kicker": "TOKENIZER", "title": "See how text", "serif": "becomes tokens." },
+    "embedding": { "kicker": "EMBEDDINGS", "title": "Fly through", "serif": "words in 3D.", "sub": "GloVe, Word2Vec and FastText, where similar words cluster together." },
+    "vectors": { "kicker": "VECTOR PLAYGROUND", "title": "Do math", "serif": "with meaning." },
+    "learn": { "kicker": "LEARN", "title": "How language models", "serif": "read text.", "sub": "Beginner-friendly articles on tokens, embeddings, attention and transformers." },
+    "article": { "kicker": "{minutes} MIN READ", "learn": "Learn" }
+  },
   "Metadata": {
     "title": "WordCanvas3D · See how AI reads text",
     "description": "A free, interactive playground for how AI reads text: split text into tokens, explore word embeddings in 3D, do vector math with meaning, and learn how language models work.",
@@ -19,9 +28,7 @@
     "madeBy": "Made by @Akage",
     "repoLabel": "WordCanvas3D on GitHub",
     "authorLabel": "About the author, @Akage",
-    "languageLabel": "Language: English",
-    "comingSoon": "Coming soon",
-    "soon": "soon"
+    "languageLabel": "Language: English"
   },
   "Home": {
     "eyebrow": "Free & open source · no sign-up",
@@ -105,6 +112,7 @@
     "pairsWith": "Pairs with: <b>{tool}</b>",
     "chapter": "Chapter {number} · {topic}",
     "backToTop": "Back to top",
+    "englishOnly": "This article is only available in English for now. The rest of the site is translated.",
     "tools": {
       "tokenizer": "Tokenizer",
       "embedding": "Embedding explorer",

@@ -9,6 +9,7 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-export default function Image() {
-  return ogTokenizer();
+export default async function Image({ params }) {
+  const { locale } = await params;
+  return ogTokenizer(locale);
 }

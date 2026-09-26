@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { AUTHOR, SITE_NAME, SITE_URL, jsonLd } from "@/lib/site";
+import { AUTHOR, SITE_NAME, SITE_URL, jsonLd, localeAlternates, localePath } from "@/lib/site";
 
 export async function generateMetadata({ params }) {
   const { locale } = await params;
@@ -9,8 +9,8 @@ export async function generateMetadata({ params }) {
   return {
     title,
     description,
-    alternates: { canonical: "/tokenizer" },
-    openGraph: { title, description, url: "/tokenizer" },
+    alternates: localeAlternates("/tokenizer", locale),
+    openGraph: { title, description, url: localePath("/tokenizer", locale) },
     twitter: { title, description },
   };
 }

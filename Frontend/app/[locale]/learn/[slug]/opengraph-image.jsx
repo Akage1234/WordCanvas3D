@@ -16,5 +16,5 @@ export default async function Image({ params }) {
   const { locale, slug } = await params;
   const a = ARTICLES.find((x) => x.slug === slug);
   const t = await getTranslations({ locale, namespace: "Learn" });
-  return ogArticle(a, t(`tracks.${a.track}.title`));
+  return ogArticle(a, t(`tracks.${a.track}.title`), locale);
 }
