@@ -1,0 +1,453 @@
+{
+  "Og": {
+    "footer": "gratis · sin anuncios · funciona en tu navegador",
+    "home": { "title": "Mira cómo la IA", "serif": "lee el texto.", "sub": "Divídelo en tokens, ubica palabras en 3D y haz matemáticas con el significado." },
+    "tokenizer": { "kicker": "TOKENIZADOR", "title": "Mira cómo el texto", "serif": "se vuelve tokens." },
+    "embedding": { "kicker": "EMBEDDINGS", "title": "Vuela entre", "serif": "palabras en 3D.", "sub": "GloVe, Word2Vec y FastText, donde las palabras parecidas se agrupan solas." },
+    "vectors": { "kicker": "LABORATORIO DE VECTORES", "title": "Haz matemáticas", "serif": "con el significado." },
+    "learn": { "kicker": "APRENDER", "title": "Cómo los modelos de lenguaje", "serif": "leen el texto.", "sub": "Artículos para principiantes sobre tokens, embeddings, atención y transformers." },
+    "article": { "kicker": "{minutes} MIN DE LECTURA", "learn": "Aprender" }
+  },
+  "Metadata": {
+    "title": "WordCanvas3D · Mira cómo la IA lee el texto",
+    "description": "Un espacio interactivo y gratuito para ver cómo la IA lee el texto: divide el texto en tokens, explora embeddings de palabras en 3D, haz aritmética vectorial con el significado y aprende cómo funcionan los modelos de lenguaje.",
+    "keywords": ["tokenizador", "contador de tokens", "embeddings de palabras", "visualizador de embeddings", "aritmética vectorial", "king - man + woman", "PCA", "UMAP", "GloVe", "Word2Vec", "FastText", "cómo funcionan los LLM", "transformer", "atención", "aprender IA"],
+    "ogLocale": "es_LA"
+  },
+  "Nav": {
+    "learn": { "label": "Aprender", "hint": "Artículos y guías" },
+    "tokenizer": { "label": "Tokenizador", "hint": "Mira cómo se divide el texto" },
+    "embedding": { "label": "Embeddings", "hint": "Explora palabras en 3D" },
+    "vectors": { "label": "Laboratorio de vectores", "hint": "Haz matemáticas con el significado" },
+    "main": "Principal",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "drawerTitle": "Navegación",
+    "drawerDescription": "Páginas de WordCanvas3D",
+    "sourceCode": "Código fuente en GitHub",
+    "madeBy": "Hecho por @Akage",
+    "repoLabel": "WordCanvas3D en GitHub",
+    "authorLabel": "Sobre el autor, @Akage",
+    "languageLabel": "Idioma: español"
+  },
+  "Home": {
+    "eyebrow": "Gratis y de código abierto · sin registro",
+    "headlines": [
+      ["El lenguaje, hecho", "visible."],
+      ["Mira cómo la IA", "lee el texto."],
+      ["Divide el texto en", "tokens."],
+      ["Vuela entre", "palabras en 3D."],
+      ["Haz matemáticas con", "el significado."],
+      ["Cada palabra tiene", "su lugar."]
+    ],
+    "pitch": "<strong>WordCanvas3D</strong> es un espacio gratuito para explorar cómo la IA entiende el texto. Divídelo en tokens, ubícalo en 3D y haz matemáticas con el significado, directo en tu navegador.",
+    "exploreCta": "Explorar embeddings",
+    "tokenizeCta": "Tokenizar texto",
+    "tokenizeChips": ["Token", "ize", " text"],
+    "galaxyLabel": "Una galaxia de palabras que gira lentamente, coloreada por clúster",
+    "tools": {
+      "kicker": "Tres herramientas, una idea",
+      "title": "Cómo ve el lenguaje un modelo.",
+      "sub": "Cada herramienta muestra un paso del recorrido. Empieza donde quieras; están conectadas entre sí."
+    },
+    "lenses": {
+      "tokenizer": { "step": "01 · Tokenizador", "title": "El texto en pedazos", "text": "Compara cómo GPT y otros tokenizadores cortan la misma oración, y por qué los emoji y las palabras raras cuestan más.", "cta": "Abrir el Tokenizador" },
+      "embedding": { "step": "02 · Embeddings", "title": "Las palabras como un mapa", "text": "Vuela entre hasta 10,000 palabras de GloVe. Los clústeres se forman solos: números, lugares, sentimientos, verbos.", "cta": "Abrir Embeddings" },
+      "vectors": { "step": "03 · Laboratorio de vectores", "title": "Matemáticas con significado", "text": "Dibuja tus propias palabras como flechas y prueba la famosa analogía: king − man + woman cae cerca de queen.", "cta": "Abrir el Laboratorio" }
+    },
+    "learn": {
+      "kicker": "Aprender",
+      "title": "Entiende lo que<br></br>estás viendo.",
+      "sub": "Artículos para principiantes sobre cómo los modelos de lenguaje leen el texto, desde tu primera palabra hasta la siguiente que escriben.",
+      "cta": "Leer las guías",
+      "minutes": "{count} min"
+    },
+    "devices": {
+      "kicker": "Funciona en cualquier dispositivo",
+      "title": "En tu escritorio, en el sillón o en el camino.",
+      "sub": "Cada herramienta está hecha para pantallas táctiles y para mouse. Gira, pellizca y toca para recorrer el lenguaje.",
+      "desktopAlt": "La página de Embeddings en una pantalla de escritorio",
+      "tabletAlt": "La página del Tokenizador en una tableta",
+      "phoneAlt": "El Laboratorio de vectores en un teléfono",
+      "tabletCaption": "Tokenizador",
+      "phoneCaption": "Laboratorio de vectores"
+    },
+    "oss": {
+      "kicker": "Código abierto",
+      "title": "Hecho a la vista de todos.",
+      "sub": "Cada línea de WordCanvas3D está en GitHub. Lee cómo funciona, ejecútalo en tu computadora, abre un issue o envía un pull request.",
+      "github": "Ver en GitHub",
+      "star": "Dale una estrella al repo",
+      "terminalLabel": "Comandos para ejecutar WordCanvas3D en tu computadora",
+      "terminalComment": "# ejecútalo en tu máquina",
+      "ready": "✓ Listo en http://localhost:3000"
+    },
+    "final": {
+      "enjoy": "¿Te gusta?",
+      "title": "Compártelo con alguien <em>curioso.</em>",
+      "sub": "Gratis, sin anuncios, sin registro. Si te sirvió, pásaselo a un amigo."
+    },
+    "footer": {
+      "copyright": "© 2026 WordCanvas3D",
+      "madeWith": "Hecho con <heart></heart> por <author>@Akage</author>",
+      "love": "amor"
+    }
+  },
+  "Share": {
+    "text": "WordCanvas3D: mira cómo la IA lee el texto. Divídelo en tokens, ubica palabras en 3D y haz matemáticas con el significado, gratis en tu navegador.",
+    "button": "Compartir WordCanvas3D",
+    "copied": "Enlace copiado",
+    "shareOn": "o comparte en"
+  },
+  "Learn": {
+    "title": "Aprender",
+    "metaTitle": "Aprender: cómo los modelos de lenguaje leen el texto",
+    "description": "Artículos para principiantes sobre cómo los modelos de lenguaje leen el texto: tokens, embeddings, atención y transformers, además de guías rápidas de cada herramienta de WordCanvas3D.",
+    "heading": "Entiende lo que estás viendo.",
+    "sub": "Cómo los modelos de lenguaje leen el texto, desde el primer paso hasta la siguiente palabra que escriben.",
+    "sectionsLabel": "Secciones de esta página",
+    "quickStart": "Inicio rápido",
+    "startPrompt": "¿No sabes por dónde empezar? <em>Empieza aquí</em>",
+    "minRead": "{count} min de lectura",
+    "pairsWith": "Va con: <b>{tool}</b>",
+    "chapter": "Capítulo {number} · {topic}",
+    "backToTop": "Volver arriba",
+    "englishOnly": "Por ahora, este artículo solo está disponible en inglés. El resto del sitio está traducido.",
+    "tools": {
+      "tokenizer": "Tokenizador",
+      "embedding": "Explorador de embeddings",
+      "vectors": "Laboratorio de vectores"
+    },
+    "tags": {
+      "Quick Start": "Inicio rápido",
+      "Tokens": "Tokens",
+      "Embeddings": "Embeddings",
+      "Transformers": "Transformers",
+      "Vectors": "Vectores"
+    },
+    "tracks": {
+      "start": { "title": "Empieza aquí", "blurb": "No necesitas conocimientos previos. Todo el recorrido, desde tu texto hasta la respuesta del modelo, en una sola imagen." },
+      "foundations": { "title": "Fundamentos", "blurb": "Material de estudio general. Cada artículo explica bien una idea, como lo haría un buen capítulo de libro de texto." },
+      "guides": { "title": "Guías del sitio", "blurb": "Recorridos rápidos de lo que muestra cada herramienta de WordCanvas3D, con enlaces a los fundamentos." }
+    },
+    "back": "← Aprender · {track}",
+    "tryIt": "Pruébalo tú mismo",
+    "pagerLabel": "Más guías",
+    "previous": "← Anterior",
+    "next": "Siguiente →"
+  },
+  "Concepts": {
+    "readMore": "Lee más en Aprender",
+    "minRead": "{count} min de lectura",
+    "close": "Cerrar",
+    "tokenizer": {
+      "kicker": "Tokenizador",
+      "title": "¿Qué es la tokenización?",
+      "lede": "Un modelo de lenguaje no puede leer letras. Antes de ver tu texto, un tokenizador lo corta en pedazos llamados tokens y cambia cada pedazo por un número.",
+      "points": [
+        "Un token suele ser una palabra común completa; a veces es parte de una palabra, un espacio o un signo de puntuación.",
+        "Cada modelo tiene una lista fija de tokens, su vocabulario, con un número (ID) para cada uno.",
+        "Las palabras raras, otros idiomas y los emoji usan más tokens, así que cuesta más procesarlos."
+      ]
+    },
+    "embedding": {
+      "kicker": "Embeddings",
+      "title": "¿Qué es un embedding?",
+      "lede": "Un embedding convierte una palabra en una larga lista de números, aquí 300, de modo que las palabras que se usan de forma parecida terminan con números parecidos.",
+      "points": [
+        "Imagina cada lista como un punto en un espacio con 300 direcciones. Puntos cercanos significan palabras relacionadas.",
+        "Nadie escribe estos números a mano. Se aprenden leyendo enormes cantidades de texto.",
+        "No podemos ver 300 dimensiones, así que esta página las comprime a 3D con PCA o UMAP. Algunas distancias se distorsionan."
+      ]
+    },
+    "vectors": {
+      "kicker": "Laboratorio de vectores",
+      "title": "¿Qué son los vectores de palabras?",
+      "lede": "El embedding de cada palabra es un vector: una flecha que va del origen a un punto. Como son flechas, puedes sumarlas y restarlas, y el resultado muchas veces sigue teniendo sentido.",
+      "points": [
+        "king − man + woman cae cerca de queen: el paso de “realeza” es más o menos la misma flecha en ambos casos.",
+        "La similitud se mide por el ángulo (coseno), no por la distancia en pantalla.",
+        "Las flechas de aquí son una vista aplanada de 300 dimensiones; los cálculos usan todas."
+      ]
+    }
+  },
+  "PageGuide": {
+    "buttonTitle": "Cómo usar esta página",
+    "kicker": "Cómo usarla",
+    "tokenizer": {
+      "title": "Cómo usar el Tokenizador",
+      "steps": [
+        "Escribe o pega texto a la izquierda, o elige un ejemplo: Corto, Escrituras del mundo, Emoji, Código o Párrafo.",
+        "Elige un tokenizador en el menú de arriba para ver cómo otro modelo divide el mismo texto.",
+        "Pasa el cursor sobre un token o tócalo para resaltar su ID, y al revés. También funcionan las flechas del teclado.",
+        "Activa Mostrar espacios para ver los espacios y saltos de línea dentro de los tokens."
+      ],
+      "tip": "Los emoji y el texto que no está en inglés muestran las mayores diferencias entre tokenizadores."
+    },
+    "embedding": {
+      "title": "Cómo usar el Explorador de embeddings",
+      "steps": [
+        "En la barra lateral, elige un modelo, cuántas palabras cargar y PCA o UMAP.",
+        "Arrastra para girar la nube; desplázate o pellizca para hacer zoom.",
+        "Haz clic en un punto, o usa Buscar palabra, para seleccionar una palabra y ver sus vecinos más cercanos.",
+        "Usa Etiquetas, Movimiento y Clústeres en el lienzo para cambiar lo que ves."
+      ],
+      "tip": "Las distancias en la vista 3D son aproximadas, porque 300 dimensiones se comprimen en 3."
+    },
+    "vectors": {
+      "title": "Cómo usar el Laboratorio de vectores",
+      "steps": [
+        "Escribe palabras en el cuadro Palabras para dibujar cada una como una flecha.",
+        "Completa a, b y c para calcular a − b + c, o elige un ejemplo, y luego presiona Calcular.",
+        "La tarjeta de resultado muestra la palabra más cercana. Abre “Mostrar las siguientes 4 palabras más cercanas” para ver otras opciones.",
+        "Usa el botón del ojo para cambiar entre las vistas Desde cero y Centro del grupo. Arrastra para girar."
+      ],
+      "tip": "Prueba paris − france + italy, o walking − walk + swim."
+    }
+  },
+  "Visualizer": {
+    "controls": "Controles",
+    "controlsTitle": "Controles de visualización",
+    "close": "Cerrar",
+    "fullScreen": "Pantalla completa",
+    "toFullScreen": "Cambiar al diseño de pantalla completa",
+    "toSidebar": "Cambiar al diseño con barra lateral"
+  },
+  "Tokenizer": {
+    "metaTitle": "Tokenizador: mira cómo el texto se vuelve tokens",
+    "description": "Pega cualquier texto y mira exactamente cómo GPT, LLaMA y otros tokenizadores lo dividen en tokens e IDs. Cuenta tokens, compara modelos y descubre por qué los emoji y otros idiomas cuestan más.",
+    "title": "Tokenizador",
+    "intro": "Mira cómo el texto se divide en tokens e IDs. Funciona en tu navegador; tu texto no se envía a ningún lado.",
+    "learnButton": "Aprende sobre la tokenización",
+    "modelLabel": "Tokenizador",
+    "llamaNote": "Ambas opciones usan el mismo vocabulario, así que sus IDs coinciden.",
+    "defaultText": "El veloz murciélago hindú comía feliz cardillo y kiwi.",
+    "presets": [
+      { "label": "Corto", "text": "Una idea tranquila puede llegar lejos." },
+      { "label": "Escrituras del mundo", "text": "Hello, world. مرحباً بالعالم. नमस्ते दुनिया। こんにちは世界。" },
+      { "label": "Emoji", "text": "Construye, prueba, celebra: 🧩 → 🛠️ → ✅ 🎉" },
+      { "label": "Código", "text": "const total = items.reduce((sum, item) => sum + item.price, 0);" },
+      { "label": "Párrafo", "text": "Al atardecer, las ventanas de la biblioteca atrapaban la última luz anaranjada. Adentro, una lectora comparaba dos traducciones y notaba cómo la puntuación, el ritmo y una sola palabra prestada cambiaban la sensación de la misma pequeña escena." }
+    ],
+    "status": {
+      "loading": "Cargando tokenizador…",
+      "error": "Error",
+      "ready": "Listo",
+      "tokenizing": "· Tokenizando…"
+    },
+    "sr": {
+      "loading": "Cargando tokenizador",
+      "inputError": "Este texto no se puede tokenizar con este codificador",
+      "loadError": "No se pudo cargar el tokenizador. Inténtalo de nuevo.",
+      "noText": "Sin texto",
+      "result": "{count} tokens, {tokenizer}"
+    },
+    "text": "Texto",
+    "sampleLegend": "Cargar un texto de ejemplo",
+    "try": "Prueba",
+    "placeholder": "Escribe o pega texto…",
+    "tokens": "Tokens",
+    "showWhitespace": "Mostrar espacios",
+    "statsLabel": "Estadísticas del texto",
+    "codePoints": "Puntos de código",
+    "utf8Bytes": "Bytes UTF-8",
+    "inputError": "Este texto no se puede tokenizar con {tokenizer}.",
+    "loadError": "No se pudo cargar el tokenizador {tokenizer}.",
+    "inputErrorDetail": "{message}. Aquí solo se acepta {special} como token especial.",
+    "retrying": "Reintentando…",
+    "retry": "Reintentar",
+    "empty": "Escribe o pega texto para ver sus tokens.",
+    "inspector": {
+      "position": "#{index} de {total}",
+      "id": " · ID ",
+      "bytes": " · {count, plural, one {# byte} other {# bytes}}: ",
+      "piece": " · pieza del vocabulario {piece}",
+      "special": " · token especial",
+      "partial": " · incluye un carácter UTF-8 parcial que se combina con los tokens vecinos",
+      "hint": "Pasa el cursor, toca o usa las flechas del teclado sobre un token para inspeccionarlo."
+    },
+    "spoken": {
+      "special": "token especial {name}",
+      "space": "espacio",
+      "newline": "salto de línea",
+      "tab": "tabulación",
+      "bytes": "bytes {hex}"
+    },
+    "tokenOption": "Token {index} de {total}: {spoken}, ID {id}",
+    "tokenTitle": "id: {id}",
+    "idOption": "ID {id}, token {index} de {total}",
+    "idTitle": "índice del token: {index}",
+    "partialTitle": "Carácter UTF-8 parcial: estos bytes se combinan con los tokens vecinos",
+    "tokenIds": "IDs de token",
+    "copyIds": "Copiar IDs",
+    "copied": "IDs copiados al portapapeles.",
+    "copyFailed": "No se pudo copiar. Selecciona los IDs de arriba y cópialos a mano."
+  },
+  "Embedding": {
+    "metaTitle": "Explorador de embeddings: embeddings de palabras en 3D",
+    "description": "Explora miles de palabras de GloVe, Word2Vec y FastText en un mapa 3D interactivo. Busca una palabra, mira sus vecinos más cercanos y compara las proyecciones PCA y UMAP.",
+    "words": "{count, number} palabras",
+    "colorHint": "IDs de clúster guardados con el conjunto de datos.",
+    "edgeHint": "Dibuja los enlaces entre vecinos guardados. No se dibujan todos, así que las líneas no son una lista completa de vecinos.",
+    "errors": {
+      "network": "No se pudo acceder al conjunto de datos. Revisa tu conexión e inténtalo de nuevo.",
+      "http": "Este conjunto de datos no está disponible ahora. Inténtalo de nuevo.",
+      "decode": "La descarga del conjunto de datos quedó incompleta. Inténtalo de nuevo.",
+      "invalid": "No se pudo leer este conjunto de datos. Inténtalo de nuevo."
+    },
+    "loadFailed": "No se pudo cargar {dataset}",
+    "retry": "Reintentar",
+    "unavailableTitle": "La vista 3D no está disponible en este navegador",
+    "stalledTitle": "La vista 3D todavía no se ha recuperado",
+    "unavailableText": "WebGL no pudo iniciarse. Aun así puedes buscar palabras y leer sus detalles en el panel.",
+    "stalledText": "El navegador pausó los gráficos y no los ha restaurado. Puede que se recupere solo.",
+    "unavailableHint": "Vuelve a intentarlo para iniciar la vista 3D.",
+    "stalledHint": "Recarga la vista 3D para restaurar los gráficos. Al recargar se reinicia la cámara.",
+    "tryAgain": "Intentar de nuevo",
+    "reloadView": "Recargar vista 3D",
+    "graphicsLost": "El navegador pausó los gráficos — restaurando…",
+    "loadingDataset": "Cargando {dataset}…",
+    "noSelection": "Busca o haz clic en un punto para ver sus detalles.",
+    "selected": "Seleccionada",
+    "clearSelection": "Quitar selección {word}",
+    "clear": "Quitar",
+    "controlsLabel": "Controles de embeddings",
+    "heading": "Espacio de embeddings",
+    "intro": "Vectores de palabras de 300 dimensiones proyectados a 3D. Aquí las distancias pueden distorsionar las relaciones.",
+    "dataset": "Conjunto de datos",
+    "model": "Modelo de embeddings",
+    "modelPlaceholder": "Selecciona un modelo de embeddings",
+    "wordCount": "Cantidad de palabras",
+    "wordCountPlaceholder": "Selecciona la cantidad de palabras",
+    "reduction": "Reducción de dimensionalidad",
+    "explore": "Explorar",
+    "wordSearch": "Buscar palabra",
+    "wordSearchSelected": "Buscar palabra, seleccionada: {word}",
+    "searchPlaceholder": "Busca una palabra...",
+    "searchWords": "Buscar palabras...",
+    "noWordFound": "No se encontró la palabra.",
+    "typeToSearch": "Escribe para buscar entre {count} palabras...",
+    "loadingWords": "Cargando palabras...",
+    "first300": "Se muestran los primeros 300 resultados. Afina tu búsqueda para ver más.",
+    "display": "Visualización",
+    "colorByCluster": "Colorear por clúster de similitud",
+    "connectClusters": "Conectar clústeres con aristas",
+    "status": {
+      "loading": "Cargando {dataset}…",
+      "error": "No se pudo cargar {dataset}.",
+      "unavailable": "Se cargaron {count} palabras. La vista 3D no está disponible; la búsqueda sigue funcionando.",
+      "lost": "Gráficos en pausa. Restaurando…",
+      "stalled": "La vista 3D no se ha recuperado.",
+      "ready": "Listo · {count} palabras"
+    },
+    "canvasLabel": "Gráfico de dispersión 3D de {count}palabras de {model}, proyección {method}. Usa Buscar palabra para explorar las palabras como texto.",
+    "tabs": {
+      "model": "Modelo",
+      "search": "Buscar",
+      "display": "Vista"
+    },
+    "modelConfig": "Modelo y configuración",
+    "typeToSearchLabel": "Escribe para buscar palabras",
+    "typeToSearchPlaceholder": "Escribe para buscar palabras...",
+    "noWordsFound": "No se encontraron palabras. Prueba con otra búsqueda.",
+    "first50": "Se muestran los primeros 50 resultados. Sigue escribiendo para afinar la búsqueda...",
+    "searchThrough": "Busca entre {count} palabras. Selecciona una para resaltarla en el lienzo.",
+    "loadingWordList": "Cargando lista de palabras...",
+    "displayOptions": "Opciones de visualización",
+    "loadingModel": "Cargando {model}"
+  },
+  "Exploration": {
+    "unassigned": "Sin asignar",
+    "cluster": "Clúster {id}",
+    "toolsLabel": "Exploración del lienzo",
+    "showLabelsTitle": "Mostrar etiquetas legibles para las palabras visibles",
+    "showLabels": "Etiquetas",
+    "motionTitle": "Rotación y deriva automáticas",
+    "motion": "Movimiento",
+    "clusters": "Clústeres",
+    "clearSpotlight": "Quitar el foco del clúster",
+    "clearCluster": "Quitar {label}",
+    "spotlightLabel": "Foco del clúster",
+    "searchCluster": "Buscar en {label} · {count}",
+    "findInCluster": "Buscar una palabra en {label}",
+    "zoomToCluster": "Acercar al clúster",
+    "wordsIn": "Palabras en {label}",
+    "noMatches": "Sin coincidencias",
+    "hint": "Selecciona una palabra para explorar sus conexiones",
+    "trayLabel": "Exploración de palabras",
+    "unpin": "Desfijar",
+    "pinToCompare": "Fijar para comparar",
+    "unpinWord": "Desfijar palabra",
+    "pinWord": "Fijar palabra para comparar",
+    "locate": "Ubicar palabra",
+    "exitFocus": "Salir del enfoque",
+    "focus": "Enfocar conexiones",
+    "collapse": "Contraer detalles de la palabra",
+    "expand": "Expandir detalles de la palabra",
+    "clearSelection": "Quitar selección",
+    "clear": "Quitar",
+    "comparison": "Comparación",
+    "shared": "{count} en común",
+    "directlyLinked": "Conectadas directamente",
+    "selectToCompare": "Selecciona una palabra para comparar",
+    "notIn": "No está en {dataset}",
+    "storedLinks": "Enlaces guardados de {word}"
+  },
+  "Vectors": {
+    "metaTitle": "Laboratorio de vectores: aritmética con vectores de palabras",
+    "description": "Haz matemáticas con el significado de las palabras: prueba king − man + woman y otras analogías, y mira los vectores de palabras como flechas en 3D, calculados con las 300 dimensiones.",
+    "views": {
+      "centred": { "label": "Centro del grupo", "origin": "centro = promedio de estas palabras", "hint": "Las flechas salen del promedio de las palabras dibujadas. Sirve para ver cómo se reparten las palabras." },
+      "zero": { "label": "Desde cero", "origin": "cero real", "hint": "Las flechas salen del cero real del modelo, donde la dirección decide la palabra más cercana. Las flechas se amontonan porque la mayoría de las palabras apuntan hacia un lado parecido." }
+    },
+    "wholeWords": "Palabras completas, buscadas directamente en {model} (sin tokenizador).",
+    "struckOut": " Las palabras tachadas no están en su vocabulario de 10,000 palabras.",
+    "hiddenWhileAnalogy": " Ocultas mientras se muestra una analogía.",
+    "clearAnalogy": "Quitar analogía",
+    "showNext": "Mostrar las siguientes {count} palabras más cercanas",
+    "hideNext": "Ocultar las siguientes {count} palabras más cercanas",
+    "howToRead": "Cómo leer esto",
+    "closeLegend": "Cerrar leyenda",
+    "legendZero": "El punto blanco es el <b>cero real</b> del modelo. La palabra más cercana es aquella cuya flecha apunta casi en la misma dirección que el punto verde.",
+    "legendCentred": "El punto blanco es el <b>promedio</b> de estas palabras, no el cero. Dónde quedan las cosas a su alrededor no significa nada por sí solo.",
+    "legendStep": "Amarillo: el paso de <b>{from}</b> a <b>{to}</b>, y luego el mismo paso dado desde <b>{start}</b>.",
+    "legendPoint": "Punto verde: donde cae ese paso. Normalmente es espacio vacío, no una palabra.",
+    "legendGap": "Línea punteada: la distancia hasta <b>{answer}</b>, la palabra real más cercana entre 10,000.",
+    "operations": ["empieza con", "resta", "suma"],
+    "heading": "Laboratorio de vectores",
+    "intro": "Haz aquí experimentos de matemáticas con vectores y analogías.",
+    "model": "Modelo de embeddings",
+    "modelPlaceholder": "Selecciona un modelo de embeddings",
+    "gridlines": "Mostrar cuadrícula",
+    "wordsToPlot": "Palabras a dibujar",
+    "wordsToPlotLimit": "Palabras a dibujar (hasta 50)",
+    "wordsPlaceholder": "Escribe palabras en inglés separadas por espacios (p. ej., man woman king queen)",
+    "wordCount": "{count} / 50 palabras",
+    "analogy": "Analogía de palabras",
+    "analogyIntro": "Empieza con una palabra, quítale una idea, súmale otra y mira en qué palabra real cae.",
+    "orTryExample": "O prueba un ejemplo",
+    "defaultWords": "If the path be beautiful , let us not ask where it leads",
+    "notInModel": "“{word}” no está en {model}.",
+    "calculate": "Calcular",
+    "loadingProgress": "Cargando {model}… {percent}%",
+    "tabs": {
+      "model": "Modelo",
+      "display": "Vista",
+      "words": "Palabras",
+      "calc": "Cálculo"
+    },
+    "displayOptions": "Opciones de visualización",
+    "calculation": "Cálculo vectorial",
+    "loadingEmbeddings": "Cargando embeddings de {model}…",
+    "changeView": "Cambiar vista. Vista actual: {view}",
+    "view": "Vista:"
+  },
+  "NotFound": {
+    "title": "Página no encontrada",
+    "kicker": "Error 404",
+    "heading": "Esta página no está en nuestro vocabulario.",
+    "sub": "Puede que el enlace esté roto o que la página se haya movido. Vuelve al inicio o empieza a aprender cómo los modelos leen el texto.",
+    "home": "Volver al inicio",
+    "learn": "Explorar Aprender"
+  }
+}
