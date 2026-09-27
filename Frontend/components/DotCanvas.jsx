@@ -1,69 +1,14 @@
-'use client';
-import { useEffect, useRef } from 'react';
-
-export default function DotCanvas({ opacity = 0.04, dotColor = '#ffffff' }) {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
-
-    function resize() {
-      canvas.width = innerWidth * dpr;
-      canvas.height = innerHeight * dpr;
-      canvas.style.width = `${innerWidth}px`;
-      canvas.style.height = `${innerHeight}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      draw();
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, innerWidth, innerHeight);
-      const step = 48;                 // grid spacing
-      const pts = [];
-      for (let x = 0; x <= innerWidth; x += step) {
-        for (let y = 0; y <= innerHeight; y += step) {
-          pts.push({ x, y });
-        }
-      }
-
-      // lines
-      ctx.strokeStyle = dotColor;
-      ctx.globalAlpha = opacity * 0.35;
-      ctx.lineWidth = 0.75;
-      pts.forEach(p => {
-        pts.forEach(q => {
-          const dist = Math.hypot(p.x - q.x, p.y - q.y);
-          if (dist && dist <= step * 1.5) {
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(q.x, q.y);
-            ctx.stroke();
-          }
-        });
-      });
-
-      // dots
-      ctx.fillStyle = dotColor;
-      ctx.globalAlpha = opacity;
-      pts.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 1.2, 0, Math.PI * 2);
-        ctx.fill();
-      });
-    }
-
-    resize();
-    addEventListener('resize', resize);
-    return () => removeEventListener('resize', resize);
-  }, [opacity, dotColor]);
-
+// Site-wide background grid: dots every 48px joined by straight and diagonal lines. A repeating CSS
+// tile rather than a canvas sized from window measurements, so it always covers the whole screen
+// (mobile browser bars, rotation and zoom used to leave parts of it empty).
+export default function DotCanvas({ opacity = 0.04, dotColor = "#ffffff" }) {
+  const line = opacity * 0.7;
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'><g stroke='${dotColor}' stroke-opacity='${line}' stroke-width='0.75'><path d='M0 24H48M24 0V48M0 0L48 48M48 0L0 48'/></g><circle cx='24' cy='24' r='1.2' fill='${dotColor}' fill-opacity='${opacity}'/></svg>`;
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 -z-10 pointer-events-none"
+    <div
       aria-hidden="true"
+      className="fixed inset-0 -z-10 pointer-events-none"
+      style={{ backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`, backgroundPosition: "-24px -24px" }}
     />
   );
 }

@@ -388,6 +388,7 @@
     "directlyLinked": "直接相连",
     "selectToCompare": "选择一个词进行比较",
     "notIn": "不在 {dataset} 中",
+    "tryMoreWords": "可在“模型”中选择更多单词。",
     "storedLinks": "{word} 的已存储连线"
   },
   "Vectors": {

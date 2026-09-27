@@ -84,9 +84,10 @@ export default function ExplorationTray({ info, focus, onFocus, pins, onPin, onU
             </div>
             {shared.length > 0 && <div className={styles.chips}>{shared.map((word) => <button key={word} className={styles.sharedChip} onClick={() => onSelect(word)}>{word}</button>)}</div>}
           </div>}
+          {/* Shown right under the title: the body (where this used to live) can't be expanded for a missing word */}
+          {info?.state === 'missing' && <p className={styles.note}>{t('notIn', { dataset: info.datasetName })}. {t('tryMoreWords')}</p>}
           {pins.length === 1 && !anchored && !info && <p className={styles.note}><Pin size={12} /> {t('selectToCompare')}</p>}
           <div className={styles.body}>
-            {info?.state === 'missing' && <p>{t('notIn', { dataset: info.datasetName })}</p>}
             {found && <div className={styles.chips} aria-label={t('storedLinks', { word: info.word })}>
               <Link2 size={14} className={styles.rowIcon} />
               {info.links.map((word) => <button key={word} onClick={() => onSelect(word)}>{word}</button>)}

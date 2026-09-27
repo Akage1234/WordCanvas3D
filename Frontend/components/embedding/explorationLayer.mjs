@@ -12,6 +12,24 @@ export function createExplorationLayer(scene, camera, container, onSelect) {
   labelLayer.setAttribute('aria-hidden', 'true');
   Object.assign(labelLayer.style, { position: 'absolute', inset: '0', pointerEvents: 'none', overflow: 'hidden', zIndex: '10', transition: 'opacity .35s' });
   container.appendChild(labelLayer);
+  // Labels are buttons over the canvas. A short finger drag or a second finger landing on one still ends in a
+  // browser 'click' (Android allows ~15px of movement), so only a still, single-finger press selects.
+  const taps = [];
+  const onMultiTouch = (e) => { if (e.touches.length > 1) for (const tap of taps) if (tap.start) tap.start.ok = false; };
+  window.addEventListener('touchstart', onMultiTouch, { passive: true });
+  const onTap = (node, fn) => {
+    const tap = { start: null };
+    taps.push(tap);
+    node.addEventListener('pointerdown', (e) => { tap.start = e.isPrimary ? { x: e.clientX, y: e.clientY, t: performance.now(), ok: true } : null; });
+    node.addEventListener('pointermove', (e) => { const s0 = tap.start; if (s0 && Math.hypot(e.clientX - s0.x, e.clientY - s0.y) > 8) s0.ok = false; });
+    node.addEventListener('pointercancel', () => { tap.start = null; });
+    node.addEventListener('click', (e) => {
+      const s0 = tap.start;
+      tap.start = null;
+      if (s0 && e.pointerType !== 'mouse' && e.detail !== 0 && (!s0.ok || performance.now() - s0.t > 500)) return;
+      fn();
+    });
+  };
   const labelNodes = Array.from({ length: 16 }, () => {
     const node = document.createElement('button');
     node.type = 'button';
@@ -22,7 +40,7 @@ export function createExplorationLayer(scene, camera, container, onSelect) {
       whiteSpace: 'nowrap', cursor: 'pointer', textAlign: 'left',
       WebkitTextStroke: '2px #05070d', paintOrder: 'stroke fill', textShadow: '0 2px 5px #000',
     });
-    node.addEventListener('click', () => onSelect(node.dataset.word));
+    onTap(node, () => onSelect(node.dataset.word));
     labelLayer.appendChild(node);
     return node;
   });
@@ -35,7 +53,7 @@ export function createExplorationLayer(scene, camera, container, onSelect) {
       color: '#fff', padding: '2px 8px', borderRadius: '7px', font: '750 17px/1.25 system-ui, sans-serif',
       WebkitTextStroke: '0.6px #000', textShadow: '0 1px 2px #000c', whiteSpace: 'nowrap', cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.5)', zIndex: '1',
     });
-    node.addEventListener('click', () => onSelect(word(node)));
+    onTap(node, () => onSelect(word(node)));
     labelLayer.appendChild(node);
     return node;
   };
@@ -283,5 +301,5 @@ export function createExplorationLayer(scene, camera, container, onSelect) {
   }
 
   return { refresh, frame, intensity, hover, setHidden, active: () => network.roots.length > 0 || options.spotlight != null,
-    dispose() { hover(null); clearGraphics(); scene.remove(group); labelLayer.remove(); } };
+    dispose() { window.removeEventListener('touchstart', onMultiTouch); hover(null); clearGraphics(); scene.remove(group); labelLayer.remove(); } };
 }

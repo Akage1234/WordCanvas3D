@@ -388,6 +388,7 @@
     "directlyLinked": "直接つながっています",
     "selectToCompare": "比較する単語を選択",
     "notIn": "{dataset} にはありません",
+    "tryMoreWords": "「モデル」で単語数を増やしてみてください。",
     "storedLinks": "{word} の保存されたリンク"
   },
   "Vectors": {

@@ -109,7 +109,7 @@ export default function VisualizerLayout({
       {/* Mobile Layout - Canvas-first with bottom icon tray */}
       {isVisualizerPage ? (
         // Full screen canvas for visualizer pages (embedding, vector-playground)
-        <div className="md:hidden fixed inset-0 w-screen h-screen overflow-hidden">
+        <div className="md:hidden fixed inset-0 h-dvh overflow-hidden">
           {concept && <ConceptButton concept={concept} className={`fixed top-20 landscape:top-16 right-4 landscape:right-2 z-50 h-9 w-9 ${roundGlass}`} />}
           {/* Full Screen Canvas */}
           <main className="absolute inset-0 w-full h-full">

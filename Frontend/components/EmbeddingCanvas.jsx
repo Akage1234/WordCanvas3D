@@ -213,16 +213,26 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
       return intersects[0].index;
     };
 
+    // A tap is one finger, down and up quickly without moving. Pinches and two-finger pans must never
+    // count: when the fingers lift one at a time, the last touchend used to look like a fresh tap.
+    let touchMulti = false;
+    let touchStartTime = 0;
+    let lastTouchEnd = 0;
+    let lastTouchWasTap = false;
     const onTouchStart = (e) => {
-      if (!e.touches || e.touches.length !== 1) return;
+      if (!e.touches) return;
+      if (e.touches.length > 1) { touchMulti = true; return; }
       const t = e.touches[0];
       touchStartX = t.clientX;
       touchStartY = t.clientY;
+      touchStartTime = performance.now();
       touchMoved = false;
+      touchMulti = false;
     };
 
     const onTouchMove = (e) => {
-      if (!e.touches || e.touches.length !== 1) return;
+      if (!e.touches) return;
+      if (e.touches.length !== 1) { touchMulti = true; return; }
       const t = e.touches[0];
       const dx = t.clientX - touchStartX;
       const dy = t.clientY - touchStartY;
@@ -233,8 +243,11 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     };
 
     const onTouchEnd = (e) => {
-      // If it was a drag, don't treat as tap
-      if (touchMoved) return;
+      // Only a quick, still, single-finger touch is a tap; wait until every finger is up.
+      if (e.touches && e.touches.length > 0) return;
+      lastTouchEnd = performance.now();
+      lastTouchWasTap = !(touchMoved || touchMulti || lastTouchEnd - touchStartTime > 500);
+      if (!lastTouchWasTap) return;
       const t = (e.changedTouches && e.changedTouches[0]) || null;
       if (!t) return;
 
@@ -922,6 +935,8 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
     const onWheel = () => { lastInput = performance.now(); };
     const onTouchInput = () => { lastInput = performance.now(); };
     const onDoubleClick = (event) => {
+      // Phones turn a double tap into dblclick; a gesture ending in a touch that wasn't a clean tap must not fly.
+      if (performance.now() - lastTouchEnd < 800 && !lastTouchWasTap) return;
       const idx = pickAt(event.clientX, event.clientY);
       if (idx === null) return;
       callbacksRef.current.onPick?.(labels[idx]);

@@ -388,6 +388,7 @@
     "directlyLinked": "Directly linked",
     "selectToCompare": "Select a word to compare",
     "notIn": "Not in {dataset}",
+    "tryMoreWords": "Try a larger word count under Model.",
     "storedLinks": "Stored links for {word}"
   },
   "Vectors": {
