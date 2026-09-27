@@ -293,8 +293,12 @@ function Pipeline({ color }) {
 async function words(locale, key) {
   const t = await getTranslations({ locale, namespace: "Og" });
   const m = t.raw(key);
-  // CJK characters are about twice as wide as Latin letters at the same size, so headlines shrink.
-  const k = CJK[locale] ? 0.62 : 1;
+  // Headlines were sized for the English text. Longer translations shrink to the same visual length;
+  // CJK characters count as ~2.4 letters, since each is about that wide next to the narrow serif.
+  const en = (await getTranslations({ locale: "en", namespace: "Og" })).raw(key);
+  const width = (str = "") => [...str].reduce((n, ch) => n + (/[⺀-鿿＀-￯]/.test(ch) ? 2.4 : 1), 0);
+  const longest = (o) => Math.max(width(o.title), width(o.serif));
+  const k = Math.max(0.5, Math.min(1, longest(en) / longest(m)));
   return { ...m, locale, footer: t("footer"), text: Object.values(m).join(" "), sz: (n) => Math.round(n * k) };
 }
 
