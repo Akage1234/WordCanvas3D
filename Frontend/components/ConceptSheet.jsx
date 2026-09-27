@@ -89,8 +89,11 @@ function Picture({ kind }) {
 // Icon-only by default; pass `label` for a text button (used on the tokenizer header).
 export function ConceptButton({ concept, label, className = "" }) {
   const t = useTranslations("Concepts");
+  const tv = useTranslations("Vectors");
   if (!CONCEPTS[concept]) return null;
   const c = { ...CONCEPTS[concept], ...t.raw(concept) };
+  // The Vector Playground's two plot views, explained where touch users can read them (no hover tooltips).
+  const views = concept === "vectors" ? tv.raw("views") : null;
   return (
     <Drawer direction="right">
       <DrawerTrigger asChild>
@@ -136,6 +139,20 @@ export function ConceptButton({ concept, label, className = "" }) {
               </li>
             ))}
           </ul>
+
+          {views && (
+            <div className="mx-6 mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div className="mb-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">{t("viewsTitle")}</div>
+              <dl className="space-y-3">
+                {["zero", "centred"].map((v) => (
+                  <div key={v}>
+                    <dt className="text-sm font-semibold text-white">{views[v].label}</dt>
+                    <dd className="mt-0.5 text-sm leading-relaxed text-neutral-400">{views[v].hint}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
 
           <div className="mt-auto px-6 pb-6 pt-8">
             <div className="mb-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">{t("readMore")}</div>

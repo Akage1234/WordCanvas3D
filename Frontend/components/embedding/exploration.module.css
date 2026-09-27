@@ -89,3 +89,5 @@
   .tools > .spotChip:not(:hover) > svg { display: none; }
   .tools { gap: 8px; }
 }
+/* Phones only: the tray sits above the dock, so lift it clear of an open search/input strip. */
+@media (max-width: 767px) { :global(body[data-dock-strip]) .trayPosition { bottom: calc(156px + env(safe-area-inset-bottom)); } }

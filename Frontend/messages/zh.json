@@ -138,6 +138,7 @@
   },
   "Concepts": {
     "readMore": "在“学习”中了解更多",
+    "viewsTitle": "两种视图",
     "minRead": "{count} 分钟阅读",
     "close": "关闭",
     "tokenizer": {
@@ -346,14 +347,10 @@
       "search": "搜索",
       "display": "显示"
     },
-    "modelConfig": "模型与配置",
-    "typeToSearchLabel": "输入以搜索词语",
-    "typeToSearchPlaceholder": "输入以搜索词语...",
     "noWordsFound": "未找到词语。试试其他搜索词。",
-    "first50": "仅显示前 50 条结果。继续输入以细化搜索...",
-    "searchThrough": "在 {count} 个词中搜索。选择一个词即可在画布上高亮它。",
-    "loadingWordList": "正在加载词表...",
-    "displayOptions": "显示选项",
+    "searchAnyWord": "搜索任意单词…",
+    "clearSearch": "清除搜索",
+    "suggestions": "建议",
     "loadingModel": "正在加载 {model}"
   },
   "Exploration": {
@@ -400,8 +397,8 @@
       "centred": { "label": "组中心", "origin": "中心 = 这些词的平均点", "hint": "箭头从所画词语的平均点出发，便于观察这些词如何分布。" },
       "zero": { "label": "从零点", "origin": "真正的零点", "hint": "箭头从模型真正的零点出发，由方向决定最近的词。由于大多数词的指向相近，箭头会挤在一起。" }
     },
-    "wholeWords": "完整单词，直接在 {model} 中查找（不经过分词器）。",
-    "struckOut": " 带删除线的词不在它 10,000 词的词表中。",
+    "wholeWords": "目前仅支持完整单词。",
+    "struckOut": " 带删除线的词不在模型中。",
     "hiddenWhileAnalogy": " 显示类比时隐藏。",
     "clearAnalogy": "清除类比",
     "showNext": "显示接下来 {count} 个最接近的词",
@@ -436,7 +433,6 @@
       "words": "词语",
       "calc": "计算"
     },
-    "displayOptions": "显示选项",
     "calculation": "向量计算",
     "loadingEmbeddings": "正在加载 {model} 嵌入…",
     "changeView": "切换视图。当前视图：{view}",

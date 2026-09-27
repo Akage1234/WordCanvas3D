@@ -138,6 +138,7 @@
   },
   "Concepts": {
     "readMore": "Read more on Learn",
+    "viewsTitle": "The two views",
     "minRead": "{count} min read",
     "close": "Close",
     "tokenizer": {
@@ -346,14 +347,10 @@
       "search": "Search",
       "display": "Display"
     },
-    "modelConfig": "Model & Configuration",
-    "typeToSearchLabel": "Type to search words",
-    "typeToSearchPlaceholder": "Type to search words...",
     "noWordsFound": "No words found. Try a different search.",
-    "first50": "Showing first 50 results. Keep typing to refine search...",
-    "searchThrough": "Search through {count} words. Select a word to highlight it on the canvas.",
-    "loadingWordList": "Loading word list...",
-    "displayOptions": "Display Options",
+    "searchAnyWord": "Search any word…",
+    "clearSearch": "Clear search",
+    "suggestions": "Suggestions",
     "loadingModel": "Loading {model}"
   },
   "Exploration": {
@@ -400,8 +397,8 @@
       "centred": { "label": "Group centre", "origin": "centre = average of these words", "hint": "Arrows start from the average of the plotted words. Good for seeing how the words spread out." },
       "zero": { "label": "From zero", "origin": "real zero", "hint": "Arrows start from the model's real zero, where directions decide the nearest word. Arrows bunch up because most words point a similar way." }
     },
-    "wholeWords": "Whole words, looked up directly in {model} (no tokenizer).",
-    "struckOut": " Struck-out words aren't in its 10,000-word vocabulary.",
+    "wholeWords": "Only whole words are supported for now.",
+    "struckOut": " Struck-out words aren't in the model.",
     "hiddenWhileAnalogy": " Hidden while an analogy is shown.",
     "clearAnalogy": "Clear analogy",
     "showNext": "Show the next {count} closest words",
@@ -436,7 +433,6 @@
       "words": "Words",
       "calc": "Calc"
     },
-    "displayOptions": "Display Options",
     "calculation": "Vector Calculation",
     "loadingEmbeddings": "Loading {model} embeddings…",
     "changeView": "Change view. Current view: {view}",

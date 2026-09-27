@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import VisualizerLayout from "@/components/VisualizerLayout";
+import SearchStrip from "@/components/embedding/SearchStrip";
 import EmbeddingCanvas from "@/components/EmbeddingCanvas";
 import { PageGuide } from "@/components/PageGuide";
 import { Check, ChevronsUpDown, Database, Search, Palette, AlertTriangle, X } from "lucide-react";
@@ -589,7 +590,6 @@ export default function EmbeddingPage() {
               <div className="space-y-4">
                 {drawerNotice}
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">{t("modelConfig")}</h3>
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <label htmlFor="mobile-embedding-select" className="text-sm font-medium">
@@ -649,85 +649,8 @@ export default function EmbeddingPage() {
             id: "search",
             icon: Search,
             label: t("tabs.search"),
-            content: (closeDrawer) => (
-              <div className="space-y-4">
-                {drawerNotice}
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">{t("wordSearch")}</h3>
-                  <div className="space-y-3">
-                    {/* Current selection */}
-                    {selectedInfo && (
-                      <SelectedWordPill info={selectedInfo} onClear={clearSelection} />
-                    )}
-                    
-                    {/* Search input - built into drawer, no popover */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">{t("typeToSearchLabel")}</label>
-                      <Command shouldFilter={false} className="rounded-lg border">
-                        <CommandInput 
-                          placeholder={t("typeToSearchPlaceholder")}
-                          className="h-11"
-                          value={searchQuery}
-                          onValueChange={setSearchQuery}
-                        />
-                        <CommandList className="max-h-[300px]">
-                          <CommandEmpty>
-                            {wordsList.length > 0 ? t("noWordsFound") : t("loadingWords")}
-                          </CommandEmpty>
-                          <CommandGroup>
-                            {wordsList
-                              .filter(word => 
-                                !searchQuery || 
-                                word.toLowerCase().includes(searchQuery.toLowerCase())
-                              )
-                              .slice(0, 50)
-                              .map((word) => (
-                                <CommandItem
-                                  key={word}
-                                  value={word}
-                                  onSelect={() => {
-                                    selectSearchWord(word);
-                                    setSearchQuery("");
-                                    // Close the drawer when word is selected
-                                    setTimeout(() => closeDrawer(), 200);
-                                  }}
-                                  className="cursor-pointer"
-                                >
-                                  <span className={cn(
-                                    "flex-1",
-                                    searchWord === word && "font-semibold text-blue-400"
-                                  )}>
-                                    {word}
-                                  </span>
-                                  {searchWord === word && (
-                                    <Check className="ml-auto h-4 w-4 text-blue-400" />
-                                  )}
-                                </CommandItem>
-                              ))}
-                            {wordsList.filter(word => 
-                              !searchQuery || 
-                              word.toLowerCase().includes(searchQuery.toLowerCase())
-                            ).length > 50 && (
-                              <div className="px-2 py-1.5 text-xs text-muted-foreground text-center">
-                                {t("first50")}
-                              </div>
-                            )}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </div>
-                    
-                    <div className="text-xs text-muted-foreground pt-2">
-                      {wordsList.length > 0 ? (
-                        <span>{t("searchThrough", { count: wordsList.length })}</span>
-                      ) : (
-                        <span>{t("loadingWordList")}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ),
+            variant: "strip",
+            content: <SearchStrip words={wordsList} selected={searchWord} onSelect={selectSearchWord} onClear={clearSelection} />,
           },
           {
             id: "display",
@@ -737,7 +660,6 @@ export default function EmbeddingPage() {
               <div className="space-y-4">
                 {drawerNotice}
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">{t("displayOptions")}</h3>
                   <div className="space-y-4">
                     <div className="flex items-start space-x-2">
                       <Checkbox

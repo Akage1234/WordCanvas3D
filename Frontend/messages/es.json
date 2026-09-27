@@ -138,6 +138,7 @@
   },
   "Concepts": {
     "readMore": "Lee más en Aprender",
+    "viewsTitle": "Las dos vistas",
     "minRead": "{count} min de lectura",
     "close": "Cerrar",
     "tokenizer": {
@@ -346,14 +347,10 @@
       "search": "Buscar",
       "display": "Vista"
     },
-    "modelConfig": "Modelo y configuración",
-    "typeToSearchLabel": "Escribe para buscar palabras",
-    "typeToSearchPlaceholder": "Escribe para buscar palabras...",
     "noWordsFound": "No se encontraron palabras. Prueba con otra búsqueda.",
-    "first50": "Se muestran los primeros 50 resultados. Sigue escribiendo para afinar la búsqueda...",
-    "searchThrough": "Busca entre {count} palabras. Selecciona una para resaltarla en el lienzo.",
-    "loadingWordList": "Cargando lista de palabras...",
-    "displayOptions": "Opciones de visualización",
+    "searchAnyWord": "Busca cualquier palabra…",
+    "clearSearch": "Borrar búsqueda",
+    "suggestions": "Sugerencias",
     "loadingModel": "Cargando {model}"
   },
   "Exploration": {
@@ -400,8 +397,8 @@
       "centred": { "label": "Centro del grupo", "origin": "centro = promedio de estas palabras", "hint": "Las flechas salen del promedio de las palabras dibujadas. Sirve para ver cómo se reparten las palabras." },
       "zero": { "label": "Desde cero", "origin": "cero real", "hint": "Las flechas salen del cero real del modelo, donde la dirección decide la palabra más cercana. Las flechas se amontonan porque la mayoría de las palabras apuntan hacia un lado parecido." }
     },
-    "wholeWords": "Palabras completas, buscadas directamente en {model} (sin tokenizador).",
-    "struckOut": " Las palabras tachadas no están en su vocabulario de 10,000 palabras.",
+    "wholeWords": "Por ahora solo se admiten palabras completas.",
+    "struckOut": " Las palabras tachadas no están en el modelo.",
     "hiddenWhileAnalogy": " Ocultas mientras se muestra una analogía.",
     "clearAnalogy": "Quitar analogía",
     "showNext": "Mostrar las siguientes {count} palabras más cercanas",
@@ -436,7 +433,6 @@
       "words": "Palabras",
       "calc": "Cálculo"
     },
-    "displayOptions": "Opciones de visualización",
     "calculation": "Cálculo vectorial",
     "loadingEmbeddings": "Cargando embeddings de {model}…",
     "changeView": "Cambiar vista. Vista actual: {view}",

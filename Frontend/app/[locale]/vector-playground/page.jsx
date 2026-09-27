@@ -1,12 +1,12 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import VisualizerLayout from "@/components/VisualizerLayout";
 import { useLayoutMode } from "@/components/LayoutContext";
 import VectorPlaygroundCanvas from "@/components/VectorPlaygroundCanvas";
 import { lookup, analogy, nearest, pca3, loadModel } from "@/components/vectorPlayground/vectorMath.mjs";
 import { PageGuide } from "@/components/PageGuide";
-import { HelpCircle, Database, Grid, FileText, Calculator, X, Eye, Radar } from "lucide-react";
+import { HelpCircle, Database, Grid, FileText, Calculator, X, Eye, Radar, Sparkles } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import {
   Select,
@@ -82,39 +82,147 @@ function WordChips({ words, colors, modelLabel, dimmed }) {
   );
 }
 
+// Phone input strips (shown above the dock). The words box starts one line tall and grows with its
+// content up to ~4 lines, then scrolls, so multi-line input still works without a big text area.
+function WordsStrip({ value, onChange, count, children }) {
+  const t = useTranslations("Vectors");
+  const grow = (el) => { if (!el) return; el.style.height = "auto"; el.style.height = `${Math.min(el.scrollHeight, 104)}px`; };
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/60 p-2 shadow-2xl backdrop-blur-xl">
+      <div className="max-h-16 overflow-y-auto px-1 pb-1.5 empty:hidden">{children}</div>
+      <div className="flex items-end gap-2">
+        <textarea
+          ref={grow}
+          rows={1}
+          value={value}
+          onChange={(e) => { onChange(e.target.value); grow(e.target); }}
+          placeholder={t("wordsPlaceholder")}
+          aria-label={t("wordsToPlot")}
+          maxLength={1000}
+          autoCapitalize="none"
+          spellCheck={false}
+          className="min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-[16px] leading-6 text-white placeholder:text-neutral-500 outline-none"
+        />
+        <span className="shrink-0 pb-2.5 pr-1 font-mono text-[11px] text-neutral-500">{count}/50</span>
+      </div>
+    </div>
+  );
+}
+
+function CalcStrip({ inputs, onInputChange, onCalculate, onPreset, disabled, busyLabel, errorField, errorMessage }) {
+  const t = useTranslations("Vectors");
+  const captions = t.raw("operations");
+  const [showPresets, setShowPresets] = useState(false);
+  const field = (name, i) => (
+    <input
+      key={name}
+      value={inputs[name]}
+      onChange={(e) => onInputChange(name, e.target.value)}
+      onKeyDown={(e) => { if (e.key === "Enter") onCalculate(); }}
+      placeholder={["king", "man", "woman"][i]}
+      aria-label={`${name}: ${captions[i]}`}
+      autoCapitalize="none"
+      spellCheck={false}
+      enterKeyHint="go"
+      className={cn("h-9 min-w-0 flex-1 rounded-lg border bg-white/[0.04] px-2 font-mono text-[16px] text-white placeholder:text-neutral-600 outline-none focus:border-cyan-300/50", errorField === name ? "border-destructive" : "border-white/10")}
+    />
+  );
+  return (
+    <div className="space-y-1.5">
+      {showPresets && (
+        <div className="-mx-3 flex gap-1.5 overflow-x-auto px-3 [scrollbar-width:none] animate-in fade-in slide-in-from-bottom-1 duration-150">
+          {PRESETS.map((p) => (
+            <button key={p.join()} type="button" onClick={() => { onPreset(p); setShowPresets(false); }} className="shrink-0 rounded-full border border-white/10 bg-black/70 px-2.5 py-1 font-mono text-[12px] text-neutral-200 backdrop-blur-xl hover:border-white/25">
+              {p[0]} − {p[1]} + {p[2]}
+            </button>
+          ))}
+        </div>
+      )}
+      <div className="rounded-2xl border border-white/10 bg-black/60 p-1.5 shadow-2xl backdrop-blur-xl">
+        {(errorMessage || busyLabel) && <p className={cn("px-1 pb-1 text-[11px]", errorMessage ? "text-destructive" : "text-neutral-400")}>{errorMessage || busyLabel}</p>}
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setShowPresets(!showPresets)}
+            aria-expanded={showPresets}
+            aria-label={t("orTryExample")}
+            title={t("orTryExample")}
+            className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-lg transition-colors", showPresets ? "bg-cyan-300/15 text-cyan-200" : "text-neutral-400 hover:bg-white/10 hover:text-white")}
+          >
+            <Sparkles className="h-4 w-4" />
+          </button>
+          {field("a", 0)}
+          <span className="font-semibold text-red-300" aria-hidden="true">−</span>
+          {field("b", 1)}
+          <span className="font-semibold text-emerald-300" aria-hidden="true">+</span>
+          {field("c", 2)}
+          <button
+            type="button"
+            onClick={onCalculate}
+            disabled={disabled}
+            aria-label={busyLabel ?? t("calculate")}
+            title={busyLabel ?? t("calculate")}
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-cyan-400 font-mono text-lg font-bold text-black disabled:opacity-40"
+          >
+            =
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ResultCard({ result, onClose, top: topClass, open, onToggle }) {
   const t = useTranslations("Vectors");
   if (!result) return null;
   const [top, ...rest] = result.neighbors;
   const [a, b, c] = result.keys;
+  const answer = <span className="rounded-md px-2 py-0.5 font-bold text-white" style={{ background: `color-mix(in srgb, ${ANSWER_COLOR} 55%, #0b0e14)` }}>{top.word}</span>;
+  const runnersUp = (
+    <ul className="space-y-0.5">
+      {rest.map((n) => (
+        <li key={n.word} className="flex items-center justify-between gap-4 px-1 text-sm text-neutral-300">
+          <span>{n.word}</span>
+          <span className="font-mono text-xs text-neutral-500">{n.similarity.toFixed(2)}</span>
+        </li>
+      ))}
+    </ul>
+  );
   return (
-    <div className={`absolute right-3 bottom-28 md:bottom-auto ${topClass} z-40 w-[min(240px,calc(100%-24px))] rounded-xl border border-white/10 bg-neutral-950/85 p-2 md:p-3 shadow-2xl backdrop-blur-md space-y-1.5 md:space-y-2 animate-in fade-in slide-in-from-top-2 duration-500`}>
-      <div className="hidden md:flex items-start justify-between gap-2">
-        <p className="font-mono text-xs text-neutral-400">{a} − {b} + {c} ≈</p>
-        <button type="button" onClick={onClose} aria-label={t("clearAnalogy")} className="-m-1 rounded p-1 text-neutral-400 hover:bg-white/10 hover:text-white">
-          <X className="h-4 w-4" />
-        </button>
+    <>
+      {/* Phones: one slim pill under the View button, so the plot stays visible; runners-up drop down on demand */}
+      <div className="md:hidden absolute left-3 top-[118px] z-40 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="flex items-center gap-1.5 rounded-full border border-white/10 bg-neutral-950/85 py-1 pl-1 pr-1 text-sm shadow-2xl backdrop-blur-md">
+          <span className="[&>span]:rounded-full [&>span]:px-2.5">{answer}</span>
+          <span className="font-mono text-[11px] text-emerald-300">cos {top.similarity.toFixed(2)}</span>
+          <button type="button" onClick={onToggle} aria-pressed={open} aria-label={t(open ? "hideNext" : "showNext", { count: rest.length })} className={cn("grid h-7 w-7 place-items-center rounded-full transition-colors", open ? "bg-sky-500/20 text-sky-200" : "text-neutral-400 hover:bg-white/10 hover:text-white")}>
+            <Radar className="h-3.5 w-3.5" />
+          </button>
+          <button type="button" onClick={onClose} aria-label={t("clearAnalogy")} className="grid h-7 w-7 place-items-center rounded-full text-neutral-400 hover:bg-white/10 hover:text-white">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        {open && <div className="mt-1.5 w-fit min-w-[170px] rounded-xl border border-white/10 bg-neutral-950/85 p-2 shadow-2xl backdrop-blur-md">{runnersUp}</div>}
       </div>
-      <div className="flex items-center justify-between gap-2">
-        <span className="rounded-md px-2 py-0.5 text-base md:text-lg font-bold text-white" style={{ background: `color-mix(in srgb, ${ANSWER_COLOR} 55%, #0b0e14)` }}>{top.word}</span>
-        <span className="font-mono text-xs text-emerald-300">cos {top.similarity.toFixed(2)}</span>
-        <button type="button" onClick={onClose} aria-label={t("clearAnalogy")} className="md:hidden rounded p-1 text-neutral-400 hover:bg-white/10 hover:text-white">
-          <X className="h-4 w-4" />
+
+      <div className={`hidden md:block absolute right-3 ${topClass} z-40 w-[240px] rounded-xl border border-white/10 bg-neutral-950/85 p-3 shadow-2xl backdrop-blur-md space-y-2 animate-in fade-in slide-in-from-top-2 duration-500`}>
+        <div className="flex items-start justify-between gap-2">
+          <p className="font-mono text-xs text-neutral-400">{a} − {b} + {c} ≈</p>
+          <button type="button" onClick={onClose} aria-label={t("clearAnalogy")} className="-m-1 rounded p-1 text-neutral-400 hover:bg-white/10 hover:text-white">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="flex items-center justify-between gap-2 text-lg">
+          {answer}
+          <span className="font-mono text-xs text-emerald-300">cos {top.similarity.toFixed(2)}</span>
+        </div>
+        <button type="button" onClick={onToggle} aria-pressed={open} className={cn("flex w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-[11px] transition-colors", open ? "bg-sky-500/15 text-sky-200" : "text-neutral-400 hover:bg-white/5 hover:text-white")}>
+          <Radar className="h-3.5 w-3.5" />
+          <span>{t(open ? "hideNext" : "showNext", { count: rest.length })}</span>
         </button>
+        {open && runnersUp}
       </div>
-      <button type="button" onClick={onToggle} aria-pressed={open} className={cn("flex w-full items-center gap-1.5 rounded-md px-1.5 py-1 text-[11px] transition-colors", open ? "bg-sky-500/15 text-sky-200" : "text-neutral-400 hover:bg-white/5 hover:text-white")}>
-        <Radar className="h-3.5 w-3.5" />
-        <span>{t(open ? "hideNext" : "showNext", { count: rest.length })}</span>
-      </button>
-      {open && <ul className="space-y-0.5">
-        {rest.map((n) => (
-          <li key={n.word} className="flex items-center justify-between px-1 text-sm text-neutral-300">
-            <span>{n.word}</span>
-            <span className="font-mono text-xs text-neutral-500">{n.similarity.toFixed(2)}</span>
-          </li>
-        ))}
-      </ul>}
-    </div>
+    </>
   );
 }
 
@@ -285,6 +393,14 @@ export default function PlaygroundPage() {
   const [models, setModels] = useState({});
   const [progress, setProgress] = useState(0);
   const [view, setView] = useState("zero");
+  const [caption, setCaption] = useState(false);
+  const captionTimer = useRef(null);
+  const flashCaption = () => {
+    setCaption(true);
+    clearTimeout(captionTimer.current);
+    captionTimer.current = setTimeout(() => setCaption(false), 3500);
+  };
+  useEffect(() => () => clearTimeout(captionTimer.current), []);
   const [showNearby, setShowNearby] = useState(false);
   const { isMinimalistMode } = useLayoutMode();
 
@@ -431,7 +547,6 @@ export default function PlaygroundPage() {
             content: (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">{t("model")}</h3>
                   <div className="space-y-2">
                     <label htmlFor="mobile-embedding-select" className="text-sm font-medium">
                       {t("model")}
@@ -458,7 +573,6 @@ export default function PlaygroundPage() {
             content: (
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-3">{t("displayOptions")}</h3>
                   <div className="flex items-center space-x-2">
                     <Checkbox id="mobile-gridlines" checked={showGridlines} onCheckedChange={setShowGridlines} />
                     <label htmlFor="mobile-gridlines" className="text-sm font-medium cursor-pointer">
@@ -473,50 +587,29 @@ export default function PlaygroundPage() {
             id: "words",
             icon: FileText,
             label: t("tabs.words"),
+            variant: "strip",
             content: (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">{t("wordsToPlot")}</h3>
-                  <div className="space-y-2">
-                    <Label htmlFor="mobile-words-input" className="text-sm font-medium">
-                      {t("wordsToPlotLimit")}
-                    </Label>
-                    <Textarea
-                      id="mobile-words-input"
-                      value={wordsText}
-                      onChange={(e) => setWordsText(e.target.value)}
-                      placeholder={t("wordsPlaceholder")}
-                      className="min-h-[120px] resize-none"
-                      maxLength={1000}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {t("wordCount", { count: Math.min(wordsText.split(/\s+/).filter((w) => w.trim().length > 0).length, 50) })}
-                    </p>
-                    <WordChips words={manualWords} colors={wordColors} modelLabel={modelLabel} dimmed={!!result} />
-                  </div>
-                </div>
-              </div>
+              <WordsStrip value={wordsText} onChange={setWordsText} count={Math.min(wordsText.split(/\s+/).filter((w) => w.trim().length > 0).length, 50)}>
+                {manualWords.length > 0 && <WordChips words={manualWords} colors={wordColors} modelLabel={modelLabel} dimmed={!!result} />}
+              </WordsStrip>
             ),
           },
           {
             id: "calculation",
             icon: Calculator,
             label: t("tabs.calc"),
+            variant: "strip",
             content: (
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-semibold mb-3">{t("calculation")}</h3>
-                  <div className="space-y-4">
-                    <EquationInputs inputs={inputs} onInputChange={onInputChange} onCalculate={handleCalculate} errorField={errorField} />
-                    {errorMessage && <p className="text-xs text-destructive">{errorMessage}</p>}
-                    <Button onClick={handleCalculate} variant="default" className="w-full" disabled={calcDisabled}>
-                      {calcLabel}
-                    </Button>
-                    <p className="text-[11px] uppercase tracking-wide text-neutral-500">{t("orTryExample")}</p>
-                    <PresetChips onPick={handlePreset} />
-                  </div>
-                </div>
-              </div>
+              <CalcStrip
+                inputs={inputs}
+                onInputChange={onInputChange}
+                onCalculate={handleCalculate}
+                onPreset={handlePreset}
+                disabled={calcDisabled}
+                busyLabel={embeddings ? null : calcLabel}
+                errorField={errorField}
+                errorMessage={errorMessage}
+              />
             ),
           },
         ]}
@@ -535,16 +628,24 @@ export default function PlaygroundPage() {
             )}
             <ResultCard result={result} onClose={() => { setEquation(null); setShowNearby(false); }} open={showNearby} onToggle={() => setShowNearby(!showNearby)} top={isMinimalistMode ? "md:top-32" : "md:top-16"} />
             <PlotLegend result={result} view={view} />
-            <button
-              type="button"
-              onClick={() => setView((v) => (v === "centred" ? "zero" : "centred"))}
-              title={t(`views.${view}.hint`)}
-              aria-label={t("changeView", { view: t(`views.${view}.label`) })}
-              className={`absolute left-3 top-20 ${isMinimalistMode ? "md:top-20" : "md:top-3"} z-40 flex items-center gap-2 rounded-full border border-white/15 bg-neutral-950/80 py-1.5 pl-2.5 pr-3.5 text-xs font-medium text-neutral-200 backdrop-blur-md transition-colors hover:bg-neutral-800`}
-            >
-              <Eye className="h-4 w-4 text-sky-300" />
-              <span className="text-neutral-400">{t("view")}</span> {t(`views.${view}.label`)}
-            </button>
+            <div className={`absolute left-3 top-20 ${isMinimalistMode ? "md:top-20" : "md:top-3"} z-40 flex max-w-[calc(100%-72px)] flex-col items-start gap-1.5`}>
+              <button
+                type="button"
+                onClick={() => { setView((v) => (v === "centred" ? "zero" : "centred")); flashCaption(); }}
+                title={t(`views.${view}.hint`)}
+                aria-label={t("changeView", { view: t(`views.${view}.label`) })}
+                className="flex items-center gap-2 rounded-full border border-white/15 bg-neutral-950/80 py-1.5 pl-2.5 pr-3.5 text-xs font-medium text-neutral-200 backdrop-blur-md transition-colors hover:bg-neutral-800"
+              >
+                <Eye className="h-4 w-4 text-sky-300" />
+                <span className="text-neutral-400">{t("view")}</span> {t(`views.${view}.label`)}
+              </button>
+              {/* On tap, a short explanation of the view just chosen (touch screens have no hover tooltip) */}
+              {caption && (
+                <p key={view} role="status" className="max-w-[300px] rounded-xl border border-white/10 bg-neutral-950/90 px-3 py-2 text-xs leading-relaxed text-neutral-300 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-1 duration-200">
+                  {t(`views.${view}.hint`)}
+                </p>
+              )}
+            </div>
             <VectorPlaygroundCanvas showGridlines={showGridlines} items={scene.items} links={scene.links} originLabel={t(`views.${view}.origin`)} />
           </div>
         }

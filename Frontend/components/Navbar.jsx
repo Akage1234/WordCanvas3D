@@ -37,7 +37,7 @@ function GithubMark({ className }) {
 // Language names stay in their own script. Switching keeps you on the same page.
 const LANGUAGES = [["en", "English", "EN"], ["zh", "中文", "中"], ["ja", "日本語", "日"], ["es", "Español", "ES"]];
 
-function LanguageMenu({ variant = "icon" }) {
+function LanguageMenu({ variant = "icon", compact }) {
   const t = useTranslations("Nav");
   const locale = useLocale();
   const pathname = usePathname();
@@ -66,7 +66,7 @@ function LanguageMenu({ variant = "icon" }) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button className={`inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-[13px] font-medium text-neutral-300 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`} aria-label={t("languageLabel")}>
-          <Globe className="h-4 w-4" />{current[2]}
+          <Globe className="h-4 w-4" />{!compact && current[2]}
         </button>
       </PopoverTrigger>
       <PopoverContent align="end" className="z-[1000] w-44 rounded-2xl border-white/10 bg-neutral-950/95 p-1.5 backdrop-blur-xl">
@@ -90,7 +90,7 @@ function LanguageMenu({ variant = "icon" }) {
 }
 
 // Repo and author links: a small corner cluster on wide screens, rows in the phone menu.
-function SocialLinks({ variant = "icons" }) {
+function SocialLinks({ variant = "icons", compact }) {
   const t = useTranslations("Nav");
   if (variant === "rows") {
     const row = "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-neutral-300 transition-colors hover:bg-white/[0.05] hover:text-white";
@@ -104,10 +104,10 @@ function SocialLinks({ variant = "icons" }) {
       </div>
     );
   }
-  const btn = `inline-flex h-10 w-10 items-center justify-center rounded-full text-neutral-300 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`;
+  const btn = `inline-flex ${compact ? "h-9 w-9" : "h-10 w-10"} items-center justify-center rounded-full text-neutral-300 transition-colors hover:bg-white/10 hover:text-white ${focusRing}`;
   return (
     <div className="flex items-center gap-1">
-      <LanguageMenu />
+      <LanguageMenu compact={compact} />
       <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className={btn} aria-label={t("repoLabel")} title={t("sourceCode")}>
         <GithubMark className="h-[18px] w-[18px]" />
       </a>
@@ -124,7 +124,7 @@ const focusRing = "outline-none focus-visible:ring-2 focus-visible:ring-cyan-300
 function Logo({ size = "md", onClick }) {
   const sizes = {
     sm: ["text-lg", "h-6 w-6 mr-2"],
-    md: ["text-base sm:text-lg md:text-2xl", "h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 mr-2 sm:mr-3 md:mr-4"],
+    md: ["text-base sm:max-md:text-lg md:max-[1279px]:text-xl min-[1280px]:text-2xl", "h-5 w-5 sm:max-md:h-6 sm:max-md:w-6 md:max-[1279px]:h-7 md:max-[1279px]:w-7 min-[1280px]:h-8 min-[1280px]:w-8 mr-2 sm:max-[1279px]:mr-3 min-[1280px]:mr-4"],
     lg: ["text-xl", "h-8 w-8 mr-3"],
   }[size];
   return (
@@ -147,7 +147,7 @@ function DesktopLinks({ isActive, compact }) {
             <Link
               href={href}
               aria-current={active ? "page" : undefined}
-              className={`block whitespace-nowrap rounded-full font-medium tracking-[-0.01em] transition-colors duration-200 ${compact ? "px-3 py-1.5 text-sm" : "px-3 lg:px-3.5 py-2 text-sm lg:text-[15px]"} ${focusRing} ${
+              className={`block whitespace-nowrap rounded-full font-medium tracking-[-0.01em] transition-colors duration-200 ${compact ? "px-3 py-1.5 text-sm" : "px-2.5 min-[1280px]:px-3.5 py-2 text-sm min-[1280px]:text-[15px]"} ${focusRing} ${
                 active ? "bg-white/[0.08] text-white" : "text-neutral-400 hover:bg-white/[0.05] hover:text-neutral-100"
               }`}
             >
@@ -266,16 +266,19 @@ export function Navbar() {
     <>
     <nav
       aria-label={t("main")}
-      className={`flex sticky top-2 mx-auto max-w-3xl z-50 items-center justify-between rounded-full pl-4 pr-2 md:pl-6 md:pr-3 py-1.5 md:py-2.5 mb-4 md:mb-8 transition-[background-color,box-shadow] duration-300 ${glass} ${scrolled ? "bg-black/60 supports-[backdrop-filter]:bg-black/55" : ""}`}
+      className={`flex sticky top-2 mx-2 mt-2 md:max-[1279px]:mx-4 min-[1280px]:mx-auto max-w-3xl md:max-[1279px]:max-w-none z-50 items-center justify-between rounded-full pl-4 pr-2 md:pl-6 md:pr-3 py-1.5 md:py-2.5 mb-4 md:mb-8 transition-[background-color,box-shadow] duration-300 ${glass} ${scrolled ? "bg-black/60 supports-[backdrop-filter]:bg-black/55" : ""}`}
     >
       <Logo />
-      <div className="hidden md:block">
+      <div className="hidden md:flex items-center gap-1">
         <DesktopLinks isActive={isActive} />
+        {/* No room for the corner pill below 1280px, so the language/GitHub/profile buttons sit in the bar */}
+        <span className="mx-1 h-5 w-px bg-white/10 min-[1280px]:hidden" aria-hidden="true" />
+        <div className="min-[1280px]:hidden"><SocialLinks compact /></div>
       </div>
       <MobileMenu isActive={isActive} />
     </nav>
     {/* Outside the bar: its backdrop-filter would make it the containing block for this fixed cluster */}
-    <div className={`fixed top-3 right-4 z-50 hidden min-[1120px]:block rounded-full p-1 ${glass}`}>
+    <div className={`fixed top-3 right-4 z-50 hidden min-[1280px]:block rounded-full p-1 ${glass}`}>
       <SocialLinks />
     </div>
     </>

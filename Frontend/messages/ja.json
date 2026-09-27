@@ -138,6 +138,7 @@
   },
   "Concepts": {
     "readMore": "「学ぶ」で詳しく読む",
+    "viewsTitle": "2つの表示",
     "minRead": "{count} 分で読めます",
     "close": "閉じる",
     "tokenizer": {
@@ -346,14 +347,10 @@
       "search": "検索",
       "display": "表示"
     },
-    "modelConfig": "モデルと設定",
-    "typeToSearchLabel": "入力して単語を検索",
-    "typeToSearchPlaceholder": "入力して単語を検索...",
     "noWordsFound": "単語が見つかりません。別の検索語を試してください。",
-    "first50": "最初の 50 件を表示しています。入力を続けて絞り込んでください...",
-    "searchThrough": "{count} 語から検索します。単語を選ぶとキャンバス上でハイライトされます。",
-    "loadingWordList": "単語リストを読み込み中...",
-    "displayOptions": "表示オプション",
+    "searchAnyWord": "単語を検索…",
+    "clearSearch": "検索をクリア",
+    "suggestions": "候補",
     "loadingModel": "{model} を読み込み中"
   },
   "Exploration": {
@@ -400,8 +397,8 @@
       "centred": { "label": "グループの中心", "origin": "中心 = これらの単語の平均", "hint": "矢印は描いた単語の平均から出ます。単語の広がり方を見るのに向いています。" },
       "zero": { "label": "ゼロから", "origin": "本当のゼロ点", "hint": "矢印はモデルの本当のゼロ点から出ます。最も近い単語は向きで決まります。ほとんどの単語が似た方向を向いているため、矢印は密集します。" }
     },
-    "wholeWords": "単語はそのまま {model} で調べます（トークナイザーは使いません）。",
-    "struckOut": " 取り消し線の単語は、10,000 語の語彙に含まれていません。",
+    "wholeWords": "現在は単語単位のみ対応しています。",
+    "struckOut": " 取り消し線の単語はモデルにありません。",
     "hiddenWhileAnalogy": " 類推の表示中は非表示になります。",
     "clearAnalogy": "類推を解除",
     "showNext": "次に近い {count} 語を表示",
@@ -436,7 +433,6 @@
       "words": "単語",
       "calc": "計算"
     },
-    "displayOptions": "表示オプション",
     "calculation": "ベクトル計算",
     "loadingEmbeddings": "{model} の埋め込みを読み込み中…",
     "changeView": "表示を切り替え。現在の表示: {view}",
