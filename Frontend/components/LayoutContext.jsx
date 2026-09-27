@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 import { usePathname } from "@/i18n/navigation";
 
 const LayoutModeContext = createContext({
@@ -11,13 +11,13 @@ export function LayoutModeProvider({ children }) {
   const [isMinimalistMode, setIsMinimalistMode] = useState(false);
   const pathname = usePathname();
 
-  // Reset minimalist mode when navigating away from visualizer pages
-  useEffect(() => {
-    const isVisualizerPage = pathname === '/embedding' || pathname === '/vector-playground';
-    if (!isVisualizerPage && isMinimalistMode) {
-      setIsMinimalistMode(false);
-    }
-  }, [pathname, isMinimalistMode]);
+  // Leaving the visualizer pages turns full-screen mode off. Adjusting state while rendering (instead of
+  // in an effect) avoids a second render with the stale value.
+  const [prevPath, setPrevPath] = useState(pathname);
+  if (pathname !== prevPath) {
+    setPrevPath(pathname);
+    if (pathname !== '/embedding' && pathname !== '/vector-playground') setIsMinimalistMode(false);
+  }
 
   return (
     <LayoutModeContext.Provider value={{ isMinimalistMode, setIsMinimalistMode }}>

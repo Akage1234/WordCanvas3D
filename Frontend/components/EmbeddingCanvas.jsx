@@ -418,11 +418,8 @@ const EmbeddingCanvas = forwardRef(function EmbeddingCanvas({ embeddingModel = "
         } catch (error) {
         if (!current()) return;
           console.error("Error loading embeddings:", error);
-        const kind = error instanceof DatasetError ? error.kind : "invalid";
-        const message = error instanceof DatasetError && error.kind === "invalid"
-          ? "This dataset couldn't be read. Try again."
-          : error instanceof DatasetError ? error.message : "This dataset couldn't be read. Try again.";
-        emitData({ state: "error", kind, message });
+        // The page shows a translated message for each kind; the English text stays on the error for the console.
+        emitData({ state: "error", kind: error instanceof DatasetError ? error.kind : "invalid" });
         }
       }
 
