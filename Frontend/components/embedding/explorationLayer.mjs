@@ -51,7 +51,8 @@ export function createExplorationLayer(scene, camera, container, onSelect) {
     Object.assign(node.style, {
       display: 'none', position: 'absolute', left: '0', top: '0', willChange: 'transform', pointerEvents: 'auto', border: '0',
       color: '#fff', padding: '2px 8px', borderRadius: '7px', font: '750 17px/1.25 system-ui, sans-serif',
-      WebkitTextStroke: '0.6px #000', textShadow: '0 1px 2px #000c', whiteSpace: 'nowrap', cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.5)', zIndex: '1',
+      // Outline painted behind the fill, like the other labels: drawn on top, Android's font showed its inner contours.
+      WebkitTextStroke: '1.2px #000', paintOrder: 'stroke fill', textShadow: '0 1px 2px #000c', whiteSpace: 'nowrap', cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.5)', zIndex: '1',
     });
     onTap(node, () => onSelect(word(node)));
     labelLayer.appendChild(node);

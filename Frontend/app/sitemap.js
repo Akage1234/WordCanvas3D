@@ -1,4 +1,4 @@
-import { ARTICLES } from "@/components/learn/registry";
+import { ARTICLES } from "@/components/learn/catalog";
 import { routing } from "@/i18n/routing";
 import { SITE_URL, localePath } from "@/lib/site";
 

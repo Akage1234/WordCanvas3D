@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Instrument_Serif } from "next/font/google";
-import { ARTICLES, TRACKS } from "@/components/learn/registry";
+import { ARTICLES, TRACKS } from "@/components/learn/catalog";
 import s from "@/components/landing/landing.module.css";
 import l from "@/components/learn/learn.module.css";
 import PipelineAnim from "@/components/learn/PipelineAnim";

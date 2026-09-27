@@ -3,8 +3,6 @@ import { ArticleLink, Callout, Fig, FurtherReading } from "../kit";
 import s from "./tokenization-algorithms.module.css";
 import { BpeApply, BpeTrainer } from "./tokenization-algorithms.figures";
 
-export const minutes = 6;
-
 // Computed from the toy corpus low×5, lower×2, newest×6, widest×3.
 // WordPiece score = pair count / (count of first part × count of second part), with ## on word-internal pieces.
 const SCORES = [

@@ -5,8 +5,6 @@ import l from "@/components/learn/learn.module.css";
 import s from "./next-token-prediction.module.css";
 import { SamplingPlayground } from "./next-token-prediction.figures";
 
-export const minutes = 5;
-
 const [RED, TEAL, , YELLOW, , PURPLE] = CLUSTER_COLORS;
 
 // Decorative shapes for the pipeline figure (not real values).

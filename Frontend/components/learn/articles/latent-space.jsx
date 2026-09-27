@@ -5,8 +5,6 @@ import { WalkBetween } from "./latent-space.figures";
 import s from "./latent-space.module.css";
 import l from "../learn.module.css";
 
-export const minutes = 7;
-
 const [RED, TEAL, SKY, YELLOW, INDIGO, PURPLE] = CLUSTER_COLORS;
 
 // All numbers below were computed offline from the site's GloVe file (10,000 words x 300 numbers, vectors scaled to length 1).

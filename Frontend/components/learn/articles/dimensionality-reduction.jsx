@@ -5,8 +5,6 @@ import { SwissRoll } from "./dimensionality-reduction.figures";
 import s from "./dimensionality-reduction.module.css";
 import l from "../learn.module.css";
 
-export const minutes = 7;
-
 const [RED, TEAL, SKY, YELLOW] = CLUSTER_COLORS;
 
 function Shadow() {

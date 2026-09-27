@@ -4,8 +4,6 @@ import l from "@/components/learn/learn.module.css";
 import s from "./attention-and-transformers.module.css";
 import { AttentionLines, AttentionMatrix, AttentionSteps } from "./attention-and-transformers.figures";
 
-export const minutes = 7;
-
 const [RED, TEAL, , YELLOW, INDIGO] = CLUSTER_COLORS;
 
 function Sentence({ label, words, hi, sub }) {

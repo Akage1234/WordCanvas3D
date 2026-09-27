@@ -5,8 +5,6 @@ import { WordMap } from "./what-are-embeddings.figures";
 import s from "./what-are-embeddings.module.css";
 import l from "../learn.module.css";
 
-export const minutes = 7;
-
 const [RED, TEAL, SKY, YELLOW] = CLUSTER_COLORS;
 
 // First 16 of the 300 numbers for each word in the site's GloVe file.

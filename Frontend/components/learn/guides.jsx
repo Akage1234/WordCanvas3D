@@ -612,55 +612,11 @@ function KingManWoman() {
 }
 
 // Site guides: short tours of what each WordCanvas3D tool shows.
-export const GUIDES = [
-  {
-    slug: "what-is-a-token",
-    tag: "Tokens",
-    color: YELLOW,
-    title: "What is a token, and why isn’t it a word?",
-    summary: "How tokenizers cut text into reusable pieces, and why those pieces rarely line up with words.",
-    minutes: 4,
-    cta: { href: "/tokenizer", label: "Open the Tokenizer", text: "Paste any sentence and see exactly how GPT and LLaMA tokenizers split it, with every token’s ID." },
-    Body: WhatIsAToken,
-  },
-  {
-    slug: "why-emoji-cost-more-tokens",
-    tag: "Tokens",
-    color: PINK,
-    title: "Why emoji and other languages cost more tokens",
-    summary: "UTF-8 bytes, byte-level BPE, and why the same greeting can take 4 tokens or 25.",
-    minutes: 4,
-    cta: { href: "/tokenizer", label: "Try the presets", text: "Load the World scripts or Emoji preset and switch tokenizers to watch the count change." },
-    Body: EmojiAndLanguages,
-  },
-  {
-    slug: "how-a-word-becomes-300-numbers",
-    tag: "Embeddings",
-    color: TEAL,
-    title: "How a word becomes 300 numbers",
-    summary: "What word embeddings are, how GloVe, Word2Vec and FastText learn them, and how to measure similarity.",
-    minutes: 4,
-    cta: { href: "/embedding", label: "Explore embeddings", text: "Fly through thousands of words from GloVe, Word2Vec or FastText and see which ones end up close together." },
-    Body: WordToNumbers,
-  },
-  {
-    slug: "pca-vs-umap",
-    tag: "Embeddings",
-    color: SKY,
-    title: "PCA vs UMAP: two ways to flatten meaning",
-    summary: "Two ways to squeeze 300 dimensions into 3, what each one keeps, and how to read the result.",
-    minutes: 4,
-    cta: { href: "/embedding", label: "Compare PCA and UMAP", text: "Switch between the two projections on the same words and see what each one reveals." },
-    Body: PcaVsUmap,
-  },
-  {
-    slug: "king-man-woman",
-    tag: "Vectors",
-    color: PURPLE,
-    title: "King − man + woman, explained",
-    summary: "Word analogies as arrow arithmetic: what the Playground computes, why it works, and where it breaks.",
-    minutes: 4,
-    cta: { href: "/vector-playground", label: "Open the Playground", text: "Type king, man and woman into the a − b + c boxes, then try your own analogies." },
-    Body: KingManWoman,
-  },
-];
+// Metadata for these guides lives in ./catalog.js.
+export const GUIDE_BODIES = {
+  "what-is-a-token": WhatIsAToken,
+  "why-emoji-cost-more-tokens": EmojiAndLanguages,
+  "how-a-word-becomes-300-numbers": WordToNumbers,
+  "pca-vs-umap": PcaVsUmap,
+  "king-man-woman": KingManWoman,
+};

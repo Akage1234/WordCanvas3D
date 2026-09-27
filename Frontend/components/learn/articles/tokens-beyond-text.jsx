@@ -2,8 +2,6 @@ import { ArticleLink, Callout, Fig, FurtherReading } from "../kit";
 import s from "./tokens-beyond-text.module.css";
 import { PatchCalculator, PatchSequence } from "./tokens-beyond-text.figures";
 
-export const minutes = 5;
-
 // Illustrative spectrogram: deterministic "energy" values, not real audio.
 const COLS = 24;
 const ROWS = 8;

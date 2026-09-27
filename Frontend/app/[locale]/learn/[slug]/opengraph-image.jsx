@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
-import { ARTICLES } from "@/components/learn/registry";
+import { ARTICLES } from "@/components/learn/catalog";
 import { ogArticle, OG_SIZE } from "@/lib/og";
 
 export const size = OG_SIZE;

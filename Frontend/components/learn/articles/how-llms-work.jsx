@@ -5,8 +5,6 @@ import l from "../learn.module.css";
 import h from "./how-llms-work.module.css";
 import { PipelineFigure } from "./how-llms-work.figures";
 
-export const minutes = 8;
-
 const [RED, TEAL] = CLUSTER_COLORS;
 
 function Chips({ label, items }) {

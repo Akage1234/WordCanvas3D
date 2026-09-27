@@ -5,8 +5,6 @@ import l from "../learn.module.css";
 import s from "./why-tokens.module.css";
 import { ThreeWaySplit } from "./why-tokens.figures";
 
-export const minutes = 6;
-
 const [RED, TEAL, , YELLOW] = CLUSTER_COLORS;
 
 // Counts for the Austen sentence below: characters and words counted directly, tokens with o200k_base.

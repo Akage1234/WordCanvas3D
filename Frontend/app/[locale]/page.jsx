@@ -6,7 +6,7 @@ import Galaxy from "@/components/landing/Galaxy";
 import Headline from "@/components/landing/Headline";
 import { TokenSplit, MiniClusters, VectorMath } from "@/components/landing/LensVisuals";
 import { Reveal, ShareBar } from "@/components/landing/Interactive";
-import { ARTICLES as LEARN } from "@/components/learn/registry";
+import { ARTICLES as LEARN } from "@/components/learn/catalog";
 import s from "@/components/landing/landing.module.css";
 import { AUTHOR as SITE_AUTHOR, REPO_URL, SITE_NAME, SITE_URL, jsonLd, localeAlternates, localePath } from "@/lib/site";
 
