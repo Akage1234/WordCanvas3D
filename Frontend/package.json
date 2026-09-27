@@ -7,7 +7,8 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "pack:embeddings": "node scripts/pack-embeddings.mjs public/glove_300d/glove_300D_full.json.gz public/glove_300d/glove_300D_vectors.bin.gz && node scripts/pack-embeddings.mjs public/FastText_300D/FastText_300D_full.json.gz public/FastText_300D/FastText_300D_vectors.bin.gz && node scripts/pack-embeddings.mjs public/Word2Vec_300D/Word2Vec_300D_full.json.gz public/Word2Vec_300D/Word2Vec_300D_vectors.bin.gz"
   },
   "dependencies": {
     "@dqbd/tiktoken": "^1.0.22",

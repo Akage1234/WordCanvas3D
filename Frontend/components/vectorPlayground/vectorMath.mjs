@@ -93,6 +93,47 @@ export function pca3(vectors, center = true) {
   return coords;
 }
 
+// Compact binary embeddings (made by scripts/pack-embeddings.mjs), little-endian:
+//   uint32 words, uint32 dims, uint32 byte length of a JSON array of the words, that JSON (padded to 4 bytes),
+//   float32[dims] one scale per dimension, int8[words × dims] values; value = int8 × scale of its dimension.
+// Per-dimension 8-bit keeps nearest-word rankings identical to the float data at about a third of the size.
+export function encodeVectors(embeddings) {
+  const words = Object.keys(embeddings);
+  const dims = embeddings[words[0]].length;
+  const scale = new Float32Array(dims);
+  for (const w of words) embeddings[w].forEach((x, i) => { scale[i] = Math.max(scale[i], Math.abs(x) / 127); });
+  const json = new TextEncoder().encode(JSON.stringify(words));
+  const jsonPadded = Math.ceil(json.length / 4) * 4;
+  const out = new Uint8Array(12 + jsonPadded + dims * 4 + words.length * dims);
+  const view = new DataView(out.buffer);
+  view.setUint32(0, words.length, true);
+  view.setUint32(4, dims, true);
+  view.setUint32(8, json.length, true);
+  out.set(json, 12);
+  let o = 12 + jsonPadded;
+  for (let i = 0; i < dims; i++, o += 4) view.setFloat32(o, scale[i], true);
+  const values = new Int8Array(out.buffer, o);
+  words.forEach((w, r) => embeddings[w].forEach((x, i) => { values[r * dims + i] = scale[i] ? Math.round(x / scale[i]) : 0; }));
+  return out;
+}
+
+export function decodeVectors(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const n = view.getUint32(0, true), dims = view.getUint32(4, true), jsonLength = view.getUint32(8, true);
+  const words = JSON.parse(new TextDecoder().decode(bytes.subarray(12, 12 + jsonLength)));
+  let o = 12 + Math.ceil(jsonLength / 4) * 4;
+  const scale = new Float32Array(dims);
+  for (let i = 0; i < dims; i++, o += 4) scale[i] = view.getFloat32(o, true);
+  const values = new Int8Array(bytes.buffer, bytes.byteOffset + o, n * dims);
+  const embeddings = {};
+  for (let r = 0; r < n; r++) {
+    const v = new Float32Array(dims);
+    for (let i = 0; i < dims; i++) v[i] = values[r * dims + i] * scale[i];
+    embeddings[words[r]] = v;
+  }
+  return embeddings;
+}
+
 const cache = new Map();
 
 export function loadModel(url, onProgress) {
@@ -115,7 +156,7 @@ export function loadModel(url, onProgress) {
       const bytes = new Uint8Array(received);
       let offset = 0;
       for (const c of chunks) { bytes.set(c, offset); offset += c.length; }
-      return JSON.parse(ungzip(bytes, { to: "string" }));
+      return decodeVectors(ungzip(bytes));
     })();
     promise.catch(() => cache.delete(url));
     cache.set(url, promise);

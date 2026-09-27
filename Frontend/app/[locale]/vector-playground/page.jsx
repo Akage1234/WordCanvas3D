@@ -23,9 +23,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const MODELS = {
-  glove_300D: { label: "GloVe", url: "/glove_300d/glove_300D_full.json.gz" },
-  fasttext_300D: { label: "FastText", url: "/FastText_300D/FastText_300D_full.json.gz" },
-  word2vec_300D: { label: "Word2Vec", url: "/Word2Vec_300D/Word2Vec_300D_full.json.gz" },
+  glove_300D: { label: "GloVe", url: "/glove_300d/glove_300D_vectors.bin.gz" },
+  fasttext_300D: { label: "FastText", url: "/FastText_300D/FastText_300D_vectors.bin.gz" },
+  word2vec_300D: { label: "Word2Vec", url: "/Word2Vec_300D/Word2Vec_300D_vectors.bin.gz" },
 };
 
 const PRESETS = [

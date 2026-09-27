@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { lookup, analogy, nearest, pca3 } from "./vectorMath.mjs";
+import { lookup, analogy, nearest, pca3, encodeVectors, decodeVectors } from "./vectorMath.mjs";
 
 const dist = (a, b) => Math.hypot(...a.map((x, i) => x - b[i]));
 
@@ -30,4 +30,11 @@ test("pca3 without centering keeps the real zero at the origin", () => {
   const p = pca3(points, false);
   assert.ok(Math.hypot(...p[0]) < 1e-9);
   for (let i = 1; i < points.length; i++) assert.ok(Math.abs(Math.hypot(...p[i]) - Math.hypot(...points[i])) < 1e-6);
+});
+
+test("packed vectors round-trip within 8-bit precision and keep word order", () => {
+  const src = { king: [0.5, -1.2, 0.03], queen: [0.45, -1.1, 0.4], "naïve": [0, 0.2, -0.9] };
+  const out = decodeVectors(encodeVectors(src));
+  assert.deepEqual(Object.keys(out), Object.keys(src));
+  for (const w of Object.keys(src)) src[w].forEach((x, i) => assert.ok(Math.abs(out[w][i] - x) < 0.01, `${w}[${i}]`));
 });
