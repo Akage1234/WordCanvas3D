@@ -212,6 +212,7 @@
     "close": "Cerrar",
     "fullScreen": "Pantalla completa",
     "toFullScreen": "Cambiar al diseño de pantalla completa",
+    "tryFullScreen": "Prueba el modo de pantalla completa",
     "toSidebar": "Cambiar al diseño con barra lateral"
   },
   "Tokenizer": {

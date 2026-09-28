@@ -212,6 +212,7 @@
     "close": "关闭",
     "fullScreen": "全屏",
     "toFullScreen": "切换到全屏布局",
+    "tryFullScreen": "试试全屏模式",
     "toSidebar": "切换到侧边栏布局"
   },
   "Tokenizer": {

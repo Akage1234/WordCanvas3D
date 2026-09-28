@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { Caveat } from "next/font/google";
 import { usePathname } from "@/i18n/navigation";
 import {
   Drawer,
@@ -15,7 +16,8 @@ import { useLayoutMode } from "@/components/LayoutContext";
 import { ConceptButton } from "@/components/ConceptSheet";
 import MobileDock from "@/components/MobileDock";
 
-const CONCEPT_BY_PATH = { "/embedding": "embedding", "/vector-playground": "vectors" };
+const hand = Caveat({ weight: "500", subsets: ["latin"] });
+const CONCEPT_BY_PATH ={ "/embedding": "embedding", "/vector-playground": "vectors" };
 const roundGlass = "bg-black/40 supports-[backdrop-filter]:bg-black/30 backdrop-blur-lg border border-white/10 shadow-xl";
 
 export default function VisualizerLayout({ 
@@ -52,6 +54,20 @@ export default function VisualizerLayout({
     <>
       {/* Desktop Layout - Side-by-side */}
       {!effectiveMinimalistMode && (
+      <>
+      {/* "Try full screen mode" hint in the gap above the canvas; its arrow ends on the full-screen button.
+          Zero-height anchor so the layout below doesn't move; the canvas area clips overflow, so it can't live there. */}
+      {isVisualizerPage && (
+        <div className="relative hidden md:block h-0" aria-hidden="true">
+          <div className="pointer-events-none absolute z-30 right-[37px] -top-[11px] flex items-end gap-1 text-cyan-300">
+            <span className={`${hand.className} mb-1 text-xl leading-none text-white`}>{t("tryFullScreen")}</span>
+            <svg className="h-5 w-10 flex-none" viewBox="0 0 40 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 8 C 16 2, 28 2, 30 17" />
+              <path d="M25 13 L30 18 L34 12" />
+            </svg>
+          </div>
+        </div>
+      )}
       <div className="hidden md:flex gap-4 p-4 h-screen overflow-hidden relative">
         {/* Left Panel */}
         <aside className="w-64 bg-white/5 rounded-xl p-4 border border-white/10 backdrop-blur overflow-hidden min-w-0 flex flex-col">
@@ -78,6 +94,7 @@ export default function VisualizerLayout({
           )}
         </main>
       </div>
+      </>
       )}
 
       {/* Desktop Minimalist Layout - Full screen canvas with bottom controls - Only on visualizer pages */}

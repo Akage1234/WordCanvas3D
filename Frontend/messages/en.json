@@ -212,6 +212,7 @@
     "close": "Close",
     "fullScreen": "Full screen",
     "toFullScreen": "Switch to full-screen layout",
+    "tryFullScreen": "Try full screen mode",
     "toSidebar": "Switch to sidebar layout"
   },
   "Tokenizer": {

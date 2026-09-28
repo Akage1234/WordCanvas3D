@@ -212,6 +212,7 @@
     "close": "閉じる",
     "fullScreen": "全画面",
     "toFullScreen": "全画面レイアウトに切り替え",
+    "tryFullScreen": "全画面モードを試してみよう",
     "toSidebar": "サイドバーレイアウトに切り替え"
   },
   "Tokenizer": {
