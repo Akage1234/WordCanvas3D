@@ -134,7 +134,12 @@
     "tryIt": "Pruébalo tú mismo",
     "pagerLabel": "Más guías",
     "previous": "← Anterior",
-    "next": "Siguiente →"
+    "next": "Siguiente →",
+    "onThisPage": "En esta página",
+    "share": "Compartir",
+    "linkCopied": "Enlace copiado",
+    "faqTitle": "Preguntas frecuentes",
+    "furtherReading": "Lecturas recomendadas"
   },
   "Concepts": {
     "readMore": "Lee más en Aprender",

@@ -1,6 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
-import { ArticleLink, Callout, Fig, FurtherReading } from "../kit";
+import { ArticleLink, Callout, Fig } from "../kit";
 import l from "../learn.module.css";
 import h from "./how-llms-work.module.css";
 import { PipelineFigure } from "./how-llms-work.figures";
@@ -232,14 +232,21 @@ export default function HowLlmsWork() {
         <ArticleLink slug="attention-and-transformers">attention</ArticleLink> and <ArticleLink slug="next-token-prediction">choosing the next token</ArticleLink>.
         On this site you can split your own text with the <Link href="/tokenizer">Tokenizer</Link> and explore word vectors in the <Link href="/embedding">Embedding explorer</Link>.
       </p>
-
-      <FurtherReading
-        links={[
-          { href: "https://www.youtube.com/watch?v=wjZofJX0v4M", title: "But what is a GPT? Visual intro to transformers", source: "3Blue1Brown, YouTube", note: "the best visual walk-through of this whole pipeline (now titled “Transformers, the tech behind LLMs”)" },
-          { href: "https://jalammar.github.io/illustrated-gpt2/", title: "The Illustrated GPT-2", source: "Jay Alammar", note: "the same pipeline drawn step by step, one level deeper" },
-          { href: "https://bbycroft.net/llm", title: "LLM Visualization", source: "Brendan Bycroft", note: "a 3D walk through every number in a small real GPT" },
-        ]}
-      />
     </>
   );
 }
+
+// Rendered by the article page, after the FAQ.
+export const reading = [
+  { href: "https://www.youtube.com/watch?v=wjZofJX0v4M", title: "But what is a GPT? Visual intro to transformers", source: "3Blue1Brown, YouTube", note: "the best visual walk-through of this whole pipeline (now titled “Transformers, the tech behind LLMs”)" },
+  { href: "https://jalammar.github.io/illustrated-gpt2/", title: "The Illustrated GPT-2", source: "Jay Alammar", note: "the same pipeline drawn step by step, one level deeper" },
+  { href: "https://bbycroft.net/llm", title: "LLM Visualization", source: "Brendan Bycroft", note: "a 3D walk through every number in a small real GPT" },
+];
+
+// Shown as the FAQ section and as FAQPage structured data. Plain strings, so they work in both.
+export const faq = [
+  { q: "How does a large language model generate text?", a: "It splits your text into tokens, turns each token ID into a vector, and runs those vectors through a transformer. The output at the last position becomes a score for every token in the vocabulary. Softmax turns the scores into probabilities, one token is picked and appended to the text, and the loop repeats until the answer is done." },
+  { q: "Does ChatGPT understand what it is saying?", a: "It does not read or think the way people do. It has learned, from huge amounts of text, which tokens tend to follow which, and those patterns capture a lot of grammar, facts and reasoning. Whether that counts as understanding is debated, but mechanically every reply is built one predicted token at a time." },
+  { q: "Why does an AI give a different answer to the same question?", a: "At each step the model produces probabilities, not one fixed answer, and most chat apps sample from those probabilities instead of always taking the top token. Settings such as temperature and top-p control how much randomness is allowed. With sampling turned off, the same model and prompt give the same output." },
+  { q: "Where does a language model get its knowledge?", a: "From training. The model reads a very large collection of text and adjusts billions of numbers, its parameters, to get better at predicting the next token. Facts end up stored implicitly in those numbers. It does not look anything up while answering unless the app around it adds a search or retrieval step." },
+];

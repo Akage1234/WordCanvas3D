@@ -134,7 +134,12 @@
     "tryIt": "自分で試してみよう",
     "pagerLabel": "ほかのガイド",
     "previous": "← 前へ",
-    "next": "次へ →"
+    "next": "次へ →",
+    "onThisPage": "このページの内容",
+    "share": "共有",
+    "linkCopied": "リンクをコピーしました",
+    "faqTitle": "よくある質問",
+    "furtherReading": "参考資料"
   },
   "Concepts": {
     "readMore": "「学ぶ」で詳しく読む",

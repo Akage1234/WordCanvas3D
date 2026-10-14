@@ -620,3 +620,37 @@ export const GUIDE_BODIES = {
   "pca-vs-umap": PcaVsUmap,
   "king-man-woman": KingManWoman,
 };
+
+// FAQ per guide, same shape as the `faq` export of each article.
+export const GUIDE_FAQ = {
+  "what-is-a-token": [
+    { q: "What is a token in ChatGPT?", a: "A token is the unit of text ChatGPT reads and writes. Common words are usually a single token, often including the space in front of them, while rare words are split into pieces. Each token has an ID, and usage limits and API prices are counted in tokens, not words." },
+    { q: "How do I count the tokens in my text?", a: "Paste the text into a tokenizer tool, such as the WordCanvas3D Tokenizer, which shows every token and its ID for several real tokenizers. In code, OpenAI’s tiktoken library counts tokens for GPT models. Counts differ between models because each one has its own vocabulary." },
+    { q: "Is a space part of a token?", a: "Usually, yes. GPT-style tokenizers attach the space to the start of the following word, so “ cat” with a space and “cat” without one are different tokens with different IDs. Capitalisation changes the token too: “Cat” is another separate entry." },
+    { q: "Why does the same word get split differently?", a: "Splits depend on the tokenizer’s vocabulary and on context such as a leading space or a capital letter. “unbelievable” at the very start of a text is three pieces in o200k_base, while “ unbelievable” after a space is a single token. Different models also have different vocabularies." },
+  ],
+  "why-emoji-cost-more-tokens": [
+    { q: "Why do emoji use so many tokens?", a: "Most emoji take four bytes in UTF-8, and some are several emoji joined together, such as skin tones or family emoji. Rare emoji have no token of their own, so a byte-level tokenizer writes them out in byte pieces. A single emoji can cost anywhere from one token to more than ten." },
+    { q: "Why do non-English languages cost more tokens?", a: "Tokenizers learn their pieces from training text that is often mostly English, so English words get long, efficient tokens. Scripts that appear less often, or need more bytes per character in UTF-8, get split into smaller pieces. The same sentence can take several times more tokens in Hindi, Thai or Burmese than in English." },
+    { q: "Do newer tokenizers close the language gap?", a: "Partly. Larger vocabularies trained on more multilingual text, such as o200k_base used by GPT-4o, cut the token count for many languages compared with older tokenizers like cl100k_base. The gap shrinks but does not disappear, because training data is still uneven across languages." },
+    { q: "Does using more tokens cost more money?", a: "Yes, for most AI APIs. Prices are charged per input and output token, and context windows are measured in tokens, so text that splits into more pieces costs more and fills the context window faster." },
+  ],
+  "how-a-word-becomes-300-numbers": [
+    { q: "What is the difference between GloVe, Word2Vec and FastText?", a: "Word2Vec learns vectors by predicting a word from its neighbours, or the neighbours from a word. GloVe learns from a global table of how often words appear together. FastText works like Word2Vec but also uses pieces of words, so it can build vectors for words it never saw in training." },
+    { q: "Why are word embeddings 300 dimensions?", a: "There is nothing special about 300. It was a popular setting in the original Word2Vec and GloVe releases because it balanced quality against memory and training time. Fewer dimensions capture less nuance, and many more give diminishing returns for single-word vectors." },
+    { q: "What can’t static word embeddings do?", a: "They give each word exactly one vector, so a word with several meanings, like “bank”, gets one blurred average. Except for FastText, they have no vector for words outside their vocabulary, and they reflect biases in their training text. Modern language models use contextual embeddings that change with the sentence." },
+    { q: "How is the similarity between two words measured?", a: "Usually with cosine similarity, which compares the directions of the two vectors. Values close to 1 mean the words appear in very similar contexts. Similar contexts often means similar meaning, but opposites like “hot” and “cold” can also score high because they are used in the same places." },
+  ],
+  "pca-vs-umap": [
+    { q: "Should I use PCA or UMAP for embeddings?", a: "Use PCA for a fast, repeatable view of the overall shape and the main directions of variation. Use UMAP when you care about which points are neighbours and want to see clusters. Looking at both on the same data is often the most informative." },
+    { q: "Why does UMAP give a different picture each time?", a: "UMAP starts from a random layout and optimises it, so different runs or settings can produce different arrangements, especially between clusters. Fixing the random seed makes it repeatable. PCA is deterministic and gives the same result every time for the same data." },
+    { q: "What does PCA keep, and what does it lose?", a: "PCA keeps the few straight-line directions along which the data spreads out the most, so large distances and the overall structure survive. It loses everything in the remaining directions, which can squash separate small groups on top of each other." },
+    { q: "How should I read a UMAP plot?", a: "Trust which points are near each other: a tight group usually shares something real. Be careful with cluster sizes and the distances between clusters, which UMAP does not preserve reliably. Hover over points and check the actual words before drawing conclusions." },
+  ],
+  "king-man-woman": [
+    { q: "What does king − man + woman = queen mean?", a: "It is a famous result from word embeddings. Taking the vector for king, subtracting man and adding woman gives a point whose nearest word is often queen. It shows that some relationships, like male to female, appear as consistent directions in the embedding space." },
+    { q: "Do word analogies always work?", a: "No. They work well for some relationships, such as gender, capital cities and verb tenses, and poorly for many others. Results are also usually reported after excluding the input words, because the nearest vector is often one of them, which makes the method look more reliable than it is." },
+    { q: "How is the analogy answer calculated?", a: "The three vectors are combined as a − b + c, and the result is compared with every word vector using cosine similarity. The closest words, excluding the three inputs, are the answers. The WordCanvas3D Vector Playground shows this calculation step by step." },
+    { q: "Can vector arithmetic reveal bias?", a: "Yes. The same arithmetic can surface stereotypes learned from training text, for example pairing certain professions more strongly with one gender. These results reflect patterns in how people write, which is why embeddings are often tested and adjusted for bias before use." },
+  ],
+};

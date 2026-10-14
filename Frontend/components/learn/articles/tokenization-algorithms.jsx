@@ -1,5 +1,5 @@
 import { Link } from "@/i18n/navigation";
-import { ArticleLink, Callout, Fig, FurtherReading } from "../kit";
+import { ArticleLink, Callout, Fig } from "../kit";
 import s from "./tokenization-algorithms.module.css";
 import { BpeApply, BpeTrainer } from "./tokenization-algorithms.figures";
 
@@ -157,13 +157,22 @@ export default function TokenizationAlgorithms() {
         Once text is tokens, each token ID is turned into a vector, as explained in <ArticleLink slug="what-are-embeddings">What are embeddings?</ArticleLink>
         You can compare the splits of several real BPE tokenizers on your own text in the <Link href="/tokenizer">Tokenizer</Link>.
       </p>
-
-      <FurtherReading links={[
-        { href: "https://huggingface.co/learn/llm-course/chapter6/5", title: "Byte-Pair Encoding tokenization", source: "Hugging Face LLM Course", note: "sections 6 and 7 cover WordPiece and Unigram" },
-        { href: "https://www.youtube.com/watch?v=zduSFxRajkE", title: "Let’s build the GPT Tokenizer", source: "Andrej Karpathy · video", note: "builds byte-level BPE from scratch" },
-        { href: "https://arxiv.org/abs/1508.07909", title: "Neural Machine Translation of Rare Words with Subword Units", source: "Sennrich, Haddow & Birch · arXiv" },
-        { href: "https://en.wikipedia.org/wiki/Byte_pair_encoding", title: "Byte pair encoding", source: "Wikipedia" },
-      ]} />
     </>
   );
 }
+
+// Rendered by the article page, after the FAQ.
+export const reading = [
+  { href: "https://huggingface.co/learn/llm-course/chapter6/5", title: "Byte-Pair Encoding tokenization", source: "Hugging Face LLM Course", note: "sections 6 and 7 cover WordPiece and Unigram" },
+  { href: "https://www.youtube.com/watch?v=zduSFxRajkE", title: "Let’s build the GPT Tokenizer", source: "Andrej Karpathy · video", note: "builds byte-level BPE from scratch" },
+  { href: "https://arxiv.org/abs/1508.07909", title: "Neural Machine Translation of Rare Words with Subword Units", source: "Sennrich, Haddow & Birch · arXiv" },
+  { href: "https://en.wikipedia.org/wiki/Byte_pair_encoding", title: "Byte pair encoding", source: "Wikipedia" },
+];
+
+// Shown as the FAQ section and as FAQPage structured data. Plain strings, so they work in both.
+export const faq = [
+  { q: "What is byte-pair encoding (BPE)?", a: "Byte-pair encoding is a way to build a tokenizer vocabulary from data. It starts with single characters or bytes, finds the adjacent pair that appears most often in the training text, merges that pair into a new token, and repeats until the vocabulary reaches its target size. GPT models use a byte-level version of BPE." },
+  { q: "What is the difference between BPE, WordPiece and Unigram?", a: "BPE merges the most frequent pair of pieces. WordPiece, used by BERT, merges the pair that most improves the likelihood of the training text, which favours pairs that are surprisingly common together. Unigram, used through SentencePiece in models like T5, starts with a large vocabulary and removes the pieces that matter least." },
+  { q: "Which tokenizer does GPT-4 use?", a: "GPT-4 and GPT-3.5 use cl100k_base, a byte-level BPE tokenizer with about 100,000 tokens. GPT-4o uses o200k_base, with about 200,000 tokens, which handles many non-English languages more efficiently. Both are available in OpenAI’s open-source tiktoken library." },
+  { q: "Can a tokenizer fail on unknown text?", a: "A byte-level tokenizer cannot. All 256 byte values are in its vocabulary, so any text, including emoji and rare scripts, can be written out byte by byte if no larger piece matches. Word-level tokenizers, and some character-level ones, replace unseen input with an unknown token instead." },
+];

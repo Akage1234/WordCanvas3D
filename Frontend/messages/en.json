@@ -134,7 +134,12 @@
     "tryIt": "Try it yourself",
     "pagerLabel": "More guides",
     "previous": "← Previous",
-    "next": "Next →"
+    "next": "Next →",
+    "onThisPage": "On this page",
+    "share": "Share",
+    "linkCopied": "Link copied",
+    "faqTitle": "Frequently asked questions",
+    "furtherReading": "Further reading"
   },
   "Concepts": {
     "readMore": "Read more on Learn",

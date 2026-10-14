@@ -28,11 +28,12 @@ export function Callout({ title, children }) {
 }
 
 // Hand-picked external material. Keep it short: only links worth a reader's time.
-// links: [{ href, title, source, note }]
-export function FurtherReading({ links }) {
+// links: [{ href, title, source, note }]. The article page renders this from each article's `reading` export.
+export function FurtherReading({ title, links }) {
+  if (!links?.length) return null;
   return (
-    <section className={s.further} aria-label="Further reading">
-      <h2>Further reading</h2>
+    <section className={s.further}>
+      <h2 id="further-reading">{title}</h2>
       <ul>
         {links.map((l) => (
           <li key={l.href}>
@@ -41,6 +42,22 @@ export function FurtherReading({ links }) {
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+// Common questions, answered in a few sentences each. items: [{ q, a }], also used for the FAQPage schema.
+export function Faq({ title, items }) {
+  if (!items?.length) return null;
+  return (
+    <section className={s.faq}>
+      <h2 id="faq">{title}</h2>
+      {items.map(({ q, a }) => (
+        <details key={q}>
+          <summary>{q}<i aria-hidden="true" /></summary>
+          <p>{a}</p>
+        </details>
+      ))}
     </section>
   );
 }

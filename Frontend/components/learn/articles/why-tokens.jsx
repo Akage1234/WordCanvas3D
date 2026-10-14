@@ -1,6 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
-import { ArticleLink, Callout, Fig, FurtherReading } from "../kit";
+import { ArticleLink, Callout, Fig } from "../kit";
 import l from "../learn.module.css";
 import s from "./why-tokens.module.css";
 import { ThreeWaySplit } from "./why-tokens.figures";
@@ -161,12 +161,21 @@ export default function WhyTokens() {
         and <ArticleLink slug="how-llms-work">How a language model turns your words into an answer</ArticleLink> shows where both steps fit in the whole pipeline.
         To split your own text with several real tokenizers side by side, try the <Link href="/tokenizer">Tokenizer</Link>.
       </p>
-
-      <FurtherReading links={[
-        { href: "https://huggingface.co/learn/llm-course/chapter6/5", title: "Byte-Pair Encoding tokenization", source: "Hugging Face LLM Course", note: "chapter 6 covers tokenizers in depth" },
-        { href: "https://www.youtube.com/watch?v=zduSFxRajkE", title: "Let’s build the GPT Tokenizer", source: "Andrej Karpathy · video" },
-        { href: "https://en.wikipedia.org/wiki/Byte_pair_encoding", title: "Byte pair encoding", source: "Wikipedia" },
-      ]} />
     </>
   );
 }
+
+// Rendered by the article page, after the FAQ.
+export const reading = [
+  { href: "https://huggingface.co/learn/llm-course/chapter6/5", title: "Byte-Pair Encoding tokenization", source: "Hugging Face LLM Course", note: "chapter 6 covers tokenizers in depth" },
+  { href: "https://www.youtube.com/watch?v=zduSFxRajkE", title: "Let’s build the GPT Tokenizer", source: "Andrej Karpathy · video" },
+  { href: "https://en.wikipedia.org/wiki/Byte_pair_encoding", title: "Byte pair encoding", source: "Wikipedia" },
+];
+
+// Shown as the FAQ section and as FAQPage structured data. Plain strings, so they work in both.
+export const faq = [
+  { q: "What is a token in AI?", a: "A token is a small piece of text that a language model treats as one unit: a whole common word, part of a rarer word, a punctuation mark or a single byte. Each token has an ID number in the model’s vocabulary, and the model only ever works with those numbers, never with letters directly." },
+  { q: "How many words is 1,000 tokens?", a: "For ordinary English text, roughly 750 words: a common rule of thumb is that a token is about three quarters of a word. The ratio changes with the tokenizer, the language and the content. Code, numbers, emoji and languages other than English usually need more tokens per word." },
+  { q: "Why don’t language models use whole words as tokens?", a: "A word list can never be complete. Names, typos, new words, code and other languages would all become a single unknown token and lose their meaning, and languages like Chinese and Japanese do not put spaces between words. Subword tokens keep common words whole while spelling rare words out of smaller, reusable pieces." },
+  { q: "Why do AI models struggle to count letters in a word?", a: "The model sees token IDs, not letters. A word like “strawberry” may be one or two tokens, each a single number, so the individual letters are not directly visible. The model has to have learned the spelling of each token from its training text, which makes letter-counting and spelling tasks surprisingly error-prone." },
+];

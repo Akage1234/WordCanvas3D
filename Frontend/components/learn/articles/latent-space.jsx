@@ -1,6 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
-import { ArticleLink, Callout, Fig, FurtherReading } from "../kit";
+import { ArticleLink, Callout, Fig } from "../kit";
 import { WalkBetween } from "./latent-space.figures";
 import s from "./latent-space.module.css";
 import l from "../learn.module.css";
@@ -225,13 +225,22 @@ export default function LatentSpace() {
         <ArticleLink slug="dimensionality-reduction"> Seeing high dimensions</ArticleLink> explains how those pictures are made and how to read them without being fooled.
         To explore GloVe yourself, try the <Link href="/embedding">Embedding explorer</Link> or do word arithmetic in the <Link href="/vector-playground">Vector Playground</Link>.
       </p>
-
-      <FurtherReading links={[
-        { href: "https://www.3blue1brown.com/lessons/gpt", title: "Transformers, the tech behind LLMs", source: "3Blue1Brown", note: "its embedding section shows directions like woman − man visually" },
-        { href: "https://nlp.stanford.edu/projects/glove/", title: "GloVe: Global Vectors for Word Representation", source: "Stanford NLP", note: "see the “linear substructures” section" },
-        { href: "https://arxiv.org/abs/1607.06520", title: "Man is to Computer Programmer as Woman is to Homemaker? Debiasing Word Embeddings", source: "Bolukbasi et al., 2016" },
-        { href: "https://arxiv.org/abs/2103.00020", title: "Learning Transferable Visual Models From Natural Language Supervision", source: "Radford et al., 2021", note: "the CLIP paper: images and text in one space" },
-      ]} />
     </>
   );
 }
+
+// Rendered by the article page, after the FAQ.
+export const reading = [
+  { href: "https://www.3blue1brown.com/lessons/gpt", title: "Transformers, the tech behind LLMs", source: "3Blue1Brown", note: "its embedding section shows directions like woman − man visually" },
+  { href: "https://nlp.stanford.edu/projects/glove/", title: "GloVe: Global Vectors for Word Representation", source: "Stanford NLP", note: "see the “linear substructures” section" },
+  { href: "https://arxiv.org/abs/1607.06520", title: "Man is to Computer Programmer as Woman is to Homemaker? Debiasing Word Embeddings", source: "Bolukbasi et al., 2016" },
+  { href: "https://arxiv.org/abs/2103.00020", title: "Learning Transferable Visual Models From Natural Language Supervision", source: "Radford et al., 2021", note: "the CLIP paper: images and text in one space" },
+];
+
+// Shown as the FAQ section and as FAQPage structured data. Plain strings, so they work in both.
+export const faq = [
+  { q: "What is latent space in AI?", a: "Latent space is the space of vectors a model uses internally to represent its inputs. Each point is an embedding, and its position reflects patterns the model learned rather than labels a person gave it. Similar inputs end up near each other, and some directions through the space line up with ideas like plural, tense or gender." },
+  { q: "Do the dimensions of an embedding have meanings?", a: "Usually not one by one. A single dimension rarely corresponds to one clean concept; meaning tends to be spread across many dimensions at once. Interpretable patterns usually show up as directions, combinations of dimensions, rather than as single named axes." },
+  { q: "Why does king − man + woman ≈ queen work?", a: "In many word embeddings, the difference between man and woman points in roughly the same direction as the difference between king and queen. Subtracting man and adding woman moves the king vector along that direction, and the nearest word to the result is often queen. It works for some relationships, but not reliably for all." },
+  { q: "Can embeddings be biased?", a: "Yes. Embeddings learn from human-written text, so they absorb the associations in it, including stereotypes. Researchers have shown, for example, that some word embeddings link certain jobs more closely with one gender. Measuring and reducing this bias is an active area of research." },
+];

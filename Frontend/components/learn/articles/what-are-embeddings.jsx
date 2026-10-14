@@ -1,6 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
-import { ArticleLink, Callout, Fig, FurtherReading } from "../kit";
+import { ArticleLink, Callout, Fig } from "../kit";
 import { WordMap } from "./what-are-embeddings.figures";
 import s from "./what-are-embeddings.module.css";
 import l from "../learn.module.css";
@@ -205,13 +205,22 @@ export default function WhatAreEmbeddings() {
         <ArticleLink slug="dimensionality-reduction">Seeing high dimensions</ArticleLink>. To explore 10,000 real word vectors in 3D, open the <Link href="/embedding">Embedding explorer</Link>,
         and for a site-specific tour see <ArticleLink slug="how-a-word-becomes-300-numbers">How a word becomes 300 numbers</ArticleLink>.
       </p>
-
-      <FurtherReading links={[
-        { href: "https://jalammar.github.io/illustrated-word2vec/", title: "The Illustrated Word2vec", source: "Jay Alammar", note: "a visual walk through how word2vec is trained" },
-        { href: "https://www.3blue1brown.com/lessons/gpt", title: "Transformers, the tech behind LLMs", source: "3Blue1Brown", note: "includes a beautiful section on word embeddings" },
-        { href: "https://arxiv.org/abs/1301.3781", title: "Efficient Estimation of Word Representations in Vector Space", source: "Mikolov et al., 2013", note: "the original word2vec paper" },
-        { href: "https://nlp.stanford.edu/projects/glove/", title: "GloVe: Global Vectors for Word Representation", source: "Stanford NLP", note: "project page with paper and downloads" },
-      ]} />
     </>
   );
 }
+
+// Rendered by the article page, after the FAQ.
+export const reading = [
+  { href: "https://jalammar.github.io/illustrated-word2vec/", title: "The Illustrated Word2vec", source: "Jay Alammar", note: "a visual walk through how word2vec is trained" },
+  { href: "https://www.3blue1brown.com/lessons/gpt", title: "Transformers, the tech behind LLMs", source: "3Blue1Brown", note: "includes a beautiful section on word embeddings" },
+  { href: "https://arxiv.org/abs/1301.3781", title: "Efficient Estimation of Word Representations in Vector Space", source: "Mikolov et al., 2013", note: "the original word2vec paper" },
+  { href: "https://nlp.stanford.edu/projects/glove/", title: "GloVe: Global Vectors for Word Representation", source: "Stanford NLP", note: "project page with paper and downloads" },
+];
+
+// Shown as the FAQ section and as FAQPage structured data. Plain strings, so they work in both.
+export const faq = [
+  { q: "What is an embedding in machine learning?", a: "An embedding is a list of numbers, a vector, that represents an item such as a word, sentence or image. The numbers are learned so that items with similar meaning or use end up close together, which lets a computer measure similarity with simple arithmetic." },
+  { q: "What is the difference between a token and an embedding?", a: "A token is a piece of text with an ID number, and the ID itself carries no meaning. An embedding is the vector the model looks up for that ID: hundreds or thousands of learned numbers that place the token in a space where similar tokens sit near each other." },
+  { q: "What is cosine similarity?", a: "Cosine similarity measures the angle between two vectors. It is 1 when they point the same way, 0 when they are at right angles and −1 when they point in opposite directions. It is the most common way to compare embeddings because it ignores vector length and looks only at direction." },
+  { q: "What are embeddings used for?", a: "Embeddings power semantic search, recommendations, clustering, duplicate detection and retrieval-augmented generation (RAG), where documents are stored as vectors and the ones closest to a question are handed to a language model. Inside every language model, the first step is turning each token into an embedding." },
+];

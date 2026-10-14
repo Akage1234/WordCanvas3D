@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Instrument_Serif } from "next/font/google";
-import { ARTICLES, TRACKS } from "@/components/learn/catalog";
+import { TRACKS, articlesFor } from "@/components/learn/catalog";
 import s from "@/components/landing/landing.module.css";
 import l from "@/components/learn/learn.module.css";
 import PipelineAnim from "@/components/learn/PipelineAnim";
@@ -25,13 +25,13 @@ export async function generateMetadata({ params }) {
   };
 }
 
-const schema = (name, description) => ({
+const schema = (name, description, locale, articles) => ({
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   name,
-  url: `${SITE_URL}/learn`,
+  url: `${SITE_URL}${localePath("/learn", locale)}`,
   description,
-  hasPart: ARTICLES.map((a) => ({ "@type": "Article", headline: a.title, url: `${SITE_URL}/learn/${a.slug}` })),
+  hasPart: articles.map((a) => ({ "@type": "Article", headline: a.title, url: `${SITE_URL}${localePath(`/learn/${a.slug}`, locale)}` })),
 });
 
 // Keys into Learn.tools for the "Pairs with" line on guide cards.
@@ -90,6 +90,7 @@ function Grid({ articles, numbered, className = l.grid }) {
 
 export default async function LearnIndex({ params }) {
   const { locale } = await params;
+  const ARTICLES = articlesFor(locale);
   setRequestLocale(locale);
   const t = await getTranslations("Learn");
   const start = ARTICLES.find((a) => a.track === "start");
@@ -98,7 +99,7 @@ export default async function LearnIndex({ params }) {
 
   return (
     <main className={`${s.page} ${l.main}`}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(schema(t("title"), t("description")))} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(schema(t("title"), t("description"), locale, ARTICLES))} />
       <div className={`${s.wrap} ${l.indexWrap}`}>
         <LearnArt className={l.headArt} />
         <header id="top" className={l.head}>

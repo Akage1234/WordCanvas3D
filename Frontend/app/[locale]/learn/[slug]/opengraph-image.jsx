@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
-import { ARTICLES } from "@/components/learn/catalog";
+import { ARTICLES, articlesFor } from "@/components/learn/catalog";
 import { ogArticle, OG_SIZE } from "@/lib/og";
 
 export const size = OG_SIZE;
@@ -14,7 +14,7 @@ export function generateStaticParams() {
 
 export default async function Image({ params }) {
   const { locale, slug } = await params;
-  const a = ARTICLES.find((x) => x.slug === slug);
+  const a = articlesFor(locale).find((x) => x.slug === slug);
   const t = await getTranslations({ locale, namespace: "Learn" });
   return ogArticle(a, t(`tracks.${a.track}.title`), locale);
 }

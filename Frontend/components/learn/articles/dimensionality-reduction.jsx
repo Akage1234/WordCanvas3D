@@ -1,6 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
-import { ArticleLink, Callout, Fig, FurtherReading } from "../kit";
+import { ArticleLink, Callout, Fig } from "../kit";
 import { SwissRoll } from "./dimensionality-reduction.figures";
 import s from "./dimensionality-reduction.module.css";
 import l from "../learn.module.css";
@@ -172,13 +172,22 @@ export default function DimensionalityReduction() {
         For why the structure is there in the first place, see <ArticleLink slug="latent-space">Latent space</ArticleLink> and <ArticleLink slug="what-are-embeddings">What are embeddings?</ArticleLink>.
         The site guide <ArticleLink slug="pca-vs-umap">PCA vs UMAP</ArticleLink> shows how these two methods are used in the <Link href="/embedding">Embedding explorer</Link>, where you can switch between them on 10,000 real words.
       </p>
-
-      <FurtherReading links={[
-        { href: "https://distill.pub/2016/misread-tsne/", title: "How to Use t-SNE Effectively", source: "Distill, 2016", note: "interactive examples of every t-SNE pitfall" },
-        { href: "https://pair-code.github.io/understanding-umap/", title: "Understanding UMAP", source: "Google PAIR", note: "UMAP and t-SNE side by side, interactively" },
-        { href: "https://umap-learn.readthedocs.io/en/latest/how_umap_works.html", title: "How UMAP Works", source: "umap-learn documentation" },
-        { href: "https://en.wikipedia.org/wiki/Principal_component_analysis", title: "Principal component analysis", source: "Wikipedia" },
-      ]} />
     </>
   );
 }
+
+// Rendered by the article page, after the FAQ.
+export const reading = [
+  { href: "https://distill.pub/2016/misread-tsne/", title: "How to Use t-SNE Effectively", source: "Distill, 2016", note: "interactive examples of every t-SNE pitfall" },
+  { href: "https://pair-code.github.io/understanding-umap/", title: "Understanding UMAP", source: "Google PAIR", note: "UMAP and t-SNE side by side, interactively" },
+  { href: "https://umap-learn.readthedocs.io/en/latest/how_umap_works.html", title: "How UMAP Works", source: "umap-learn documentation" },
+  { href: "https://en.wikipedia.org/wiki/Principal_component_analysis", title: "Principal component analysis", source: "Wikipedia" },
+];
+
+// Shown as the FAQ section and as FAQPage structured data. Plain strings, so they work in both.
+export const faq = [
+  { q: "What is the difference between PCA, t-SNE and UMAP?", a: "PCA is a linear method that keeps the directions with the most spread, so it preserves the overall shape but can blur small groups together. t-SNE focuses on keeping close neighbours together and is good at showing clusters, but distances between clusters mean little. UMAP has a similar goal to t-SNE, runs faster and usually keeps a bit more global structure." },
+  { q: "Is UMAP better than t-SNE?", a: "Neither is better in every case. UMAP is usually faster on large datasets and tends to keep more of the large-scale layout, while t-SNE often separates local clusters very cleanly. Both depend on settings such as perplexity or the number of neighbours, so try a few values before drawing conclusions." },
+  { q: "Why reduce embeddings to 2D or 3D?", a: "People cannot see hundreds of dimensions. Projecting embeddings down to two or three lets you plot them and spot clusters, outliers and structure. Every projection throws information away, so the picture is a useful summary, not an exact map of the original space." },
+  { q: "Can I trust distances in a t-SNE or UMAP plot?", a: "Only locally. Points that sit close together were probably close in the original space, but the gaps between clusters and the size of each cluster are often distorted. PCA keeps large distances more faithfully, which is why comparing more than one method is useful." },
+];
