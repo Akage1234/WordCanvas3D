@@ -13,7 +13,6 @@ export default function ArticleToc({ label, target }) {
   const [items, setItems] = useState([]);
   const [active, setActive] = useState(0);
   const listRef = useRef(null);
-  const navRef = useRef(null);
 
   useEffect(() => {
     const hs = [...document.querySelectorAll(`${target} h2`)];
@@ -21,10 +20,6 @@ export default function ArticleToc({ label, target }) {
     setItems(hs.map((h) => ({ id: h.id, text: h.textContent })));
     // ids are added after hydration, so a shared #section link needs one nudge
     if (location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();
-
-    // figures that break out of the text column, wide enough to run under the timeline
-    const body = document.querySelector(target);
-    const wides = [...(body?.children ?? [])].filter((el) => el.offsetWidth > body.clientWidth);
 
     let frame = 0;
     const update = () => {
@@ -41,12 +36,6 @@ export default function ArticleToc({ label, target }) {
         fill = dots[i] + f * ((dots[i + 1] ?? dots[i]) - dots[i]) - dots[0];
       }
       setActive(Math.max(i, 0));
-      const nav = navRef.current?.getBoundingClientRect();
-      const covered = nav && wides.some((el) => {
-        const r = el.getBoundingClientRect();
-        return r.left < nav.right && r.top < nav.bottom && r.bottom > nav.top;
-      });
-      navRef.current?.toggleAttribute("data-covered", !!covered);
       listRef.current?.style.setProperty("--fill", `${fill}px`);
     };
     const onScroll = () => { frame ||= requestAnimationFrame(update); };
@@ -61,7 +50,7 @@ export default function ArticleToc({ label, target }) {
 
   if (items.length < 2) return null;
   return (
-    <nav ref={navRef} className={s.toc} aria-label={label}>
+    <nav className={s.toc} aria-label={label}>
       <small>{label}</small>
       <ol ref={listRef}>
         {items.map((it, i) => (

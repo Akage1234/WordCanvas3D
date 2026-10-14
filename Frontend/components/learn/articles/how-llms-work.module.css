@@ -1,5 +1,7 @@
 /* ---------- The film ---------- */
 .wide { position: relative; left: 50%; translate: -50% 0; width: min(980px, 100vw - 32px); margin: 32px 0 36px; padding: 18px; border-radius: 18px; border: 1px solid var(--line); background: var(--card); }
+/* while the Learn section timeline is shown (over 1240px), stay clear of it: 24px edge + 220px timeline + 20px gap a side, plus the scrollbar */
+@media (min-width: 1241px) { .wide { width: min(980px, 100vw - 544px); } }
 .wide figcaption { margin-top: 14px; color: var(--dim); font-size: 14px; line-height: 1.5; }
 .screen { display: block; width: 100%; height: auto; border-radius: 12px; background: radial-gradient(90% 90% at 50% 40%, #121826, #0a0c11); }
 .screen .fTitle { font: 400 38px var(--serif); font-style: italic; fill: #f2f5fa; }

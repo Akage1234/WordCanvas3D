@@ -261,11 +261,12 @@ html:has(.jump) { scroll-behavior: smooth; }
 html:has(.toc) { scroll-behavior: smooth; }
 
 .toc {
-  grid-column: 1; grid-row: 1; justify-self: end; align-self: start; position: sticky; top: 132px;
-  width: 220px; margin: 230px 56px 0 0; max-height: calc(100vh - 170px); overflow-y: auto; scrollbar-width: none;
-  animation: rise .7s .3s cubic-bezier(.2, .8, .2, 1) both; transition: opacity .3s;
+  grid-column: 1; grid-row: 1; justify-self: end; align-self: start; position: sticky; top: 112px;
+  /* starts level with the breadcrumb. The right margin keeps 20px clear of figures that overhang the
+     text column by up to 150px (980px wide), shrinking to keep the timeline 24px from the window edge. */
+  width: 220px; margin: 0 min(170px, (100vw - 680px) / 2 - 244px) 0 0; max-height: calc(100vh - 140px); overflow-y: auto; scrollbar-width: none;
+  animation: rise .7s .3s cubic-bezier(.2, .8, .2, 1) both;
 }
-.toc[data-covered] { opacity: 0; pointer-events: none; } /* a wide figure is passing behind it */
 .toc small { display: block; margin: 0 0 16px 22px; font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
 .toc ol { position: relative; list-style: none; margin: 0; padding: 0; }
 /* the lit part of the line, grown by ArticleToc as you read */
