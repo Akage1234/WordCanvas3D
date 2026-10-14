@@ -256,15 +256,16 @@ html:has(.jump) { scroll-behavior: smooth; }
 
 /* ---------- Article extras: section timeline, share button, FAQ ---------- */
 .articleWrap { display: grid; grid-template-columns: minmax(0, 1fr) min(680px, 100% - 32px) minmax(0, 1fr); }
-.articleWrap .article { grid-column: 2; grid-row: 1; width: auto; }
+.articleWrap .article { grid-column: 2; grid-row: 1; width: auto; margin: 0; } /* auto margins would size it to its widest figure */
 .body h2 { scroll-margin-top: 100px; }
 html:has(.toc) { scroll-behavior: smooth; }
 
 .toc {
   grid-column: 1; grid-row: 1; justify-self: end; align-self: start; position: sticky; top: 132px;
   width: 220px; margin: 230px 56px 0 0; max-height: calc(100vh - 170px); overflow-y: auto; scrollbar-width: none;
-  animation: rise .7s .3s cubic-bezier(.2, .8, .2, 1) both;
+  animation: rise .7s .3s cubic-bezier(.2, .8, .2, 1) both; transition: opacity .3s;
 }
+.toc[data-covered] { opacity: 0; pointer-events: none; } /* a wide figure is passing behind it */
 .toc small { display: block; margin: 0 0 16px 22px; font: 500 11px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
 .toc ol { position: relative; list-style: none; margin: 0; padding: 0; }
 /* the lit part of the line, grown by ArticleToc as you read */
@@ -287,7 +288,7 @@ html:has(.toc) { scroll-behavior: smooth; }
 .toc .tocActive a { color: #fff; }
 @media (max-width: 1240px) {
   .articleWrap { display: block; }
-  .articleWrap .article { width: min(680px, 100% - 32px); }
+  .articleWrap .article { width: min(680px, 100% - 32px); margin: 0 auto; }
   .toc { display: none; }
 }
 
