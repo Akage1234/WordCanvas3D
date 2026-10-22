@@ -9,6 +9,7 @@ import * as LatentSpace from "./latent-space";
 import * as DimensionalityReduction from "./dimensionality-reduction";
 import * as AttentionAndTransformers from "./attention-and-transformers";
 import * as NextTokenPrediction from "./next-token-prediction";
+import * as WhatIsAToken from "./what-is-a-token";
 
 export default {
   "how-llms-work": HowLlmsWork,
@@ -20,4 +21,5 @@ export default {
   "dimensionality-reduction": DimensionalityReduction,
   "attention-and-transformers": AttentionAndTransformers,
   "next-token-prediction": NextTokenPrediction,
+  "what-is-a-token": WhatIsAToken,
 };
