@@ -13,6 +13,7 @@ import * as WhatIsAToken from "./what-is-a-token";
 import * as WhyEmojiCostMoreTokens from "./why-emoji-cost-more-tokens";
 import * as HowAWordBecomes300Numbers from "./how-a-word-becomes-300-numbers";
 import * as PcaVsUmap from "./pca-vs-umap";
+import * as KingManWoman from "./king-man-woman";
 
 export default {
   "how-llms-work": HowLlmsWork,
@@ -28,4 +29,5 @@ export default {
   "why-emoji-cost-more-tokens": WhyEmojiCostMoreTokens,
   "how-a-word-becomes-300-numbers": HowAWordBecomes300Numbers,
   "pca-vs-umap": PcaVsUmap,
+  "king-man-woman": KingManWoman,
 };
