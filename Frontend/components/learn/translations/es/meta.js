@@ -25,4 +25,8 @@ export default {
     title: "El espacio latente: el significado oculto en los números",
     summary: "Qué capturan las dimensiones de un embedding, por qué las direcciones llevan significado y qué no podemos leer directamente.",
   },
+  "dimensionality-reduction": {
+    title: "Ver muchas dimensiones: PCA, t-SNE, UMAP y compañía",
+    summary: "Cómo aplastar cientos de dimensiones en 2 o 3, qué conserva cada método y qué desecha sin avisar.",
+  },
 };
