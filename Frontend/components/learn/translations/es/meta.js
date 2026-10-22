@@ -42,4 +42,9 @@ export default {
     summary: "Cómo los tokenizadores cortan el texto en pedazos reutilizables, y por qué esos pedazos rara vez coinciden con las palabras.",
     cta: { label: "Abrir el Tokenizador", text: "Pega cualquier frase y mira exactamente cómo la dividen los tokenizadores de GPT y LLaMA, con el ID de cada token." },
   },
+  "why-emoji-cost-more-tokens": {
+    title: "Por qué los emoji y otros idiomas cuestan más tokens",
+    summary: "Bytes UTF-8, BPE a nivel de bytes y por qué el mismo saludo puede ocupar 4 tokens o 25.",
+    cta: { label: "Prueba los ejemplos", text: "Carga el ejemplo Escrituras del mundo o Emoji y cambia de tokenizador para ver cómo cambia el conteo." },
+  },
 };
