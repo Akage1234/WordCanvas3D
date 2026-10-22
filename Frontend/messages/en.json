@@ -271,6 +271,7 @@
       "piece": " · vocabulary piece {piece}",
       "special": " · special token",
       "partial": " · includes a partial UTF-8 character that combines with neighbouring tokens",
+      "partOf": " · part of “{char}”, which is split across neighbouring tokens",
       "hint": "Hover, tap, or use the arrow keys on a token to inspect it."
     },
     "spoken": {
@@ -285,6 +286,7 @@
     "idOption": "ID {id}, token {index} of {total}",
     "idTitle": "token index: {index}",
     "partialTitle": "Partial UTF-8 character: these bytes combine with neighbouring tokens",
+    "partialTitleOf": "Part of “{char}”: these bytes combine with neighbouring tokens",
     "tokenIds": "Token IDs",
     "copyIds": "Copy IDs",
     "copied": "Copied IDs to the clipboard.",

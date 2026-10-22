@@ -43,6 +43,28 @@ export function describeBytes(bytes) {
   return { bytes, parts, kind: hasBytes ? (hasText ? 'mixed' : 'fragment') : 'text' }
 }
 
+// For each token, the characters it holds only part of (e.g. "ぬ" when ぬ's 3 bytes are split
+// across two tokens), so a chip of raw bytes can say what it belongs to. "" for whole tokens.
+export function splitChars(tokens) {
+  const owner = []
+  const bytes = []
+  tokens.forEach((t, i) => { for (const b of t.bytes ?? []) { bytes.push(b); owner.push(i) } })
+  const out = tokens.map(() => '')
+  const all = Uint8Array.from(bytes)
+  for (let i = 0; i < all.length; ) {
+    const n = seqLen(all[i])
+    let ch = null
+    if (n > 1 && i + n <= all.length) {
+      try { ch = strict.decode(all.subarray(i, i + n)) } catch { /* invalid sequence */ }
+    }
+    if (ch !== null && owner[i] !== owner[i + n - 1]) {
+      for (const k of new Set(owner.slice(i, i + n))) out[k] += ch
+    }
+    i += ch !== null ? n : 1
+  }
+  return out
+}
+
 // Display-only whitespace markers (the underlying token text is unchanged).
 export const markWhitespace = (s) =>
   s.replace(/ /g, '·').replace(/\t/g, '→').replace(/\r/g, '␍').replace(/\n/g, '↵\n')
