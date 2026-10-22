@@ -57,4 +57,9 @@ export default {
     summary: "Dos maneras de comprimir 300 dimensiones en 3, qué conserva cada una y cómo leer el resultado.",
     cta: { label: "Comparar PCA y UMAP", text: "Cambia entre las dos proyecciones con las mismas palabras y mira qué revela cada una." },
   },
+  "king-man-woman": {
+    title: "King − man + woman, explicado",
+    summary: "Las analogías de palabras como aritmética de flechas: qué calcula el Laboratorio, por qué funciona y dónde falla.",
+    cta: { label: "Abrir el Laboratorio", text: "Escribe king, man y woman en las casillas a − b + c, y luego prueba tus propias analogías." },
+  },
 };
