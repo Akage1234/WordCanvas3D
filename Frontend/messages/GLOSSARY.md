@@ -17,7 +17,7 @@ Number grouping (1,000 vs 1.000) is left to `Intl`: messages use `{count, number
 ## Never translate
 
 WordCanvas3D, GloVe, Word2Vec, FastText, PCA, UMAP, t-SNE, BPE, WordPiece, Unigram, GPT, LLaMA, tiktoken,
-SentencePiece, UTF-8, WebGL, GitHub, `<|endoftext|>`, `<unk>`, token IDs and example words inside the tools
+SentencePiece, UTF-8, WebGL, GitHub, Isomap, LDA, RoPE, ViT, BERT, T5, o200k_base, cl100k_base, gpt2, `<|endoftext|>`, `<unk>`, token IDs and example words inside the tools
 (king, queen, paris…: the embedding data is English only).
 
 ## Tool names
@@ -68,6 +68,28 @@ Nav labels and page titles are translated. Only the brand WordCanvas3D stays in 
 | 30 | dataset | 数据集 | データセット | conjunto de datos | |
 | 31 | model (embedding model) | 模型（嵌入模型） | モデル（埋め込みモデル） | modelo (modelo de embeddings) | |
 | 32 | multimodal | 多模态 | マルチモーダル | multimodal | |
+| 33 | query / key / value | 查询 / 键 / 值 | クエリ / キー / バリュー | consulta / clave / valor | Learn articles. Give the English in brackets on first use. |
+| 34 | attention head / multi-head attention | 注意力头 / 多头注意力 | アテンションヘッド / マルチヘッドアテンション | cabeza de atención / atención multicabeza | |
+| 35 | causal mask(ing) | 因果掩码 | 因果マスク | máscara causal | |
+| 36 | positional encoding / position vector | 位置编码 / 位置向量 | 位置エンコーディング / 位置ベクトル | codificación posicional / vector de posición | RoPE stays as is. |
+| 37 | transformer block / layer | Transformer 块 / 层 | Transformer ブロック / 層 | bloque / capa del transformer | |
+| 38 | context window | 上下文窗口 | コンテキストウィンドウ | ventana de contexto | |
+| 39 | sequence length | 序列长度 | 系列長 | longitud de secuencia | |
+| 40 | subword | 子词 | サブワード | subpalabra | |
+| 41 | merge (BPE) | 合并 | マージ | fusión | |
+| 42 | unknown token, `[UNK]` | 未知词元 | 未知トークン | token desconocido | `[UNK]` itself stays. |
+| 43 | unembedding | 反嵌入（unembedding） | アンエンベディング（出力射影） | unembedding (matriz de salida) | |
+| 44 | probability distribution | 概率分布 | 確率分布 | distribución de probabilidad | |
+| 45 | sampling / decoding / greedy | 采样 / 解码 / 贪心 | サンプリング / デコーディング / 貪欲法 | muestreo / decodificación / voraz | |
+| 46 | parameters / weights | 参数 / 权重 | パラメータ / 重み | parámetros / pesos | |
+| 47 | training / training data | 训练 / 训练数据 | 学習 / 学習データ | entrenamiento / datos de entrenamiento | |
+| 48 | patch (image) | 图像块（patch） | パッチ | parche | |
+| 49 | spectrogram | 频谱图 | スペクトログラム | espectrograma | |
+| 50 | frame (audio / video) | 帧 | フレーム | trama (audio) / fotograma (video) | |
+| 51 | contextual / static embedding | 上下文嵌入 / 静态嵌入 | 文脈埋め込み / 静的埋め込み | embedding contextual / estático | |
+| 52 | interpolation | 插值 | 補間 | interpolación | |
+| 53 | bias (in data or models) | 偏见 | バイアス（偏り） | sesgo | |
+| 54 | swiss roll (test shape) | 瑞士卷 | スイスロール | rollo suizo | |
 
 ## Site words
 

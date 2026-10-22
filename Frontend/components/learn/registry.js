@@ -9,6 +9,9 @@ import * as LatentSpace from "./articles/latent-space";
 import * as DimensionalityReduction from "./articles/dimensionality-reduction";
 import * as AttentionAndTransformers from "./articles/attention-and-transformers";
 import * as NextTokenPrediction from "./articles/next-token-prediction";
+import zh from "./translations/zh";
+import ja from "./translations/ja";
+import es from "./translations/es";
 
 // Article content by slug: { default: Body, faq, reading }. Only the article page should import this module;
 // everything else uses ./catalog.
@@ -25,10 +28,9 @@ const EN = {
   ...Object.fromEntries(Object.entries(GUIDE_BODIES).map(([slug, Body]) => [slug, { default: Body, faq: GUIDE_FAQ[slug] }])),
 };
 
-// Translated content, same shape as EN, by locale then slug. Add an entry here (and its title in
-// translations/<locale>/meta.js) when an article is translated; see translations/README.md.
-// e.g. import * as WhyTokensJa from "./translations/ja/why-tokens";  ja: { "why-tokens": WhyTokensJa }
-const TRANSLATED = { zh: {}, ja: {}, es: {} };
+// Translated content, same shape as EN, by locale then slug. Each locale registers its own articles in
+// translations/<locale>/index.js, so translations for different languages never touch the same file.
+const TRANSLATED = { zh, ja, es };
 
 export { TRACKS };
 

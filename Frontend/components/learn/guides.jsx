@@ -5,7 +5,8 @@ import s from "./learn.module.css";
 
 const [RED, TEAL, SKY, YELLOW, INDIGO, PURPLE, GREEN, PINK] = CLUSTER_COLORS;
 
-function Chips({ label, items }) {
+// Exported, with the figures below, so translated guides (translations/<locale>/<slug>.jsx) can reuse them.
+export function Chips({ label, items }) {
   return (
     <div className={s.row}>
       {label && <span className={s.rowLabel}>{label}</span>}
@@ -19,7 +20,7 @@ function Chips({ label, items }) {
   );
 }
 
-function Fig({ caption, children }) {
+export function Fig({ caption, children }) {
   return (
     <figure className={s.fig}>
       {children}
@@ -377,13 +378,13 @@ function cloud(centers, spread) {
     Array.from({ length: 22 }, () => [cx + rand() * spread * (1 + Math.abs(rand())), cy + rand() * spread, c])
   );
 }
-const PCA_POINTS = cloud([[92, 96], [120, 84], [110, 118], [140, 104]], 26);
-const UMAP_POINTS = cloud([[52, 52], [170, 60], [70, 150], [178, 158]], 13);
+export const PCA_POINTS = cloud([[92, 96], [120, 84], [110, 118], [140, 104]], 26);
+export const UMAP_POINTS = cloud([[52, 52], [170, 60], [70, 150], [178, 158]], 13);
 const CLOUD_COLORS = [TEAL, YELLOW, PINK, INDIGO];
 
-function Scatter({ points }) {
+export function Scatter({ points, label = "Scatter plot of four coloured groups" }) {
   return (
-    <svg viewBox="0 0 230 210" role="img" aria-label="Scatter plot of four coloured groups">
+    <svg viewBox="0 0 230 210" role="img" aria-label={label}>
       <rect x="0.5" y="0.5" width="229" height="209" rx="10" fill="none" stroke="#ffffff14" />
       {points.map(([x, y, c], i) => <circle key={i} cx={x} cy={y} r="3.2" fill={CLOUD_COLORS[c]} fillOpacity=".85" />)}
     </svg>
@@ -486,12 +487,12 @@ const RESULTS = [
   ["Word2Vec 300D", "royal", "0.51"],
 ];
 
-function Parallelogram() {
+export function Parallelogram({ label = "Arrows from man to king and from woman to queen are parallel", royalty = "royalty", gender = "gender" }) {
   const arrow = (x1, y1, x2, y2, color, dash) => (
     <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth="2.5" strokeDasharray={dash} markerEnd={`url(#tip-${color.slice(1)})`} />
   );
   return (
-    <svg viewBox="0 0 420 240" className={s.big} role="img" aria-label="Arrows from man to king and from woman to queen are parallel">
+    <svg viewBox="0 0 420 240" className={s.big} role="img" aria-label={label}>
       <defs>
         {[PURPLE, SKY, GREEN].map((c) => (
           <marker key={c} id={`tip-${c.slice(1)}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -509,8 +510,8 @@ function Parallelogram() {
           <text x={x + 10} y={y + (y > 100 ? 20 : -10)}>{w}</text>
         </g>
       ))}
-      <text x="18" y="120" style={{ fill: PURPLE }}>royalty</text>
-      <text x="140" y="228" style={{ fill: SKY }}>gender</text>
+      <text x="18" y="120" style={{ fill: PURPLE }}>{royalty}</text>
+      <text x="140" y="228" style={{ fill: SKY }}>{gender}</text>
     </svg>
   );
 }
