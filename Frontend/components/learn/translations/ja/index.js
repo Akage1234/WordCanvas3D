@@ -7,6 +7,7 @@ import * as TokensBeyondText from "./tokens-beyond-text";
 import * as WhatAreEmbeddings from "./what-are-embeddings";
 import * as LatentSpace from "./latent-space";
 import * as DimensionalityReduction from "./dimensionality-reduction";
+import * as AttentionAndTransformers from "./attention-and-transformers";
 
 export default {
   "how-llms-work": HowLlmsWork,
@@ -16,4 +17,5 @@ export default {
   "what-are-embeddings": WhatAreEmbeddings,
   "latent-space": LatentSpace,
   "dimensionality-reduction": DimensionalityReduction,
+  "attention-and-transformers": AttentionAndTransformers,
 };

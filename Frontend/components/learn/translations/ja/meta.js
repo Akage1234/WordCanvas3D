@@ -29,4 +29,8 @@ export default {
     title: "高次元を見る：PCA、t-SNE、UMAP など",
     summary: "何百もの次元を 2 次元や 3 次元に押し縮める方法と、各手法が残すもの、こっそり捨てるもの。"
   },
+  "attention-and-transformers": {
+    title: "アテンションと Transformer をゼロから解説",
+    summary: "各トークンが他のトークンを見て自分の意味を更新する仕組みと、それを積み重ねて Transformer ができるまで。"
+  },
 };
