@@ -78,7 +78,7 @@ export default function TokensBeyondText() {
         </li>
       </ul>
       <p>
-        最后，每个向量还要加上一个<strong>位置嵌入</strong>，让模型知道这个图像块来自图像的哪个位置；没有它，打乱顺序的图像看起来会一模一样。
+        最后，每个向量还要加上一个<strong>位置向量</strong>，让模型知道这个图像块来自图像的哪个位置；没有它，打乱顺序的图像看起来会一模一样。
         从这里开始，图像块向量就进入普通的<ArticleLink slug="attention-and-transformers">注意力层</ArticleLink>，每个图像块都能看到其他所有图像块。
       </p>
       <p>
