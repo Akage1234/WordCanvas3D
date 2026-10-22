@@ -37,4 +37,29 @@ export default {
     title: "从最后一个向量到下一个词",
     summary: "logits、softmax、温度、top-k 和 top-p：模型如何挑选接下来要说的话。",
   },
+  "what-is-a-token": {
+    title: "什么是词元？它为什么不是一个词？",
+    summary: "分词器如何把文本切成可复用的片段，以及为什么这些片段很少和单词对齐。",
+    cta: { label: "打开分词器", text: "粘贴任意句子，准确地看到 GPT 和 LLaMA 的分词器如何切分它，以及每个词元的 ID。" },
+  },
+  "why-emoji-cost-more-tokens": {
+    title: "为什么表情符号和其他语言更费词元",
+    summary: "UTF-8 字节、字节级 BPE，以及为什么同一句问候可能占 4 个词元，也可能占 25 个。",
+    cta: { label: "试试预设", text: "加载“多种文字”或“表情符号”预设，再切换分词器，看看词元数如何变化。" },
+  },
+  "how-a-word-becomes-300-numbers": {
+    title: "一个词如何变成 300 个数字",
+    summary: "什么是词嵌入，GloVe、Word2Vec 和 FastText 如何学习它们，以及如何衡量相似度。",
+    cta: { label: "探索词嵌入", text: "在来自 GloVe、Word2Vec 或 FastText 的数千个词中穿行，看看哪些词最终靠在一起。" },
+  },
+  "pca-vs-umap": {
+    title: "PCA 与 UMAP：压平意义的两种方式",
+    summary: "把 300 个维度压到 3 个的两种方式，各自保留了什么，以及怎样读结果。",
+    cta: { label: "比较 PCA 和 UMAP", text: "在同一批词上切换两种投影，看看每种投影揭示了什么。" },
+  },
+  "king-man-woman": {
+    title: "King − man + woman 详解",
+    summary: "把词语类比看作箭头的算术：实验场计算的是什么，为什么有效，又在哪里失效。",
+    cta: { label: "打开向量实验场", text: "在 a − b + c 框中输入 king、man 和 woman，然后试试你自己的类比。" },
+  },
 };
