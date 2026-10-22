@@ -21,4 +21,8 @@ export default {
     title: "¿Qué son los embeddings?",
     summary: "Convertir una palabra en una lista de números para que los significados parecidos queden cerca.",
   },
+  "latent-space": {
+    title: "El espacio latente: el significado oculto en los números",
+    summary: "Qué capturan las dimensiones de un embedding, por qué las direcciones llevan significado y qué no podemos leer directamente.",
+  },
 };
