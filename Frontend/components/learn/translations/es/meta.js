@@ -47,4 +47,9 @@ export default {
     summary: "Bytes UTF-8, BPE a nivel de bytes y por qué el mismo saludo puede ocupar 4 tokens o 25.",
     cta: { label: "Prueba los ejemplos", text: "Carga el ejemplo Escrituras del mundo o Emoji y cambia de tokenizador para ver cómo cambia el conteo." },
   },
+  "how-a-word-becomes-300-numbers": {
+    title: "Cómo una palabra se convierte en 300 números",
+    summary: "Qué son los embeddings de palabras, cómo los aprenden GloVe, Word2Vec y FastText, y cómo se mide la similitud.",
+    cta: { label: "Explorar embeddings", text: "Vuela entre miles de palabras de GloVe, Word2Vec o FastText y mira cuáles terminan cerca." },
+  },
 };

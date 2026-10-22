@@ -11,6 +11,7 @@ import * as AttentionAndTransformers from "./attention-and-transformers";
 import * as NextTokenPrediction from "./next-token-prediction";
 import * as WhatIsAToken from "./what-is-a-token";
 import * as WhyEmojiCostMoreTokens from "./why-emoji-cost-more-tokens";
+import * as HowAWordBecomes300Numbers from "./how-a-word-becomes-300-numbers";
 
 export default {
   "how-llms-work": HowLlmsWork,
@@ -24,4 +25,5 @@ export default {
   "next-token-prediction": NextTokenPrediction,
   "what-is-a-token": WhatIsAToken,
   "why-emoji-cost-more-tokens": WhyEmojiCostMoreTokens,
+  "how-a-word-becomes-300-numbers": HowAWordBecomes300Numbers,
 };
