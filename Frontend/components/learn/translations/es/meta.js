@@ -52,4 +52,9 @@ export default {
     summary: "Qué son los embeddings de palabras, cómo los aprenden GloVe, Word2Vec y FastText, y cómo se mide la similitud.",
     cta: { label: "Explorar embeddings", text: "Vuela entre miles de palabras de GloVe, Word2Vec o FastText y mira cuáles terminan cerca." },
   },
+  "pca-vs-umap": {
+    title: "PCA vs UMAP: dos maneras de aplanar el significado",
+    summary: "Dos maneras de comprimir 300 dimensiones en 3, qué conserva cada una y cómo leer el resultado.",
+    cta: { label: "Comparar PCA y UMAP", text: "Cambia entre las dos proyecciones con las mismas palabras y mira qué revela cada una." },
+  },
 };
