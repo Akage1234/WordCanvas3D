@@ -3,9 +3,11 @@
 import * as HowLlmsWork from "./how-llms-work";
 import * as WhyTokens from "./why-tokens";
 import * as TokenizationAlgorithms from "./tokenization-algorithms";
+import * as TokensBeyondText from "./tokens-beyond-text";
 
 export default {
   "how-llms-work": HowLlmsWork,
   "why-tokens": WhyTokens,
   "tokenization-algorithms": TokenizationAlgorithms,
+  "tokens-beyond-text": TokensBeyondText,
 };

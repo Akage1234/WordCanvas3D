@@ -13,4 +13,8 @@ export default {
     title: "Cómo se construyen los tokenizadores: BPE, WordPiece y Unigram",
     summary: "Paso a paso por byte-pair encoding, y en qué decisiones se distinguen WordPiece y Unigram.",
   },
+  "tokens-beyond-text": {
+    title: "Tokens más allá del texto: imágenes, audio y video",
+    summary: "Cómo los modelos multimodales cortan las imágenes en parches y el sonido en tramas para poder leerlos como palabras.",
+  },
 };
