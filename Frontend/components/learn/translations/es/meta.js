@@ -29,4 +29,8 @@ export default {
     title: "Ver muchas dimensiones: PCA, t-SNE, UMAP y compañía",
     summary: "Cómo aplastar cientos de dimensiones en 2 o 3, qué conserva cada método y qué desecha sin avisar.",
   },
+  "attention-and-transformers": {
+    title: "La atención y el transformer, explicados desde cero",
+    summary: "Cómo cada token mira a los demás para actualizar su significado, y cómo apilar esa idea construye un transformer.",
+  },
 };
