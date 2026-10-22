@@ -9,4 +9,16 @@ export default {
     title: "为什么模型读的是词元，而不是字母或单词",
     summary: "在字母、单词和词的片段之间如何取舍，为什么所有现代模型都选了片段，并用字节兜底。",
   },
+  "tokenization-algorithms": {
+    title: "分词器是怎样构建的：BPE、WordPiece 和 Unigram",
+    summary: "一步步走完字节对编码的过程，再看 WordPiece 和 Unigram 做出了哪些不同的选择。",
+  },
+  "tokens-beyond-text": {
+    title: "文本之外的词元：图像、音频和视频",
+    summary: "多模态模型如何把图片切成图像块、把声音切成帧，好让它们像词一样被读取。",
+  },
+  "what-are-embeddings": {
+    title: "什么是嵌入？",
+    summary: "把一个词变成一串数字，让意思相近的词彼此靠近。",
+  },
 };
