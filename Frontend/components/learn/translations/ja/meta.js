@@ -33,4 +33,8 @@ export default {
     title: "アテンションと Transformer をゼロから解説",
     summary: "各トークンが他のトークンを見て自分の意味を更新する仕組みと、それを積み重ねて Transformer ができるまで。"
   },
+  "next-token-prediction": {
+    title: "最後のベクトルから次の単語へ",
+    summary: "ロジット、ソフトマックス、温度、top-k、top-p：モデルが次に何を言うかを選ぶ仕組み。"
+  },
 };
