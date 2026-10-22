@@ -25,4 +25,8 @@ export default {
     title: "潜在空間：数値に隠れた意味",
     summary: "埋め込みの次元が捉えているもの、方向が意味を持つ理由、そして直接は読み取れないもの。"
   },
+  "dimensionality-reduction": {
+    title: "高次元を見る：PCA、t-SNE、UMAP など",
+    summary: "何百もの次元を 2 次元や 3 次元に押し縮める方法と、各手法が残すもの、こっそり捨てるもの。"
+  },
 };
