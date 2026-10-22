@@ -9,4 +9,8 @@ export default {
     title: "Por qué los modelos leen tokens y no letras ni palabras",
     summary: "El equilibrio entre letras, palabras y pedazos de palabra, y por qué todos los modelos modernos se quedaron con los pedazos, con los bytes como red de seguridad.",
   },
+  "tokenization-algorithms": {
+    title: "Cómo se construyen los tokenizadores: BPE, WordPiece y Unigram",
+    summary: "Paso a paso por byte-pair encoding, y en qué decisiones se distinguen WordPiece y Unigram.",
+  },
 };
