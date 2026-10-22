@@ -21,4 +21,12 @@ export default {
     title: "什么是嵌入？",
     summary: "把一个词变成一串数字，让意思相近的词彼此靠近。",
   },
+  "latent-space": {
+    title: "潜在空间：数字中隐藏的意义",
+    summary: "嵌入的各个维度捕捉了什么，为什么方向能携带意义，以及哪些东西我们无法直接读出。",
+  },
+  "dimensionality-reduction": {
+    title: "看见高维空间：PCA、t-SNE、UMAP 及其他方法",
+    summary: "怎样把几百个维度压到 2 维或 3 维，每种方法保留了什么，又悄悄丢掉了什么。",
+  },
 };

@@ -5,6 +5,8 @@ import * as WhyTokens from "./why-tokens";
 import * as TokenizationAlgorithms from "./tokenization-algorithms";
 import * as TokensBeyondText from "./tokens-beyond-text";
 import * as WhatAreEmbeddings from "./what-are-embeddings";
+import * as LatentSpace from "./latent-space";
+import * as DimensionalityReduction from "./dimensionality-reduction";
 
 export default {
   "how-llms-work": HowLlmsWork,
@@ -12,4 +14,6 @@ export default {
   "tokenization-algorithms": TokenizationAlgorithms,
   "tokens-beyond-text": TokensBeyondText,
   "what-are-embeddings": WhatAreEmbeddings,
+  "latent-space": LatentSpace,
+  "dimensionality-reduction": DimensionalityReduction,
 };
