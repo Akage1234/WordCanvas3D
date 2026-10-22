@@ -13,4 +13,8 @@ export default {
     title: "トークナイザーの作り方：BPE、WordPiece、Unigram",
     summary: "バイトペア符号化を一歩ずつたどり、WordPiece と Unigram がどう違う選び方をするかを見ます。"
   },
+  "tokens-beyond-text": {
+    title: "テキスト以外のトークン：画像、音声、動画",
+    summary: "マルチモーダルモデルが画像をパッチに、音をフレームに切り分け、単語のように読めるようにする仕組み。"
+  },
 };
