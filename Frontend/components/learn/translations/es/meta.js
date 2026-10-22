@@ -33,4 +33,8 @@ export default {
     title: "La atención y el transformer, explicados desde cero",
     summary: "Cómo cada token mira a los demás para actualizar su significado, y cómo apilar esa idea construye un transformer.",
   },
+  "next-token-prediction": {
+    title: "Del último vector a la siguiente palabra",
+    summary: "Logits, softmax, temperatura, top-k y top-p: cómo un modelo elige qué decir a continuación.",
+  },
 };

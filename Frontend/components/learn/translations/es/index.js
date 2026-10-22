@@ -8,6 +8,7 @@ import * as WhatAreEmbeddings from "./what-are-embeddings";
 import * as LatentSpace from "./latent-space";
 import * as DimensionalityReduction from "./dimensionality-reduction";
 import * as AttentionAndTransformers from "./attention-and-transformers";
+import * as NextTokenPrediction from "./next-token-prediction";
 
 export default {
   "how-llms-work": HowLlmsWork,
@@ -18,4 +19,5 @@ export default {
   "latent-space": LatentSpace,
   "dimensionality-reduction": DimensionalityReduction,
   "attention-and-transformers": AttentionAndTransformers,
+  "next-token-prediction": NextTokenPrediction,
 };
