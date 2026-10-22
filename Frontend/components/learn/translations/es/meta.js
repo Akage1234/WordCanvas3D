@@ -17,4 +17,8 @@ export default {
     title: "Tokens más allá del texto: imágenes, audio y video",
     summary: "Cómo los modelos multimodales cortan las imágenes en parches y el sonido en tramas para poder leerlos como palabras.",
   },
+  "what-are-embeddings": {
+    title: "¿Qué son los embeddings?",
+    summary: "Convertir una palabra en una lista de números para que los significados parecidos queden cerca.",
+  },
 };
