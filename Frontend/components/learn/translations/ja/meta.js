@@ -53,4 +53,12 @@ export default {
       text: "「世界の文字」や「絵文字」のプリセットを読み込み、トークナイザーを切り替えて、トークン数が変わる様子を見てみましょう。"
     }
   },
+  "how-a-word-becomes-300-numbers": {
+    title: "単語が 300 個の数値になるまで",
+    summary: "単語埋め込みとは何か、GloVe、Word2Vec、FastText がそれをどう学習するか、そして類似度の測り方。",
+    cta: {
+      label: "埋め込みを探索する",
+      text: "GloVe、Word2Vec、FastText の何千もの単語の間を飛び回り、どの単語同士が近くに集まるかを見てみましょう。"
+    }
+  },
 };
