@@ -29,4 +29,12 @@ export default {
     title: "看见高维空间：PCA、t-SNE、UMAP 及其他方法",
     summary: "怎样把几百个维度压到 2 维或 3 维，每种方法保留了什么，又悄悄丢掉了什么。",
   },
+  "attention-and-transformers": {
+    title: "从零讲清注意力机制与 Transformer",
+    summary: "每个词元如何查看其他词元来更新自己的含义，以及把这个思想层层堆叠如何构成 Transformer。",
+  },
+  "next-token-prediction": {
+    title: "从最后一个向量到下一个词",
+    summary: "logits、softmax、温度、top-k 和 top-p：模型如何挑选接下来要说的话。",
+  },
 };
