@@ -37,4 +37,9 @@ export default {
     title: "Del último vector a la siguiente palabra",
     summary: "Logits, softmax, temperatura, top-k y top-p: cómo un modelo elige qué decir a continuación.",
   },
+  "what-is-a-token": {
+    title: "¿Qué es un token y por qué no es una palabra?",
+    summary: "Cómo los tokenizadores cortan el texto en pedazos reutilizables, y por qué esos pedazos rara vez coinciden con las palabras.",
+    cta: { label: "Abrir el Tokenizador", text: "Pega cualquier frase y mira exactamente cómo la dividen los tokenizadores de GPT y LLaMA, con el ID de cada token." },
+  },
 };
