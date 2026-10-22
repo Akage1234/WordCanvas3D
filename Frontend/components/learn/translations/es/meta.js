@@ -5,4 +5,8 @@ export default {
     title: "Cómo un modelo de lenguaje convierte tus palabras en una respuesta",
     summary: "Texto, tokens, vectores, un transformer y un token a la vez: todo el proceso explicado en lenguaje sencillo.",
   },
+  "why-tokens": {
+    title: "Por qué los modelos leen tokens y no letras ni palabras",
+    summary: "El equilibrio entre letras, palabras y pedazos de palabra, y por qué todos los modelos modernos se quedaron con los pedazos, con los bytes como red de seguridad.",
+  },
 };
