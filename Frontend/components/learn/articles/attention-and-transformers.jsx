@@ -1,5 +1,5 @@
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
-import { Fig, ArticleLink, Callout, FurtherReading } from "@/components/learn/kit";
+import { Fig, ArticleLink, Callout } from "@/components/learn/kit";
 import l from "@/components/learn/learn.module.css";
 import s from "./attention-and-transformers.module.css";
 import { AttentionLines, AttentionMatrix, AttentionSteps } from "./attention-and-transformers.figures";
@@ -214,15 +214,22 @@ export default function AttentionAndTransformers() {
       <Callout title="In one sentence">
         Each token builds a query, key and value; attention compares queries with keys to decide how much of each value to blend in; a transformer repeats that, plus a small per-token network, in block after block.
       </Callout>
-
-      <FurtherReading
-        links={[
-          { href: "https://www.3blue1brown.com/lessons/attention", title: "Attention in transformers, step-by-step", source: "3Blue1Brown", note: "video, the best visual walk-through" },
-          { href: "https://www.3blue1brown.com/lessons/gpt", title: "Transformers, the tech behind LLMs", source: "3Blue1Brown", note: "video, the big picture" },
-          { href: "https://jalammar.github.io/illustrated-transformer/", title: "The Illustrated Transformer", source: "Jay Alammar" },
-          { href: "https://arxiv.org/abs/1706.03762", title: "Attention Is All You Need", source: "Vaswani et al., 2017", note: "the original paper" },
-        ]}
-      />
     </>
   );
 }
+
+// Rendered by the article page, after the FAQ.
+export const reading = [
+  { href: "https://www.3blue1brown.com/lessons/attention", title: "Attention in transformers, step-by-step", source: "3Blue1Brown", note: "video, the best visual walk-through" },
+  { href: "https://www.3blue1brown.com/lessons/gpt", title: "Transformers, the tech behind LLMs", source: "3Blue1Brown", note: "video, the big picture" },
+  { href: "https://jalammar.github.io/illustrated-transformer/", title: "The Illustrated Transformer", source: "Jay Alammar" },
+  { href: "https://arxiv.org/abs/1706.03762", title: "Attention Is All You Need", source: "Vaswani et al., 2017", note: "the original paper" },
+];
+
+// Shown as the FAQ section and as FAQPage structured data. Plain strings, so they work in both.
+export const faq = [
+  { q: "What is attention in a transformer?", a: "Attention lets each token look at the other tokens in the text and decide how much each one matters to it. Every token makes a query, a key and a value; its query is compared with every key to get weights, and its new vector is a weighted blend of the values. This is how context changes a word’s meaning." },
+  { q: "What are queries, keys and values?", a: "They are three vectors computed from each token’s vector with learned weights. The query describes what the token is looking for, the key describes what it offers, and the value is the information it passes on. Query–key matches decide the attention weights, and those weights mix the values." },
+  { q: "What is multi-head attention?", a: "Instead of running attention once, a transformer runs several attention heads side by side, each with its own query, key and value weights. Different heads can learn to track different relationships, such as nearby words, grammar or references back to an earlier name, and their outputs are combined." },
+  { q: "How does a transformer know the order of words?", a: "Attention on its own treats the input as an unordered set, so position has to be added. The original transformer added a fixed sine-wave pattern to each embedding, GPT-2 learns a position vector, and many newer models use rotary position embeddings (RoPE), which rotate queries and keys by an angle based on position." },
+];

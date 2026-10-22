@@ -6,7 +6,7 @@ import Galaxy from "@/components/landing/Galaxy";
 import Headline from "@/components/landing/Headline";
 import { TokenSplit, MiniClusters, VectorMath } from "@/components/landing/LensVisuals";
 import { Reveal, ShareBar } from "@/components/landing/Interactive";
-import { ARTICLES as LEARN } from "@/components/learn/catalog";
+import { articlesFor } from "@/components/learn/catalog";
 import s from "@/components/landing/landing.module.css";
 import { AUTHOR as SITE_AUTHOR, REPO_URL, SITE_NAME, SITE_URL, jsonLd, localeAlternates, localePath } from "@/lib/site";
 
@@ -51,10 +51,11 @@ const CHIP_COLORS = ["#f9ca24", "#fd79a8", "#4ecdc4"];
 
 // A short reading path for the landing page; titles and reading times come from the Learn registry.
 const FEATURED = ["how-llms-work", "why-tokens", "what-are-embeddings", "attention-and-transformers", "king-man-woman"];
-const ARTICLES = FEATURED.map((slug) => LEARN.find((a) => a.slug === slug));
 
 export default async function Home({ params }) {
   const { locale } = await params;
+  const learn = articlesFor(locale);
+  const ARTICLES = FEATURED.map((slug) => learn.find((a) => a.slug === slug));
   setRequestLocale(locale);
   const t = await getTranslations("Home");
   const tm = await getTranslations("Metadata");

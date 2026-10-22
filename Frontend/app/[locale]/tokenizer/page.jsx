@@ -6,7 +6,7 @@ import { ConceptButton } from "@/components/ConceptSheet";
 import { PageGuide } from "@/components/PageGuide";
 import { Textarea } from "@/components/ui/textarea";
 import { tokenizeText } from "@/lib/tokenizer";
-import { markWhitespace, toHex, tokenColor, tokenLabel, TOKEN_TEXT } from "@/lib/tokenDisplay";
+import { markWhitespace, splitChars, toHex, tokenColor, tokenLabel, TOKEN_TEXT } from "@/lib/tokenDisplay";
 import { ChevronDown, Copy, RotateCw } from "lucide-react";
 import {
   DropdownMenu,
@@ -71,7 +71,8 @@ const escapeHtml = (value) =>
     "'": "&#39;",
   })[char]);
 
-function tokenHtml(t, showWs, tr) {
+// `join`: the character(s) this token holds only part of, from splitChars.
+function tokenHtml(t, showWs, tr, join) {
   if (t.kind === "text") return escapeHtml(showWs ? markWhitespace(t.parts[0].text) : t.parts[0].text);
   if (t.kind === "special") {
     return `<span class="rounded-sm px-0.5 font-mono text-[0.85em] outline-1 outline-dashed outline-white/70">${escapeHtml(t.name)}</span>`;
@@ -80,7 +81,7 @@ function tokenHtml(t, showWs, tr) {
     .map((p) =>
       "text" in p
         ? escapeHtml(showWs ? markWhitespace(p.text) : p.text)
-        : `<span title="${escapeHtml(tr("partialTitle"))}" class="mx-px rounded-sm px-0.5 font-mono text-[0.8em] ring-1 ring-inset ring-white/50">‹${toHex(p.bytes)}›</span>`
+        : `<span title="${escapeHtml(join ? tr("partialTitleOf", { char: join }) : tr("partialTitle"))}" class="mx-px rounded-sm px-0.5 font-mono text-[0.8em] ring-1 ring-inset ring-white/50">‹${toHex(p.bytes)}›</span>`
     )
     .join("");
 }
@@ -135,6 +136,7 @@ export default function TokenizerPage() {
     ? "empty"
     : "ready";
   const tokens = result && !result.error ? result.tokens : NO_TOKENS;
+  const joins = useMemo(() => splitChars(tokens), [tokens]);
   const ids = useMemo(() => tokens.map((t) => t.id), [tokens]);
   const activeIndex =
     active && active.result === result && active.index < tokens.length ? active.index : null;
@@ -251,10 +253,10 @@ export default function TokenizerPage() {
       tokens
         .map(
           (t, i) =>
-            `<span data-i="${i}" role="option" aria-label="${escapeHtml(tr("tokenOption", { index: i + 1, total: tokens.length, spoken: spoken(t, tr), id: t.id }))}" data-kind="${t.kind}" class="tok-option cursor-pointer rounded-[3px] py-0.5 shadow-[inset_-1px_0_0_rgba(0,0,0,0.6)] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]" style="color:${TOKEN_TEXT};--token-color:${tokenColor(t.id)};background-color:var(--token-color)" title="${escapeHtml(tr("tokenTitle", { id: t.id }))}">${tokenHtml(t, showWs, tr)}</span>`
+            `<span data-i="${i}" role="option" aria-label="${escapeHtml(tr("tokenOption", { index: i + 1, total: tokens.length, spoken: spoken(t, tr), id: t.id }))}" data-kind="${t.kind}" class="tok-option cursor-pointer rounded-[3px] py-0.5 shadow-[inset_-1px_0_0_rgba(0,0,0,0.6)] [box-decoration-break:clone] [-webkit-box-decoration-break:clone]" style="color:${TOKEN_TEXT};--token-color:${tokenColor(t.id)};background-color:var(--token-color)" title="${escapeHtml(tr("tokenTitle", { id: t.id }))}">${tokenHtml(t, showWs, tr, joins[i])}</span>`
         )
         .join(""),
-    [tokens, showWs, tr]
+    [tokens, joins, showWs, tr]
   );
   const idOptions = useMemo(
     () =>
@@ -526,7 +528,7 @@ export default function TokenizerPage() {
                       {activeToken.piece !== undefined && tr("inspector.piece", { piece: JSON.stringify(activeToken.piece) })}
                       {activeToken.kind === "special" && tr("inspector.special")}
                       {(activeToken.kind === "fragment" || activeToken.kind === "mixed") &&
-                        tr("inspector.partial")}
+                        (joins[activeIndex] ? tr("inspector.partOf", { char: joins[activeIndex] }) : tr("inspector.partial"))}
                     </>
                   ) : (
                     tr("inspector.hint")

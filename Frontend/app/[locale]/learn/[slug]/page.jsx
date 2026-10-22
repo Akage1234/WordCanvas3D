@@ -1,7 +1,11 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
-import { ARTICLES } from "@/components/learn/registry";
+import { getArticles } from "@/components/learn/registry";
+import { ARTICLES, articlesFor } from "@/components/learn/catalog";
+import { Faq, FurtherReading } from "@/components/learn/kit";
+import ArticleToc from "@/components/learn/ArticleToc";
+import ShareButton from "@/components/learn/ShareButton";
 import s from "@/components/landing/landing.module.css";
 import l from "@/components/learn/learn.module.css";
 import { AUTHOR, SITE_NAME, SITE_URL, jsonLd, localeAlternates, localePath } from "@/lib/site";
@@ -15,7 +19,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }) {
   const { locale, slug } = await params;
-  const a = ARTICLES.find((x) => x.slug === slug);
+  const a = articlesFor(locale).find((x) => x.slug === slug);
   if (!a) return {};
   const path = `/learn/${a.slug}`;
   const url = localePath(path, locale);
@@ -38,11 +42,12 @@ export default async function Article({ params }) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Learn");
-  const i = ARTICLES.findIndex((x) => x.slug === slug);
+  const articles = getArticles(locale);
+  const i = articles.findIndex((x) => x.slug === slug);
   if (i < 0) notFound();
-  const a = ARTICLES[i];
-  const prev = ARTICLES[i - 1];
-  const next = ARTICLES[i + 1];
+  const a = articles[i];
+  const prev = articles[i - 1];
+  const next = articles[i + 1];
 
   const url = `${SITE_URL}${localePath(`/learn/${a.slug}`, locale)}`;
   const trackTitle = t(`tracks.${a.track}.title`);
@@ -54,7 +59,7 @@ export default async function Article({ params }) {
       description: a.summary,
       url,
       image: `${SITE_URL}/${locale}/learn/${a.slug}/opengraph-image`, // the path Next generates for og:image
-      inLanguage: "en", // article bodies are English-only for now
+      inLanguage: a.translated ? locale : "en", // untranslated bodies fall back to English
       timeRequired: `PT${a.minutes}M`,
       articleSection: a.tag,
       isAccessibleForFree: true,
@@ -71,46 +76,57 @@ export default async function Article({ params }) {
         { "@type": "ListItem", position: 3, name: a.title, item: url },
       ],
     },
-  ];
+    a.faq.length > 0 && {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: a.faq.map(({ q, a: answer }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: answer } })),
+    },
+  ].filter(Boolean);
 
   return (
     <main className={`${s.page} ${l.main}`}>
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(schema)} />
-      <article className={l.article}>
-        <Link href="/learn" className={l.back}>{t("back", { track: trackTitle })}</Link>
-        <div className={l.meta}>
-          <span className={s.tag} style={{ "--tc": a.color }}>{t(`tags.${a.tag}`)}</span>
-          <span>{t("minRead", { count: a.minutes })}</span>
-        </div>
-        <h1 className={l.h1}>{a.title}</h1>
-        <p className={l.lede}>{a.summary}</p>
-        {locale !== "en" && <p className={l.langNote} lang={locale}>{t("englishOnly")}</p>}
-        <div className={l.body}>
-          <a.Body />
-        </div>
+      <div className={l.articleWrap}>
+        <ArticleToc label={t("onThisPage")} target={`.${l.body}`} />
+        <article className={l.article}>
+          <Link href="/learn" className={l.back}>{t("back", { track: trackTitle })}</Link>
+          <div className={l.meta}>
+            <span className={s.tag} style={{ "--tc": a.color }}>{t(`tags.${a.tag}`)}</span>
+            <span>{t("minRead", { count: a.minutes })}</span>
+            <ShareButton title={a.title} label={t("share")} copied={t("linkCopied")} />
+          </div>
+          <h1 className={l.h1}>{a.title}</h1>
+          <p className={l.lede}>{a.summary}</p>
+          {!a.translated && <p className={l.langNote} lang={locale}>{t("englishOnly")}</p>}
+          <div className={l.body}>
+            <a.Body />
+            <Faq title={t("faqTitle")} items={a.faq} />
+            <FurtherReading title={t("furtherReading")} links={a.reading} />
+          </div>
 
-        {a.cta && <aside className={l.cta}>
-          <span className={s.kicker}>{t("tryIt")}</span>
-          <h2>{a.cta.label}</h2>
-          <p>{a.cta.text}</p>
-          <Link className={`${s.cta} ${s.ctaExplore}`} href={a.cta.href}>{a.cta.label} <Arrow /></Link>
-        </aside>}
+          {a.cta && <aside className={l.cta}>
+            <span className={s.kicker}>{t("tryIt")}</span>
+            <h2>{a.cta.label}</h2>
+            <p>{a.cta.text}</p>
+            <Link className={`${s.cta} ${s.ctaExplore}`} href={a.cta.href}>{a.cta.label} <Arrow /></Link>
+          </aside>}
 
-        <nav className={l.pager} aria-label={t("pagerLabel")}>
-          {prev && (
-            <Link href={`/learn/${prev.slug}`}>
-              <small>{t("previous")}</small>
-              <strong>{prev.title}</strong>
-            </Link>
-          )}
-          {next && (
-            <Link href={`/learn/${next.slug}`} className={l.next}>
-              <small>{t("next")}</small>
-              <strong>{next.title}</strong>
-            </Link>
-          )}
-        </nav>
-      </article>
+          <nav className={l.pager} aria-label={t("pagerLabel")}>
+            {prev && (
+              <Link href={`/learn/${prev.slug}`}>
+                <small>{t("previous")}</small>
+                <strong>{prev.title}</strong>
+              </Link>
+            )}
+            {next && (
+              <Link href={`/learn/${next.slug}`} className={l.next}>
+                <small>{t("next")}</small>
+                <strong>{next.title}</strong>
+              </Link>
+            )}
+          </nav>
+        </article>
+      </div>
     </main>
   );
 }

@@ -134,7 +134,12 @@
     "tryIt": "Pruébalo tú mismo",
     "pagerLabel": "Más guías",
     "previous": "← Anterior",
-    "next": "Siguiente →"
+    "next": "Siguiente →",
+    "onThisPage": "En esta página",
+    "share": "Compartir",
+    "linkCopied": "Enlace copiado",
+    "faqTitle": "Preguntas frecuentes",
+    "furtherReading": "Lecturas recomendadas"
   },
   "Concepts": {
     "readMore": "Lee más en Aprender",
@@ -266,6 +271,7 @@
       "piece": " · pieza del vocabulario {piece}",
       "special": " · token especial",
       "partial": " · incluye un carácter UTF-8 parcial que se combina con los tokens vecinos",
+      "partOf": " · parte de “{char}”, que está dividido entre tokens vecinos",
       "hint": "Pasa el cursor, toca o usa las flechas del teclado sobre un token para inspeccionarlo."
     },
     "spoken": {
@@ -280,6 +286,7 @@
     "idOption": "ID {id}, token {index} de {total}",
     "idTitle": "índice del token: {index}",
     "partialTitle": "Carácter UTF-8 parcial: estos bytes se combinan con los tokens vecinos",
+    "partialTitleOf": "Parte de “{char}”: estos bytes se combinan con los tokens vecinos",
     "tokenIds": "IDs de token",
     "copyIds": "Copiar IDs",
     "copied": "IDs copiados al portapapeles.",

@@ -32,7 +32,7 @@ globalThis.fetch = async () => {
 }
 
 const { tokenizeText } = await import('./tokenizer.js')
-const { describeBytes, tokenLabel, tokenColor, TOKEN_TEXT, markWhitespace } = await import('./tokenDisplay.js')
+const { describeBytes, tokenLabel, tokenColor, TOKEN_TEXT, markWhitespace, splitChars } = await import('./tokenDisplay.js')
 const { Tiktoken } = require('@dqbd/tiktoken/lite')
 const llama = (await import('llama-tokenizer-js')).default
 
@@ -150,6 +150,18 @@ test('describeBytes splits complete characters from stray bytes', () => {
   assert.deepEqual(describeBytes(new Uint8Array([0xef, 0xbb, 0xbf])).parts, [{ text: '\uFEFF' }], 'U+FEFF is not stripped as a BOM')
   assert.deepEqual(describeBytes(new Uint8Array([0x20, 0xef, 0xbb, 0xbf, 0xe4])).parts, [{ text: ' \uFEFF' }, { bytes: [0xe4] }])
   assert.equal(markWhitespace(' a\tb\n'), '\u00b7a\u2192b\u21b5\n')
+})
+
+test('splitChars names the character a byte chip belongs to', async () => {
+  const b = (...x) => ({ bytes: new Uint8Array(x) })
+  assert.deepEqual(splitChars([b(0xe3, 0x81), b(0xac), { bytes: utf8('a') }]), ['ぬ', 'ぬ', ''], 'ぬ split 2 + 1')
+  assert.deepEqual(splitChars([b(0x20, 0xf0, 0x9f), b(0xa6), b(0x92)]), ['\u{1F992}', '\u{1F992}', '\u{1F992}'], 'one emoji over three tokens')
+  assert.deepEqual(splitChars([{ id: 1, kind: 'special', name: '<s>', piece: '<s>' }, b(0xe3, 0x81, 0xac)]), ['', ''], 'no bytes, whole char')
+  // Real o200k_base output: the chips of ぬ point at ぬ, every whole token gets ''.
+  const toks = await tokenizeText('ちりぬるを', 'o200k_base', OPTS)
+  const joins = splitChars(toks)
+  toks.forEach((t, i) => assert.equal(joins[i], t.kind === 'text' ? '' : 'ぬ'))
+  assert.ok(joins.includes('ぬ'))
 })
 
 // WCAG relative-luminance contrast for every hue the chips can take.

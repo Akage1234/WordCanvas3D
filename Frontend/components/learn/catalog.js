@@ -1,4 +1,7 @@
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
+import zh from "./translations/zh/meta";
+import ja from "./translations/ja/meta";
+import es from "./translations/es/meta";
 
 // Everything about the Learn articles except their bodies. Index pages, the sitemap and link-preview images
 // import this, not registry.js: pulling the article bodies (and their CSS) into those routes made the
@@ -111,3 +114,12 @@ export const ARTICLES = [
     cta: { href: "/vector-playground", label: "Open the Playground", text: "Type king, man and woman into the a − b + c boxes, then try your own analogies." },
   },
 ];
+
+// Per-locale titles, summaries and CTAs. Plain data only: this file must never import article bodies (see above).
+const META = { zh, ja, es };
+
+// ARTICLES with this locale's translated text merged in; anything not translated yet stays English.
+export function articlesFor(locale) {
+  const own = META[locale] ?? {};
+  return ARTICLES.map((a) => (own[a.slug] ? { ...a, ...own[a.slug], cta: a.cta && { ...a.cta, ...own[a.slug].cta } } : a));
+}

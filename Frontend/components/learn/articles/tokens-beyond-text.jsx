@@ -1,4 +1,4 @@
-import { ArticleLink, Callout, Fig, FurtherReading } from "../kit";
+import { ArticleLink, Callout, Fig } from "../kit";
 import s from "./tokens-beyond-text.module.css";
 import { PatchCalculator, PatchSequence } from "./tokens-beyond-text.figures";
 
@@ -158,12 +158,21 @@ export default function TokensBeyondText() {
         The pieces also cost the same thing: space in the <strong>context window</strong>. An image or a minute of audio can use as many tokens as several paragraphs of text, which is why the same limits and prices apply.
         For how text tokens are chosen, see <ArticleLink slug="why-tokens">Why models read tokens</ArticleLink>; for what happens to all these vectors once they are in the sequence, see <ArticleLink slug="how-llms-work">How a language model turns your words into an answer</ArticleLink>.
       </p>
-
-      <FurtherReading links={[
-        { href: "https://arxiv.org/abs/2010.11929", title: "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale", source: "Dosovitskiy et al. · arXiv", note: "the Vision Transformer paper" },
-        { href: "https://arxiv.org/abs/2304.08485", title: "Visual Instruction Tuning (LLaVA)", source: "Liu et al. · arXiv", note: "joining a vision encoder to a language model" },
-        { href: "https://arxiv.org/abs/2103.15691", title: "ViViT: A Video Vision Transformer", source: "Arnab et al. · arXiv" },
-      ]} />
     </>
   );
 }
+
+// Rendered by the article page, after the FAQ.
+export const reading = [
+  { href: "https://arxiv.org/abs/2010.11929", title: "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale", source: "Dosovitskiy et al. · arXiv", note: "the Vision Transformer paper" },
+  { href: "https://arxiv.org/abs/2304.08485", title: "Visual Instruction Tuning (LLaVA)", source: "Liu et al. · arXiv", note: "joining a vision encoder to a language model" },
+  { href: "https://arxiv.org/abs/2103.15691", title: "ViViT: A Video Vision Transformer", source: "Arnab et al. · arXiv" },
+];
+
+// Shown as the FAQ section and as FAQPage structured data. Plain strings, so they work in both.
+export const faq = [
+  { q: "How do AI models see images?", a: "A vision transformer cuts the image into a grid of small square patches, often 16×16 pixels, flattens each patch into a list of numbers and projects it into a vector the same size as a word embedding. The model then reads the patch vectors as a sequence, just like tokens of text." },
+  { q: "How many tokens is an image?", a: "It depends on the model and the image size. A 224×224 image cut into 16×16 patches makes 196 patch tokens. Commercial models resize or tile larger images and count tokens per tile, so a single photo usually costs from a few hundred to a few thousand tokens." },
+  { q: "How do language models process audio?", a: "Audio is sliced into short frames, typically 20 to 25 milliseconds each, and usually converted into a spectrogram that shows how much energy there is at each frequency. Each frame, or a small group of frames, becomes one vector, so a few seconds of speech turns into a sequence of hundreds of tokens." },
+  { q: "What is a multimodal model?", a: "A multimodal model can take in more than one kind of data, such as text, images, audio or video, and often produce more than one kind too. Each type of input is turned into vectors of the same size, so they can sit in one sequence and be processed by the same transformer." },
+];

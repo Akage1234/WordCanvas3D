@@ -1,6 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { CLUSTER_COLORS } from "@/components/embedding/embeddingPalette.mjs";
-import { Fig, ArticleLink, Callout, FurtherReading } from "@/components/learn/kit";
+import { Fig, ArticleLink, Callout } from "@/components/learn/kit";
 import l from "@/components/learn/learn.module.css";
 import s from "./next-token-prediction.module.css";
 import { SamplingPlayground } from "./next-token-prediction.figures";
@@ -185,14 +185,21 @@ export default function NextTokenPrediction() {
       <p>
         Want to see the tokens a model actually works with? The <Link href="/tokenizer">Tokenizer</Link> on this site splits any text into GPT and LLaMA tokens with their IDs.
       </p>
-
-      <FurtherReading
-        links={[
-          { href: "https://huggingface.co/blog/how-to-generate", title: "How to generate text: using different decoding methods", source: "Hugging Face blog", note: "greedy, beam search, top-k and top-p with code" },
-          { href: "https://www.3blue1brown.com/lessons/gpt", title: "Transformers, the tech behind LLMs", source: "3Blue1Brown", note: "video, includes unembedding, softmax and temperature" },
-          { href: "https://arxiv.org/abs/1904.09751", title: "The Curious Case of Neural Text Degeneration", source: "Holtzman et al., 2019", note: "the paper that introduced nucleus (top-p) sampling" },
-        ]}
-      />
     </>
   );
 }
+
+// Rendered by the article page, after the FAQ.
+export const reading = [
+  { href: "https://huggingface.co/blog/how-to-generate", title: "How to generate text: using different decoding methods", source: "Hugging Face blog", note: "greedy, beam search, top-k and top-p with code" },
+  { href: "https://www.3blue1brown.com/lessons/gpt", title: "Transformers, the tech behind LLMs", source: "3Blue1Brown", note: "video, includes unembedding, softmax and temperature" },
+  { href: "https://arxiv.org/abs/1904.09751", title: "The Curious Case of Neural Text Degeneration", source: "Holtzman et al., 2019", note: "the paper that introduced nucleus (top-p) sampling" },
+];
+
+// Shown as the FAQ section and as FAQPage structured data. Plain strings, so they work in both.
+export const faq = [
+  { q: "What are logits in a language model?", a: "Logits are the raw scores a model gives every token in its vocabulary for the next position. They come from multiplying the final vector by an unembedding matrix. Higher means more likely, but logits only become probabilities after softmax turns them into numbers between 0 and 1 that add up to 1." },
+  { q: "What does temperature do in an LLM?", a: "Temperature rescales the logits before softmax. Below 1, it sharpens the distribution so the top tokens dominate and answers become more predictable. Above 1, it flattens it, giving unlikely tokens more chance and making output more varied but more error-prone. Temperature 0 effectively means always picking the top token." },
+  { q: "What is the difference between top-k and top-p sampling?", a: "Top-k keeps only the k most likely tokens and samples from them. Top-p, also called nucleus sampling, keeps the smallest set of tokens whose probabilities add up to p, such as 0.9, so the number of options grows when the model is unsure and shrinks when it is confident." },
+  { q: "Does a language model plan its whole answer in advance?", a: "Not explicitly. It produces one token at a time, and each new token is added to the input before the next one is predicted. Its internal state can carry information about where a sentence is heading, but there is no separate finished draft that it reads out." },
+];
